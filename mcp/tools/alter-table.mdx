@@ -1,0 +1,534 @@
+---
+title: "alter_table"
+description: "Modify existing table structures by adding columns, constraints, or renaming elements safely"
+icon: "wrench"
+---
+
+## Overview
+
+The `alter_table` tool provides safe modification of existing database tables. You can add columns, drop columns, rename columns, add constraints, drop constraints, and rename tables. All operations include safety checks and validation to prevent data loss or structural issues.
+
+<Warning>
+This tool **modifies existing database structures**. Some operations may be irreversible or cause data loss. Always backup important data before structural changes.
+</Warning>
+
+## Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Table to modify |
+| `operations` | array | Yes | List of operations to perform |
+
+### Operation Types
+
+Each operation in the `operations` array must specify a `type` and relevant parameters:
+
+#### Add Column
+```json
+{
+  "type": "add_column",
+  "column_name": "new_column",
+  "data_type": "varchar(255)",
+  "nullable": true,
+  "default_value": null
+}
+```
+
+#### Drop Column
+```json
+{
+  "type": "drop_column", 
+  "column_name": "old_column"
+}
+```
+
+#### Rename Column
+```json
+{
+  "type": "rename_column",
+  "old_name": "old_column_name",
+  "new_name": "new_column_name"
+}
+```
+
+#### Rename Table
+```json
+{
+  "type": "rename_table",
+  "new_name": "new_table_name"
+}
+```
+
+#### Add Constraint
+```json
+{
+  "type": "add_constraint",
+  "constraint_name": "unique_email",
+  "constraint_type": "UNIQUE",
+  "columns": ["email"]
+}
+```
+
+#### Drop Constraint
+```json
+{
+  "type": "drop_constraint",
+  "constraint_name": "old_constraint_name"
+}
+```
+
+## Request Format
+
+```json
+{
+  "table_name": "users",
+  "operations": [
+    {
+      "type": "add_column",
+      "column_name": "phone_number",
+      "data_type": "varchar(20)",
+      "nullable": true
+    },
+    {
+      "type": "add_constraint",
+      "constraint_name": "users_phone_unique",
+      "constraint_type": "UNIQUE", 
+      "columns": ["phone_number"]
+    }
+  ]
+}
+```
+
+## Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "table_name": "users",
+    "operations_completed": 2,
+    "operations": [
+      {
+        "type": "add_column",
+        "column_name": "phone_number",
+        "status": "completed",
+        "sql": "ALTER TABLE users ADD COLUMN phone_number varchar(20)"
+      },
+      {
+        "type": "add_constraint",
+        "constraint_name": "users_phone_unique",
+        "status": "completed", 
+        "sql": "ALTER TABLE users ADD CONSTRAINT users_phone_unique UNIQUE (phone_number)"
+      }
+    ]
+  },
+  "message": "Successfully applied 2 operations to table 'users'",
+  "execution_time": "156ms"
+}
+```
+
+## Usage Examples
+
+<CodeGroup>
+
+```json Add Multiple Columns
+{
+  "table_name": "products",
+  "operations": [
+    {
+      "type": "add_column",
+      "column_name": "sku",
+      "data_type": "varchar(50)",
+      "nullable": false
+    },
+    {
+      "type": "add_column",
+      "column_name": "weight",
+      "data_type": "decimal(8,2)",
+      "nullable": true
+    },
+    {
+      "type": "add_column", 
+      "column_name": "last_updated",
+      "data_type": "timestamp",
+      "default_value": "now()",
+      "nullable": false
+    }
+  ]
+}
+```
+
+```json Rename and Restructure
+{
+  "table_name": "old_user_accounts",
+  "operations": [
+    {
+      "type": "rename_table",
+      "new_name": "users"
+    },
+    {
+      "type": "rename_column",
+      "old_name": "user_email",
+      "new_name": "email"
+    },
+    {
+      "type": "add_constraint",
+      "constraint_name": "users_email_unique",
+      "constraint_type": "UNIQUE",
+      "columns": ["email"]
+    }
+  ]
+}
+```
+
+```json Remove Legacy Columns
+{
+  "table_name": "orders",
+  "operations": [
+    {
+      "type": "drop_column",
+      "column_name": "legacy_status"
+    },
+    {
+      "type": "drop_constraint",
+      "constraint_name": "orders_old_check"
+    },
+    {
+      "type": "add_column",
+      "column_name": "status",
+      "data_type": "varchar(50)",
+      "default_value": "'pending'",
+      "nullable": false
+    }
+  ]
+}
+```
+
+```bash Claude Desktop
+"Add a phone_number column to the users table"
+"Rename the 'customer_email' column to just 'email' in the orders table"
+"Add a unique constraint on the email column in users table"
+```
+
+</CodeGroup>
+
+## Constraint Types
+
+### Primary Key
+```json
+{
+  "type": "add_constraint",
+  "constraint_name": "users_pkey",
+  "constraint_type": "PRIMARY KEY",
+  "columns": ["id"]
+}
+```
+
+### Foreign Key
+```json
+{
+  "type": "add_constraint",
+  "constraint_name": "orders_customer_fkey",
+  "constraint_type": "FOREIGN KEY",
+  "columns": ["customer_id"],
+  "references_table": "customers",
+  "references_columns": ["id"]
+}
+```
+
+### Unique
+```json
+{
+  "type": "add_constraint",
+  "constraint_name": "users_email_unique",
+  "constraint_type": "UNIQUE",
+  "columns": ["email"]
+}
+```
+
+### Check
+```json
+{
+  "type": "add_constraint",
+  "constraint_name": "products_price_positive",
+  "constraint_type": "CHECK",
+  "check_expression": "price > 0"
+}
+```
+
+### Not Null
+```json
+{
+  "type": "add_constraint",
+  "constraint_name": "users_email_not_null",
+  "constraint_type": "NOT NULL",
+  "columns": ["email"]
+}
+```
+
+## Common Operations
+
+### Database Migration Patterns
+
+#### Adding User Profile Information
+```json
+{
+  "table_name": "users",
+  "operations": [
+    {"type": "add_column", "column_name": "first_name", "data_type": "varchar(100)", "nullable": true},
+    {"type": "add_column", "column_name": "last_name", "data_type": "varchar(100)", "nullable": true},
+    {"type": "add_column", "column_name": "date_of_birth", "data_type": "date", "nullable": true},
+    {"type": "add_column", "column_name": "profile_updated_at", "data_type": "timestamp", "default_value": "now()"}
+  ]
+}
+```
+
+#### Modernizing Legacy Schema
+```json
+{
+  "table_name": "customer_data",
+  "operations": [
+    {"type": "rename_table", "new_name": "customers"},
+    {"type": "rename_column", "old_name": "cust_id", "new_name": "id"},
+    {"type": "rename_column", "old_name": "cust_name", "new_name": "full_name"},
+    {"type": "add_column", "column_name": "created_at", "data_type": "timestamptz", "default_value": "now()"}
+  ]
+}
+```
+
+#### Adding E-commerce Features
+```json
+{
+  "table_name": "products",
+  "operations": [
+    {"type": "add_column", "column_name": "category_id", "data_type": "integer", "nullable": true},
+    {"type": "add_column", "column_name": "tags", "data_type": "jsonb", "nullable": true},
+    {"type": "add_column", "column_name": "is_featured", "data_type": "boolean", "default_value": "false"},
+    {"type": "add_constraint", "constraint_name": "products_category_fkey", "constraint_type": "FOREIGN KEY", "columns": ["category_id"], "references_table": "categories", "references_columns": ["id"]}
+  ]
+}
+```
+
+## Error Handling
+
+### Column Already Exists
+```json
+{
+  "success": false,
+  "error": {
+    "type": "ValidationError",
+    "message": "Column 'email' already exists in table 'users'",
+    "suggestions": [
+      "Check existing table schema with get_table_schema",
+      "Use a different column name",
+      "Use rename_column if you want to change an existing column name"
+    ]
+  }
+}
+```
+
+### Column Doesn't Exist
+```json
+{
+  "success": false,
+  "error": {
+    "type": "ValidationError",
+    "message": "Column 'old_column' does not exist in table 'users'",
+    "suggestions": [
+      "Verify column name spelling",
+      "Use get_table_schema to see existing columns",
+      "Check if column was already dropped"
+    ]
+  }
+}
+```
+
+### Constraint Violation
+```json
+{
+  "success": false,
+  "error": {
+    "type": "ConstraintError",
+    "message": "Cannot add NOT NULL constraint: table contains null values",
+    "suggestions": [
+      "Update null values before adding constraint",
+      "Add column with default value first",
+      "Use nullable column if null values are acceptable"
+    ]
+  }
+}
+```
+
+### Foreign Key Issues
+```json
+{
+  "success": false,
+  "error": {
+    "type": "ValidationError",
+    "message": "Referenced table 'categories' does not exist",
+    "suggestions": [
+      "Create referenced table first",
+      "Check table name spelling",
+      "Verify table exists in correct schema"
+    ]
+  }
+}
+```
+
+## Integration with Other Tools
+
+<CardGroup cols={2}>
+  <Card title="get_table_schema" icon="sitemap">
+    Check current table structure before modifications
+  </Card>
+  <Card title="query_records" icon="magnifying-glass">
+    Verify data integrity after structural changes
+  </Card>
+  <Card title="create_table" icon="plus">
+    Create new tables with proper structure from the start
+  </Card>
+  <Card title="drop_table" icon="trash">
+    Remove tables that are no longer needed
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+### 1. Plan Operations Carefully
+Always understand current structure first:
+
+```bash
+# Good workflow
+1. get_table_schema      # Understand current structure
+2. Plan operations       # Design changes carefully  
+3. alter_table          # Apply modifications
+4. get_table_schema      # Verify changes
+```
+
+### 2. Use Safe Defaults
+When adding columns, provide sensible defaults:
+
+```json
+// Good: Safe default for new column
+{
+  "type": "add_column",
+  "column_name": "status", 
+  "data_type": "varchar(20)",
+  "default_value": "'active'",
+  "nullable": false
+}
+
+// Risky: No default for NOT NULL column
+{
+  "type": "add_column",
+  "column_name": "status",
+  "data_type": "varchar(20)", 
+  "nullable": false
+}
+```
+
+### 3. Batch Related Operations
+Group related changes together:
+
+```json
+{
+  "operations": [
+    {"type": "add_column", "column_name": "full_name", "data_type": "text"},
+    {"type": "drop_column", "column_name": "first_name"},
+    {"type": "drop_column", "column_name": "last_name"}
+  ]
+}
+```
+
+### 4. Maintain Data Integrity
+Consider data impact of changes:
+
+```json
+// Safe: Add nullable column first
+{"type": "add_column", "column_name": "email", "data_type": "varchar(255)", "nullable": true}
+
+// Then add constraint after populating data
+{"type": "add_constraint", "constraint_name": "users_email_not_null", "constraint_type": "NOT NULL", "columns": ["email"]}
+```
+
+### 5. Use Descriptive Constraint Names
+Follow naming conventions:
+
+```json
+{
+  "constraint_name": "users_email_unique",  // Good: descriptive
+  "constraint_name": "constraint_1"         // Bad: generic
+}
+```
+
+## Operation Order Considerations
+
+Some operations must be performed in specific order:
+
+### Safe Order Example
+```json
+{
+  "operations": [
+    // 1. Add columns first
+    {"type": "add_column", "column_name": "new_email", "data_type": "varchar(255)", "nullable": true},
+    
+    // 2. Populate data (would be done separately with update_records)
+    
+    // 3. Add constraints last  
+    {"type": "add_constraint", "constraint_name": "users_new_email_unique", "constraint_type": "UNIQUE", "columns": ["new_email"]},
+    
+    // 4. Drop old columns
+    {"type": "drop_column", "column_name": "old_email"}
+  ]
+}
+```
+
+## Performance Considerations
+
+- **Operation Time**: 200ms - 2s depending on table size and complexity
+- **Table Size**: Larger tables take longer to modify
+- **Constraints**: Adding constraints on large tables can be slow
+- **Locking**: Some operations may lock the table briefly
+
+<Tip>
+For large production tables, consider performing modifications during maintenance windows to minimize user impact.
+</Tip>
+
+## Security Notes
+
+- **Data Preservation**: Operations are designed to preserve existing data
+- **Validation**: All operations are validated before execution  
+- **Permissions**: Respects database user permissions for table modification
+- **Rollback**: Some operations cannot be easily reversed
+
+## Troubleshooting
+
+### Performance Issues
+If operations are slow:
+
+1. **Table Size**: Large tables take longer to modify
+2. **Constraints**: Complex constraints slow operations
+3. **System Load**: Database under heavy load
+4. **Locks**: Other operations might be locking the table
+
+### Failed Operations
+If operations fail:
+
+1. **Check Dependencies**: Ensure referenced tables/columns exist
+2. **Data Integrity**: Existing data might violate new constraints
+3. **Permissions**: Verify modification privileges
+4. **Syntax**: Check operation parameter syntax
+
+## Related Tools
+
+<CardGroup cols={3}>
+  <Card title="get_table_schema" icon="sitemap" href="/mcp/tools/get-table-schema">
+    Verify table structure before and after changes
+  </Card>
+  <Card title="query_records" icon="magnifying-glass" href="/mcp/tools/query-records">
+    Check data integrity after modifications
+  </Card>
+  <Card title="create_table" icon="plus" href="/mcp/tools/create-table">
+    Create new tables with proper structure
+  </Card>
+</CardGroup>

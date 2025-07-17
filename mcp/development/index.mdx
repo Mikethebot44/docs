@@ -1,0 +1,89 @@
+---
+title: "Development Overview"
+description: "Guide to developing and extending Tablr MCP server functionality"
+icon: "code"
+---
+
+# Development Overview
+
+Welcome to the Tablr MCP development guide. This section provides comprehensive information for developers who want to contribute to, extend, or customize the Tablr MCP server.
+
+## What You'll Learn
+
+<CardGroup cols={2}>
+  <Card title="Development Setup" icon="wrench" href="/mcp/development/setup">
+    Set up your development environment and understand the project structure
+  </Card>
+  <Card title="Adding New Tools" icon="plus" href="/mcp/development/adding-tools">
+    Learn how to create and integrate new database management tools
+  </Card>
+</CardGroup>
+
+## Development Philosophy
+
+Tablr MCP is built with the following principles in mind:
+
+### Type Safety First
+- **Full TypeScript support** with strict typing
+- **Comprehensive type definitions** for all interfaces
+- **Runtime validation** of inputs and outputs
+
+### Modular Architecture
+- **Tool-based design** where each function is a separate tool
+- **Shared base classes** for common functionality
+- **Clean separation** between core infrastructure and tool implementations
+
+### Security by Design
+- **Input validation** at every layer
+- **SQL injection protection** through parameterized queries
+- **Confirmation prompts** for destructive operations
+
+### Developer Experience
+- **Clear error messages** with actionable suggestions
+- **Comprehensive logging** for debugging
+- **Hot reload** during development
+- **Extensive documentation** and examples
+
+## Core Components
+
+### Base Tool Class
+All tools inherit from `BaseTool` which provides:
+- Response formatting
+- Error handling
+- Connection management
+- Validation helpers
+
+### Tool Registry
+Manages tool registration and discovery:
+- Automatic tool loading
+- Schema validation
+- Runtime tool access
+
+### Connection Manager
+Handles Supabase connections:
+- Connection pooling
+- Authentication
+- Health checking
+- Error recovery
+
+### Response Formatter
+Standardizes all tool responses:
+- Success/error formatting
+- Performance metrics
+- Message consistency
+
+## Development Workflow
+
+1. **Environment Setup**: Configure your development environment
+2. **Code Changes**: Make your modifications following established patterns
+3. **Testing**: Test with MCP Inspector and Claude Desktop
+4. **Documentation**: Update documentation as needed
+5. **Contribution**: Submit pull requests following our guidelines
+
+## Getting Started
+
+Ready to start developing? Begin with the [Development Setup](/mcp/development/setup) guide to configure your environment and understand the project structure.
+
+<Note>
+**Prerequisites**: Ensure you have Node.js 18+, TypeScript knowledge, and familiarity with the MCP protocol before beginning development.
+</Note>

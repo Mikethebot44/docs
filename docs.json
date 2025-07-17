@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Tablr Documentation",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#3B82F6",
+    "light": "#60A5FA",
+    "dark": "#1E40AF"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -17,39 +17,83 @@
             "group": "Get Started",
             "pages": [
               "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "quickstart"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "MCP Tools",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Getting Started",
             "pages": [
-              "api-reference/introduction"
+              "mcp/index",
+              "mcp/what-is-mcp",
+              "mcp/prerequisites", 
+              "mcp/installation",
+              "mcp/configuration"
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "Tools Reference",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "mcp/tools/index",
+              {
+                "group": "Database Discovery",
+                "pages": [
+                  "mcp/tools/list-tables",
+                  "mcp/tools/get-table-schema"
+                ]
+              },
+              {
+                "group": "Table Management", 
+                "pages": [
+                  "mcp/tools/create-table",
+                  "mcp/tools/alter-table", 
+                  "mcp/tools/drop-table"
+                ]
+              },
+              {
+                "group": "Data Operations",
+                "pages": [
+                  "mcp/tools/query-records",
+                  "mcp/tools/insert-records",
+                  "mcp/tools/update-records", 
+                  "mcp/tools/delete-records"
+                ]
+              },
+              {
+                "group": "Advanced Tools",
+                "pages": [
+                  "mcp/tools/execute-sql",
+                  "mcp/tools/rls-policies"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Integration",
+            "pages": [
+              "mcp/integration/claude-desktop",
+              "mcp/integration/other-clients",
+              "mcp/integration/testing"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "mcp/development/index",
+              "mcp/development/setup", 
+              "mcp/development/adding-tools"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "mcp/troubleshooting",
+              "mcp/security", 
+              "mcp/contributing"
             ]
           }
         ]
@@ -58,19 +102,14 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Dashboard",
+          "href": "https://tablr.vercel.app/dashboard",
+          "icon": "chart-line"
         },
         {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "GitHub",
+          "href": "https://github.com/Mikethebot44/tablr-mcp",
+          "icon": "github"
         }
       ]
     }
@@ -83,20 +122,18 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "https://github.com/Mikethebot44/tablr-mcp/issues"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://tablr.vercel.app/dashboard"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/Mikethebot44/tablr-mcp"
     }
   }
 }

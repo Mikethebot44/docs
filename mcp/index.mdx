@@ -1,0 +1,174 @@
+---
+title: "Tablr MCP - Complete Supabase Database Management"
+description: "A comprehensive MCP server that provides full database management capabilities for Supabase projects through AI assistants"
+icon: "database"
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.png"
+  alt="Tablr MCP Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.png"
+  alt="Tablr MCP Hero Dark"
+/>
+
+## What is Tablr MCP?
+
+Tablr MCP is a specialized Model Context Protocol (MCP) server that provides comprehensive database management for Supabase projects. It allows AI assistants to:
+
+- **Explore** your database structure (tables, schemas, relationships)
+- **Query** data with complex filters and sorting
+- **Modify** table structures and data
+- **Execute** custom SQL safely
+- **Manage** database operations through natural language
+
+Instead of manually writing SQL or using the Supabase dashboard, you can simply ask your AI assistant: *"Show me all users created this week"* or *"Create a new table for storing blog posts"*.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Table Management" icon="table">
+    List tables, get schemas, create new tables, and safely drop existing ones with confirmation prompts
+  </Card>
+  <Card title="Data Operations" icon="chart-line">
+    Query records with advanced filtering, insert/update/delete data with validation and safety checks
+  </Card>
+  <Card title="Schema Operations" icon="screwdriver-wrench">
+    Alter table structures, execute custom SQL, and manage relationships with built-in safety features
+  </Card>
+  <Card title="Security Features" icon="shield-check">
+    Service role authentication, SQL injection protection, and operation confirmations for destructive actions
+  </Card>
+</CardGroup>
+
+## Why Choose Tablr MCP?
+
+### **Comprehensive Table Management**
+- **List Tables**: Discover all tables in your database
+- **Table Schema**: Get detailed column information, types, and constraints
+- **Create Tables**: Build new tables with proper relationships and constraints
+- **Drop Tables**: Safely remove tables with confirmation prompts
+
+### **Advanced Data Operations**
+- **Query Records**: Filter, sort, and paginate data with complex conditions
+- **Insert Records**: Add single or multiple records with validation
+- **Update Records**: Modify existing data with flexible field mapping
+- **Delete Records**: Remove records with safety confirmations
+
+### **Powerful Schema Operations**
+- **Alter Tables**: Modify columns, add constraints, rename tables
+- **Execute SQL**: Run custom SQL queries with safety checks
+- **Relationship Management**: Handle foreign keys and table relationships
+
+### **Enterprise-Grade Security**
+- **Service Role Authentication**: Secure connection using Supabase service keys
+- **SQL Injection Protection**: Automatic query sanitization
+- **Operation Confirmation**: Safety prompts for destructive operations
+- **Access Control**: Respects Supabase Row Level Security (RLS) policies
+
+### **Superior Developer Experience**
+- **Comprehensive Error Handling**: Helpful error messages with suggestions
+- **Performance Monitoring**: Execution time tracking for all operations
+- **Auto-Discovery**: Automatic table and schema detection
+- **Type Safety**: Full TypeScript support with proper type definitions
+
+## Getting Started
+
+<CardGroup cols={2}>
+  <Card
+    title="Learn About MCP"
+    icon="question-circle"
+    href="/mcp/what-is-mcp"
+  >
+    Understand the Model Context Protocol and how it works
+  </Card>
+  <Card
+    title="Check Prerequisites"
+    icon="list-check"
+    href="/mcp/prerequisites"
+  >
+    Ensure you have everything needed to get started
+  </Card>
+  <Card
+    title="Installation Guide"
+    icon="download"
+    href="/mcp/installation"
+  >
+    Step-by-step setup instructions for your environment
+  </Card>
+  <Card
+    title="Browse All Tools"
+    icon="toolbox"
+    href="/mcp/tools"
+  >
+    Explore all 16 available database management tools
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+Ready to dive in? Here's what you need:
+
+1. **Node.js 18+** and **npm** installed
+2. **Supabase account** with an active project
+3. **Service role key** from your Supabase dashboard
+
+<Note>
+Tablr MCP provides 16 comprehensive database management functions that work with any MCP-compatible AI assistant, including Claude Desktop, Cursor IDE, and custom applications.
+</Note>
+
+## Example Usage
+
+Once set up, you can interact with your database through natural language:
+
+```
+You: "Show me all tables in my database"
+AI: [Uses list_tables tool and shows results]
+
+You: "Get the schema for the users table"
+AI: [Uses get_table_schema tool]
+
+You: "Find all users created in the last week"
+AI: [Uses query_records with date filters]
+
+You: "Create a new table for storing blog posts"
+AI: [Uses create_table with appropriate schema]
+```
+
+## Architecture Overview
+
+Tablr MCP acts as a bridge between AI assistants and your Supabase database:
+
+- **MCP Client** (Claude Desktop, Cursor, etc.) sends requests
+- **Tablr MCP Server** processes requests and validates operations
+- **Supabase Database** executes the actual database operations
+- **Results** are formatted and returned to the AI assistant
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card
+    title="Understanding MCP"
+    icon="graduation-cap"
+    href="/mcp/what-is-mcp"
+  >
+    Learn the fundamentals
+  </Card>
+  <Card
+    title="Prerequisites"
+    icon="clipboard-check"
+    href="/mcp/prerequisites"
+  >
+    Get ready to install
+  </Card>
+  <Card
+    title="Installation"
+    icon="rocket"
+    href="/mcp/installation"
+  >
+    Start building
+  </Card>
+</CardGroup>

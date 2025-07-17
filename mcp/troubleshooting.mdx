@@ -1,0 +1,577 @@
+---
+title: "Troubleshooting"
+description: "Common issues and solutions for Tablr MCP"
+icon: "wrench"
+---
+
+# Troubleshooting
+
+This guide covers common issues you might encounter when setting up or using Tablr MCP, along with step-by-step solutions.
+
+## Common Issues and Solutions
+
+### Environment and Configuration Issues
+
+<AccordionGroup>
+  <Accordion title="No Supabase environment variables found" icon="exclamation-triangle">
+    **Problem**: Environment variables are not being loaded properly.
+
+    **Symptoms**:
+    - Server fails to start with connection errors
+    - Missing credentials warnings in logs
+    - `SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` undefined
+
+    **Solutions**:
+
+    <Steps>
+      <Step title="Verify .env File Location">
+        Ensure `.env` file is in the project root directory (same directory as `package.json`):
+        ```bash
+        # Check if .env exists in correct location
+        ls -la /path/to/tablr-mcp/.env
+        
+        # Should show file with proper permissions
+        -rw------- 1 user group 156 date .env
+        ```
+      </Step>
+      
+      <Step title="Check .env File Format">
+        Verify there are no spaces around the `=` sign:
+        ```bash
+        # Correct format
+        SUPABASE_URL=https://your-project.supabase.co
+        SUPABASE_SERVICE_ROLE_KEY=eyJhbG...
+        
+        # Incorrect format (will fail)
+        SUPABASE_URL = https://your-project.supabase.co
+        SUPABASE_SERVICE_ROLE_KEY =eyJhbG...
+        ```
+      </Step>
+      
+      <Step title="Verify dotenv Installation">
+        Ensure the dotenv package is installed:
+        ```bash
+        # Check if dotenv is in dependencies
+        npm list dotenv
+        
+        # If missing, install it
+        npm install dotenv
+        ```
+      </Step>
+      
+      <Step title="Restart the Server">
+        Always restart after changing environment variables:
+        ```bash
+        # Stop the server (Ctrl+C)
+        # Then restart
+        npm start
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="Authentication failed or insufficient permissions" icon="lock">
+    **Problem**: Unable to connect to Supabase or access database.
+
+    **Symptoms**:
+    - Authentication errors in logs
+    - "Invalid API key" messages
+    - Permission denied for database operations
+
+    **Solutions**:
+
+    <Steps>
+      <Step title="Verify Service Role Key">
+        Ensure you're using the **service_role** key, not the anon/public key:
+        ```bash
+        # Service role key characteristics:
+        # - Starts with "eyJ"
+        # - Very long (500+ characters)
+        # - Found in Supabase Dashboard → Settings → API
+        # - Should NOT be the "anon" key
+        ```
+      </Step>
+      
+      <Step title="Check Project Status">
+        Verify your Supabase project is active:
+        - Log into [supabase.com](https://supabase.com)
+        - Ensure project is not paused or suspended
+        - Check project health status
+      </Step>
+      
+      <Step title="Test Connection Manually">
+        Test the connection directly:
+        ```bash
+        # Test with curl
+        curl -H "Authorization: Bearer YOUR_SERVICE_ROLE_KEY" \
+             -H "apikey: YOUR_SERVICE_ROLE_KEY" \
+             "https://your-project.supabase.co/rest/v1/"
+        ```
+      </Step>
+      
+      <Step title="Regenerate Keys">
+        If keys seem corrupted, regenerate them:
+        - Go to Supabase Dashboard → Settings → API
+        - Generate new service role key
+        - Update your `.env` file
+      </Step>
+    </Steps>
+  </Accordion>
+</AccordionGroup>
+
+### Database and Table Issues
+
+<AccordionGroup>
+  <Accordion title="Table not found errors" icon="table">
+    **Problem**: Tools can't find your database tables.
+
+    **Symptoms**:
+    - "Table 'tablename' does not exist" errors
+    - Empty results from `list_tables`
+    - Schema errors when accessing tables
+
+    **Solutions**:
+
+    <Steps>
+      <Step title="Verify Table Schema">
+        Ensure tables exist in the `public` schema:
+        ```sql
+        -- Check all tables in public schema
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public';
+        ```
+      </Step>
+      
+      <Step title="Check Table Names">
+        Verify exact table names (case-sensitive):
+        ```bash
+        # Use list_tables tool first
+        # Check for typos, case sensitivity
+        # PostgreSQL table names are case-sensitive
+        ```
+      </Step>
+      
+      <Step title="Verify Service Role Permissions">
+        Check if service role can access tables:
+        ```sql
+        -- Test basic access
+        SELECT * FROM your_table_name LIMIT 1;
+        
+        -- Check permissions
+        SELECT grantee, privilege_type 
+        FROM information_schema.role_table_grants 
+        WHERE table_name = 'your_table_name';
+        ```
+      </Step>
+      
+      <Step title="Use list_tables First">
+        Always start with listing available tables:
+        ```json
+        // Use this tool to see what's available
+        {
+          "tool": "list_tables",
+          "parameters": {}
+        }
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="Row Level Security (RLS) Issues" icon="shield">
+    **Problem**: Operations blocked by RLS policies.
+
+    **Symptoms**:
+    - Empty results despite data existing
+    - "Permission denied" on operations
+    - Inconsistent behavior between tools
+
+    **Solutions**:
+
+    <Steps>
+      <Step title="Check RLS Status">
+        Verify if RLS is enabled on your tables:
+        ```sql
+        SELECT schemaname, tablename, rowsecurity 
+        FROM pg_tables 
+        WHERE schemaname = 'public';
+        ```
+      </Step>
+      
+      <Step title="Review RLS Policies">
+        Check existing policies:
+        ```sql
+        SELECT schemaname, tablename, policyname, cmd, qual 
+        FROM pg_policies 
+        WHERE schemaname = 'public';
+        ```
+      </Step>
+      
+      <Step title="Service Role Bypasses RLS">
+        The service role should bypass RLS policies. If not working:
+        - Verify you're using the correct service role key
+        - Check Supabase project settings
+        - Test with a simple query in Supabase SQL editor
+      </Step>
+      
+      <Step title="Temporarily Disable RLS">
+        For testing, temporarily disable RLS:
+        ```sql
+        -- Disable RLS for testing (re-enable after!)
+        ALTER TABLE your_table_name DISABLE ROW LEVEL SECURITY;
+        
+        -- Re-enable after testing
+        ALTER TABLE your_table_name ENABLE ROW LEVEL SECURITY;
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+</AccordionGroup>
+
+### Build and Development Issues
+
+<AccordionGroup>
+  <Accordion title="Build failed or TypeScript errors" icon="code">
+    **Problem**: TypeScript compilation or build process fails.
+
+    **Symptoms**:
+    - `npm run build` fails with errors
+    - TypeScript type errors
+    - Missing modules or dependencies
+
+    **Solutions**:
+
+    <Steps>
+      <Step title="Check Node.js Version">
+        Ensure you have Node.js 18 or higher:
+        ```bash
+        # Check version
+        node --version
+        
+        # Should show v18.x.x or higher
+        # If not, update Node.js
+        ```
+      </Step>
+      
+      <Step title="Clean and Reinstall">
+        Clear cache and reinstall dependencies:
+        ```bash
+        # Remove node_modules and package-lock.json
+        rm -rf node_modules package-lock.json
+        
+        # Clear npm cache
+        npm cache clean --force
+        
+        # Reinstall dependencies
+        npm install
+        ```
+      </Step>
+      
+      <Step title="Clean Build">
+        Clear build artifacts and rebuild:
+        ```bash
+        # Clean build directory
+        npm run clean
+        
+        # Or manually remove
+        rm -rf dist/
+        
+        # Rebuild
+        npm run build
+        ```
+      </Step>
+      
+      <Step title="Check for Syntax Errors">
+        Verify TypeScript files for syntax issues:
+        ```bash
+        # Check TypeScript without building
+        npx tsc --noEmit
+        
+        # Check specific file
+        npx tsc --noEmit src/your-file.ts
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="Import/Export Module Errors" icon="exchange-alt">
+    **Problem**: Module import/export issues in TypeScript.
+
+    **Symptoms**:
+    - "Cannot find module" errors
+    - Import/export syntax errors
+    - Module resolution failures
+
+    **Solutions**:
+
+    <Steps>
+      <Step title="Check Import Extensions">
+        Use `.js` extensions in imports (TypeScript requirement):
+        ```typescript
+        // Correct
+        import { BaseTool } from '../core/base-tool.js';
+        
+        // Incorrect
+        import { BaseTool } from '../core/base-tool';
+        ```
+      </Step>
+      
+      <Step title="Verify tsconfig.json">
+        Ensure proper module configuration:
+        ```json
+        {
+          "compilerOptions": {
+            "module": "ESNext",
+            "moduleResolution": "node",
+            "target": "ES2022"
+          }
+        }
+        ```
+      </Step>
+      
+      <Step title="Check File Paths">
+        Verify relative import paths are correct:
+        ```typescript
+        // From src/tools/my-tool.ts
+        import { BaseTool } from '../core/base-tool.js';
+        
+        // From src/core/base-tool.ts
+        import { ResponseFormatter } from './response-formatter.js';
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+</AccordionGroup>
+
+### MCP Integration Issues
+
+<AccordionGroup>
+  <Accordion title="MCP Inspector connection failed" icon="plug">
+    **Problem**: MCP Inspector can't connect to the server.
+
+    **Symptoms**:
+    - Inspector shows connection errors
+    - Server not responding to inspector
+    - "Failed to connect" messages
+
+    **Solutions**:
+
+    <Steps>
+      <Step title="Ensure Server is Running">
+        Verify the server is actually running:
+        ```bash
+        # Start server in one terminal
+        npm start
+        
+        # Should show:
+        # "MCP Server connected via stdio"
+        # "Server started successfully"
+        ```
+      </Step>
+      
+      <Step title="Use Correct Inspector Command">
+        Use the exact command format:
+        ```bash
+        # Correct command
+        npx @modelcontextprotocol/inspector node dist/index.js
+        
+        # Ensure dist/index.js exists
+        ls -la dist/index.js
+        ```
+      </Step>
+      
+      <Step title="Check Build Status">
+        Ensure project is built successfully:
+        ```bash
+        # Build the project
+        npm run build
+        
+        # Verify dist directory exists
+        ls -la dist/
+        ```
+      </Step>
+      
+      <Step title="Verify Node.js and npm">
+        Check versions and installation:
+        ```bash
+        # Check versions
+        node --version
+        npm --version
+        
+        # Should both return version numbers
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="Claude Desktop not recognizing tools" icon="robot">
+    **Problem**: Claude Desktop doesn't see or use MCP tools.
+
+    **Symptoms**:
+    - Claude doesn't mention available tools
+    - Tools not appearing in Claude's responses
+    - "No tools available" messages
+
+    **Solutions**:
+
+    <Steps>
+      <Step title="Use Absolute Paths">
+        Ensure configuration uses absolute paths:
+        ```json
+        {
+          "mcpServers": {
+            "tablr-mcp": {
+              "command": "node",
+              "args": ["/Users/username/path/to/tablr-mcp/dist/index.js"],
+              "env": {
+                "SUPABASE_URL": "https://your-project.supabase.co",
+                "SUPABASE_SERVICE_ROLE_KEY": "your-key"
+              }
+            }
+          }
+        }
+        ```
+      </Step>
+      
+      <Step title="Verify Configuration File Location">
+        Check configuration file is in the correct location:
+        
+        **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        
+        **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+        
+        **Linux**: `~/.config/Claude/claude_desktop_config.json`
+      </Step>
+      
+      <Step title="Restart Claude Desktop">
+        Always restart Claude Desktop after configuration changes:
+        - Quit Claude Desktop completely
+        - Wait a few seconds
+        - Restart the application
+      </Step>
+      
+      <Step title="Check Claude Desktop Logs">
+        Look for error messages in Claude Desktop logs:
+        - Check application logs
+        - Look for MCP-related errors
+        - Verify server startup messages
+      </Step>
+      
+      <Step title="Test with MCP Inspector First">
+        Always verify tools work with Inspector before trying Claude:
+        ```bash
+        npx @modelcontextprotocol/inspector node dist/index.js
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+</AccordionGroup>
+
+## Debug Mode and Logging
+
+### Enable Debug Mode
+
+Add debug flags to your `.env` file:
+
+```bash
+# Add to your .env file
+DEBUG=true
+MCP_DEBUG=true
+NODE_ENV=development
+```
+
+### Debug Output Examples
+
+<CodeGroup>
+```bash Connection Debug
+Starting Tablr MCP Server...
+DEBUG: Loading environment variables
+DEBUG: SUPABASE_URL found: https://abc123.supabase.co
+DEBUG: SUPABASE_SERVICE_ROLE_KEY found: eyJ***
+Auto-connecting to Supabase using environment variables...
+DEBUG: Creating Supabase client
+Successfully connected to Supabase
+```
+
+```bash Tool Registration Debug
+DEBUG: Registering tool: list_tables
+DEBUG: Registering tool: get_table_schema
+DEBUG: Registering tool: query_records
+DEBUG: All tools registered successfully
+DEBUG: Tools available: 10
+```
+
+```bash Execution Debug
+DEBUG: Executing tool: query_records
+DEBUG: Parameters: {"table_name":"users","limit":50}
+DEBUG: Validating connection...
+DEBUG: Connection valid
+DEBUG: Executing query on table: users
+DEBUG: Query result: 45 records
+DEBUG: Response formatted successfully
+```
+</CodeGroup>
+
+## Performance Troubleshooting
+
+### Slow Query Performance
+
+<Steps>
+  <Step title="Check Query Complexity">
+    Simplify complex queries and add proper indexes
+  </Step>
+  <Step title="Limit Result Sets">
+    Use reasonable limits (100-1000 records max)
+  </Step>
+  <Step title="Monitor Database Performance">
+    Check Supabase dashboard for slow queries
+  </Step>
+  <Step title="Optimize Network">
+    Ensure good network connection to Supabase
+  </Step>
+</Steps>
+
+### Memory Issues
+
+```bash
+# Monitor memory usage
+node --max-old-space-size=4096 dist/index.js
+
+# Check for memory leaks
+DEBUG=true node --inspect dist/index.js
+```
+
+## Getting Help
+
+### Self-Diagnostic Steps
+
+1. **Check Logs**: Look for error messages in the terminal output
+2. **Test Incrementally**: Start with `list_tables`, then try other tools
+3. **Verify Credentials**: Test Supabase connection in their dashboard
+4. **Use MCP Inspector**: Test tools individually before using with Claude
+5. **Check Documentation**: Review MCP and Supabase documentation
+
+### Reporting Issues
+
+When reporting problems, include:
+
+<Checklist>
+- [ ] Operating system and version
+- [ ] Node.js version (`node --version`)
+- [ ] npm version (`npm --version`)
+- [ ] Complete error messages
+- [ ] Steps to reproduce the issue
+- [ ] Your configuration (with sensitive data removed)
+- [ ] Debug output (if applicable)
+</Checklist>
+
+### Community Resources
+
+- **MCP Documentation**: [Model Context Protocol Docs](https://modelcontextprotocol.io)
+- **Supabase Docs**: [Supabase Documentation](https://supabase.com/docs)
+- **GitHub Issues**: Report bugs and request features
+- **Discord Communities**: Join MCP and Supabase Discord servers
+
+<Note>
+Always test with MCP Inspector before trying integration with Claude Desktop or other clients. This helps isolate whether issues are with the server or the client integration.
+</Note>

@@ -1,0 +1,516 @@
+---
+title: "Contributing"
+description: "Guidelines for contributing to Tablr MCP development"
+icon: "handshake"
+---
+
+# Contributing
+
+We welcome contributions to Tablr MCP! This guide will help you get started with contributing to the project, whether you're fixing bugs, adding features, or improving documentation.
+
+## Getting Started
+
+### Prerequisites
+
+Before contributing, ensure you have:
+
+<Checklist>
+- [ ] Node.js 18+ installed
+- [ ] Git for version control
+- [ ] Familiarity with TypeScript
+- [ ] Understanding of the MCP protocol
+- [ ] Access to a Supabase project for testing
+</Checklist>
+
+### Development Workflow
+
+<Steps>
+  <Step title="Fork the Repository">
+    Create your own fork of the Tablr MCP repository
+  </Step>
+  
+  <Step title="Clone Your Fork">
+    ```bash
+    git clone https://github.com/your-username/tablr-mcp.git
+    cd tablr-mcp
+    ```
+  </Step>
+  
+  <Step title="Create a Feature Branch">
+    ```bash
+    git checkout -b feature/amazing-feature
+    # or
+    git checkout -b fix/bug-description
+    ```
+  </Step>
+  
+  <Step title="Set Up Development Environment">
+    ```bash
+    # Install dependencies
+    npm install
+    
+    # Set up environment
+    cp .env.example .env
+    # Edit .env with your credentials
+    
+    # Build the project
+    npm run build
+    ```
+  </Step>
+  
+  <Step title="Make Your Changes">
+    Follow the established patterns and code standards
+  </Step>
+  
+  <Step title="Test Your Changes">
+    Thoroughly test with MCP Inspector and Claude Desktop
+  </Step>
+  
+  <Step title="Submit a Pull Request">
+    Create a detailed pull request with your changes
+  </Step>
+</Steps>
+
+## Code Standards
+
+### TypeScript Guidelines
+
+#### Strict Typing
+Always use explicit types and avoid `any`:
+
+<CodeGroup>
+```typescript Good Examples
+// Good: Explicit interfaces
+interface CreateTableParams {
+  table_name: string;
+  columns: ColumnDefinition[];
+  enable_rls?: boolean;
+}
+
+// Good: Proper type guards
+function isValidTableName(name: unknown): name is string {
+  return typeof name === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
+}
+
+// Good: Generic constraints
+class BaseTool<T extends Record<string, unknown>> {
+  async execute(params: T): Promise<ToolResponse> {
+    // Implementation
+  }
+}
+```
+
+```typescript Bad Examples
+// Bad: Using any
+function execute(params: any): any {
+  // Avoid this
+}
+
+// Bad: No type information
+const result = await someOperation();
+
+// Bad: Unclear return types
+function processData(data) {
+  return data.map(item => item.value);
+}
+```
+</CodeGroup>
+
+#### Naming Conventions
+
+<AccordionGroup>
+  <Accordion title="Files and Directories" icon="folder">
+    ```
+    // Good file naming
+    src/tools/create-table.ts        // kebab-case for files
+    src/utils/error-handler.ts       // descriptive names
+    src/core/base-tool.ts           // clear purpose
+    
+    // Good class naming
+    export class CreateTableTool     // PascalCase
+    export class QueryRecordsTool    // Descriptive
+    ```
+  </Accordion>
+  
+  <Accordion title="Variables and Functions" icon="code">
+    ```typescript
+    // Good variable naming
+    const tableName = 'users';           // camelCase
+    const maxQueryLimit = 1000;         // descriptive
+    const isTableExists = true;         // boolean prefix
+    
+    // Good function naming
+    async function validateTableName()   // verb-based
+    private formatSuccessResponse()      // clear purpose
+    protected ensureConnection()         // meaningful
+    ```
+  </Accordion>
+  
+  <Accordion title="Constants and Enums" icon="list">
+    ```typescript
+    // Good constants
+    const DEFAULT_QUERY_LIMIT = 100;    // UPPER_SNAKE_CASE
+    const MAX_BATCH_SIZE = 1000;        // descriptive
+    
+    // Good enums
+    enum OperationType {
+      CREATE = 'create',
+      READ = 'read',
+      UPDATE = 'update',
+      DELETE = 'delete'
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Code Organization
+
+#### Tool Structure
+All tools should follow this structure:
+
+```typescript
+import { BaseTool } from '../core/base-tool.js';
+import { SupabaseConnectionManager } from '../supabase-client.js';
+
+export class MyNewTool extends BaseTool {
+  name = 'my_new_tool';
+  description = 'Clear description of tool purpose';
+
+  constructor(connectionManager: SupabaseConnectionManager) {
+    super(connectionManager);
+  }
+
+  getToolDefinition() {
+    return {
+      name: this.name,
+      description: this.description,
+      inputSchema: {
+        // JSON Schema definition
+      }
+    };
+  }
+
+  async execute(params: ToolParams): Promise<ToolResponse> {
+    try {
+      // 1. Validate connection
+      await this.ensureConnection();
+      
+      // 2. Validate parameters
+      this.validateParameters(params);
+      
+      // 3. Perform operation
+      const result = await this.performOperation(params);
+      
+      // 4. Return formatted response
+      return this.formatSuccess(result, 'Operation completed');
+      
+    } catch (error) {
+      return this.formatError(error);
+    }
+  }
+
+  private validateParameters(params: ToolParams): void {
+    // Parameter validation logic
+  }
+
+  private async performOperation(params: ToolParams): Promise<unknown> {
+    // Main operation logic
+  }
+}
+```
+
+### Error Handling
+
+#### Comprehensive Error Management
+
+<CodeGroup>
+```typescript Standard Error Handling
+try {
+  const result = await this.performDatabaseOperation();
+  return this.formatSuccess(result, 'Operation successful');
+} catch (error) {
+  // Log error for debugging
+  console.error(`Tool ${this.name} failed:`, error);
+  
+  // Return formatted error response
+  return this.formatError(error);
+}
+```
+
+```typescript Specific Error Types
+// Handle different error scenarios
+try {
+  // ... operation
+} catch (error) {
+  if (error.code === '23505') {
+    // Unique constraint violation
+    return this.formatError(new Error('Record already exists'));
+  } else if (error.code === '42P01') {
+    // Table does not exist
+    return this.formatError(new Error(`Table '${tableName}' not found`));
+  } else {
+    // Generic error
+    return this.formatError(error);
+  }
+}
+```
+
+```typescript Input Validation Errors
+private validateTableName(name: string): void {
+  if (!name || typeof name !== 'string') {
+    throw new Error('Table name must be a non-empty string');
+  }
+  
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
+    throw new Error('Invalid table name format. Use letters, numbers, and underscores only.');
+  }
+  
+  if (name.length > 63) {
+    throw new Error('Table name too long (max 63 characters)');
+  }
+}
+```
+</CodeGroup>
+
+### Documentation Standards
+
+#### Code Comments
+
+```typescript
+/**
+ * Creates a new table in the database with specified columns and constraints.
+ * 
+ * @param params - Table creation parameters
+ * @param params.table_name - Name of the table to create
+ * @param params.columns - Array of column definitions
+ * @param params.enable_rls - Whether to enable Row Level Security (default: true)
+ * @returns Promise resolving to creation result
+ * 
+ * @example
+ * ```typescript
+ * const result = await createTable.execute({
+ *   table_name: 'users',
+ *   columns: [
+ *     { name: 'id', type: 'integer', primary_key: true },
+ *     { name: 'email', type: 'text', nullable: false }
+ *   ]
+ * });
+ * ```
+ */
+async execute(params: CreateTableParams): Promise<ToolResponse> {
+  // Implementation
+}
+```
+
+#### README Updates
+
+When adding new features, update documentation:
+
+- Add tool descriptions to README
+- Include usage examples
+- Update feature lists
+- Add troubleshooting tips if needed
+
+## Testing Guidelines
+
+### Test Your Tools
+
+#### MCP Inspector Testing
+
+<Steps>
+  <Step title="Build and Start">
+    ```bash
+    npm run build
+    npm start
+    ```
+  </Step>
+  
+  <Step title="Launch Inspector">
+    ```bash
+    npx @modelcontextprotocol/inspector node dist/index.js
+    ```
+  </Step>
+  
+  <Step title="Test Scenarios">
+    - Valid inputs with expected outputs
+    - Invalid inputs to test error handling
+    - Edge cases and boundary conditions
+    - Performance with large datasets
+  </Step>
+</Steps>
+
+#### Integration Testing
+
+Test with actual MCP clients:
+
+<CodeGroup>
+```json Claude Desktop Test
+// Test with Claude Desktop
+"Show me all tables in my database"
+"Create a new table called 'products' with id and name columns"
+"Query the users table for active users"
+```
+
+```javascript Custom Client Test
+// Test with custom MCP client
+const client = new Client({
+  name: "test-client",
+  version: "1.0.0"
+}, {
+  capabilities: {}
+});
+
+await client.connect(transport);
+const result = await client.callTool('list_tables', {});
+```
+</CodeGroup>
+
+### Test Coverage Areas
+
+<Checklist>
+- [ ] **Happy Path**: Normal operation with valid inputs
+- [ ] **Error Handling**: Invalid inputs and edge cases
+- [ ] **Security**: Injection attempts and unauthorized access
+- [ ] **Performance**: Large datasets and complex queries
+- [ ] **Integration**: Works with different MCP clients
+- [ ] **Backwards Compatibility**: Doesn't break existing functionality
+</Checklist>
+
+## Areas for Contribution
+
+### High-Priority Contributions
+
+<CardGroup cols={2}>
+  <Card title="New Database Tools" icon="plus">
+    - Table relationship management
+    - Index creation and optimization
+    - Backup and restore functionality
+    - Database migration tools
+  </Card>
+  
+  <Card title="Performance Improvements" icon="tachometer-alt">
+    - Query optimization
+    - Connection pooling
+    - Caching mechanisms
+    - Batch operation support
+  </Card>
+  
+  <Card title="Documentation" icon="book">
+    - Tutorial guides
+    - API documentation
+    - Troubleshooting guides
+    - Video tutorials
+  </Card>
+  
+  <Card title="Testing & Quality" icon="check-circle">
+    - Unit test coverage
+    - Integration tests
+    - Performance benchmarks
+    - Security audits
+  </Card>
+</CardGroup>
+
+### Feature Ideas
+
+<AccordionGroup>
+  <Accordion title="Advanced Database Features" icon="database">
+    - **Views Management**: Create and manage database views
+    - **Stored Procedures**: Execute and manage custom functions
+    - **Triggers**: Set up database triggers
+    - **Indexes**: Create and optimize database indexes
+    - **Constraints**: Manage foreign keys and check constraints
+  </Accordion>
+  
+  <Accordion title="Data Analysis Tools" icon="chart-line">
+    - **Statistical Analysis**: Basic statistics on table data
+    - **Data Profiling**: Analyze data quality and patterns
+    - **Export Tools**: Export data in various formats
+    - **Visualization**: Generate simple charts and graphs
+    - **Reporting**: Create automated reports
+  </Accordion>
+  
+  <Accordion title="Developer Experience" icon="code">
+    - **Schema Diffing**: Compare database schemas
+    - **Migration Generator**: Auto-generate migration scripts
+    - **Code Generation**: Generate TypeScript types from schema
+    - **Documentation**: Auto-generate database documentation
+    - **Testing Utilities**: Database testing helpers
+  </Accordion>
+</AccordionGroup>
+
+## Pull Request Guidelines
+
+### Before Submitting
+
+<Checklist>
+- [ ] Code follows established patterns and standards
+- [ ] All tests pass (manual testing with MCP Inspector)
+- [ ] Documentation is updated as needed
+- [ ] No breaking changes (or clearly documented)
+- [ ] Commit messages are clear and descriptive
+- [ ] No sensitive information in code or commits
+</Checklist>
+
+### PR Description Template
+
+```markdown
+## Description
+Brief description of the changes and their purpose.
+
+## Type of Change
+- [ ] Bug fix (non-breaking change that fixes an issue)
+- [ ] New feature (non-breaking change that adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Documentation update
+
+## Testing
+- [ ] Tested with MCP Inspector
+- [ ] Tested with Claude Desktop
+- [ ] Added/updated tests as needed
+
+## Screenshots/Examples
+Include examples of the new functionality or bug fix.
+
+## Checklist
+- [ ] My code follows the style guidelines
+- [ ] I have performed a self-review of my own code
+- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] My changes generate no new warnings
+```
+
+### Review Process
+
+1. **Automated Checks**: Code style and basic validation
+2. **Manual Review**: Code quality, architecture, and best practices
+3. **Testing**: Reviewer tests the changes
+4. **Documentation**: Verify documentation is complete
+5. **Approval**: Final approval and merge
+
+## Community Guidelines
+
+### Code of Conduct
+
+- **Be Respectful**: Treat all contributors with respect and kindness
+- **Be Constructive**: Provide helpful feedback and suggestions
+- **Be Collaborative**: Work together to improve the project
+- **Be Patient**: Understand that everyone has different experience levels
+
+### Communication
+
+- **Issues**: Use GitHub issues for bug reports and feature requests
+- **Discussions**: Use GitHub discussions for questions and ideas
+- **Pull Requests**: Use PR comments for code-specific feedback
+- **Documentation**: Keep documentation clear and up-to-date
+
+## Recognition
+
+Contributors are recognized through:
+
+- **GitHub Contributors**: Automatic recognition in repository
+- **Release Notes**: Major contributions mentioned in releases
+- **Documentation**: Contributor acknowledgments in docs
+
+<Note>
+**Thank you for contributing!** Every contribution, whether it's code, documentation, testing, or feedback, helps make Tablr MCP better for everyone.
+</Note>

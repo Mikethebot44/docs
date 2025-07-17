@@ -1,0 +1,289 @@
+---
+title: "Prerequisites & Requirements"
+description: "System requirements, accounts needed, and verification steps to get started with Tablr MCP"
+icon: "list-check"
+---
+
+## Overview
+
+Before setting up Tablr MCP, ensure you have all the required software, accounts, and access credentials. This guide will walk you through each requirement and how to verify your setup.
+
+<Note>
+Taking time to verify these prerequisites will save you troubleshooting time later. Each requirement serves a specific purpose in the Tablr MCP ecosystem.
+</Note>
+
+## Required Software
+
+### Node.js (Version 18.0.0 or Higher)
+
+Node.js is the JavaScript runtime that powers Tablr MCP. Version 18+ is required for modern JavaScript features and security updates.
+
+**Installation:**
+- Download from [nodejs.org](https://nodejs.org/)
+- Choose the LTS (Long Term Support) version
+- Follow the installer instructions for your operating system
+
+**Verification:**
+```bash
+# Check Node.js version (should be 18+)
+node --version
+
+# Expected output: v18.x.x or higher
+```
+
+<Tip>
+If you have an older version of Node.js, consider using a version manager like `nvm` (macOS/Linux) or `nvm-windows` to manage multiple Node.js versions.
+</Tip>
+
+### npm (Node Package Manager)
+
+npm comes bundled with Node.js and is used to install Tablr MCP's dependencies.
+
+**Verification:**
+```bash
+# Check npm version
+npm --version
+
+# Expected output: 8.x.x or higher
+```
+
+### Git (Version Control)
+
+Git is needed to clone the Tablr MCP repository and manage code updates.
+
+**Installation:**
+- Download from [git-scm.com](https://git-scm.com/)
+- Follow the installation guide for your operating system
+
+**Verification:**
+```bash
+# Check Git installation
+git --version
+
+# Expected output: git version 2.x.x
+```
+
+## Required Accounts
+
+### Supabase Account
+
+Supabase provides the PostgreSQL database that Tablr MCP manages. A free account includes:
+- 2 projects
+- 500MB database storage
+- 50,000 monthly active users
+- 2GB bandwidth
+
+**Setup Steps:**
+1. Visit [supabase.com](https://supabase.com)
+2. Click "Start your project"
+3. Sign up with GitHub, Google, or email
+4. Verify your email address
+
+### Supabase Project
+
+You need an active Supabase project with a database to manage.
+
+**Creating a Project:**
+1. Log into your Supabase dashboard
+2. Click "New Project"
+3. Choose an organization (or create one)
+4. Enter project details:
+   - **Name**: Descriptive project name
+   - **Database Password**: Strong, secure password
+   - **Region**: Choose closest to your location
+5. Click "Create new project"
+6. Wait for project initialization (2-3 minutes)
+
+<Note>
+Remember your database password - you'll need it for direct database access, though Tablr MCP uses service keys for authentication.
+</Note>
+
+## System Verification
+
+Run these commands to verify your environment is ready:
+
+### Complete Prerequisites Check
+
+```bash
+# Create a new directory for testing
+mkdir tablr-mcp-test && cd tablr-mcp-test
+
+# Check all required software
+echo "Node.js version:"
+node --version
+
+echo "npm version:"
+npm --version
+
+echo "Git version:"
+git --version
+
+# Test npm functionality
+npm init -y
+npm install dotenv
+echo "npm is working correctly"
+
+# Clean up
+cd .. && rm -rf tablr-mcp-test
+```
+
+**Expected Output:**
+```
+Node.js version:
+v18.17.0
+
+npm version:
+9.6.7
+
+Git version:
+git version 2.40.1
+
+npm is working correctly
+```
+
+## Supabase Setup Verification
+
+### Access Your Project Credentials
+
+1. **Navigate to Project Settings:**
+   - Open your Supabase dashboard
+   - Select your project
+   - Go to **Settings** → **API**
+
+2. **Locate Required Information:**
+   - **Project URL**: `https://your-project-id.supabase.co`
+   - **Service Role Key**: Long key starting with `eyJ`
+
+<Warning>
+**Security Important**: The service_role key has admin privileges. Never commit it to version control or share it publicly. It's more powerful than the anon/public key.
+</Warning>
+
+### Test Database Connection
+
+Verify your Supabase project is accessible:
+
+1. **Using Supabase Dashboard:**
+   - Go to **Table Editor** in your project
+   - You should see the interface without errors
+   - Try creating a test table to verify write access
+
+2. **Using SQL Editor:**
+   - Go to **SQL Editor** in your project
+   - Run a simple query: `SELECT NOW();`
+   - You should see the current timestamp
+
+### Understand Key Differences
+
+| Key Type | Purpose | Power Level | Use Case |
+|----------|---------|-------------|----------|
+| `anon` | Public access | Limited | Frontend applications |
+| `service_role` | Server access | Full admin | Backend services (Tablr MCP) |
+
+<Tip>
+Tablr MCP requires the `service_role` key because it needs to perform administrative database operations like creating tables and managing schemas.
+</Tip>
+
+## Optional but Recommended
+
+### Code Editor
+
+While not required, a good code editor improves the development experience:
+
+**Recommended Options:**
+- **Visual Studio Code** - Free, extensive extension ecosystem
+- **Cursor** - AI-powered editor with built-in MCP support
+- **WebStorm** - Full-featured IDE for JavaScript/TypeScript
+
+### MCP Client for Testing
+
+Having an MCP client ready helps with testing:
+
+**Popular Options:**
+- **Claude Desktop** - Desktop AI assistant by Anthropic
+- **MCP Inspector** - Web-based testing tool
+- **Cursor IDE** - Code editor with MCP integration
+
+## Troubleshooting Common Issues
+
+### Node.js Version Issues
+
+**Problem**: `node --version` shows version < 18
+```bash
+# Solution: Update Node.js
+# Download latest LTS from nodejs.org
+# Or use version manager:
+nvm install --lts
+nvm use --lts
+```
+
+### npm Permission Errors
+
+**Problem**: `npm install` fails with permission errors
+```bash
+# Solution: Fix npm permissions
+npm config set prefix ~/.npm-global
+export PATH=~/.npm-global/bin:$PATH
+```
+
+### Git Not Found
+
+**Problem**: `git --version` command not found
+```bash
+# Solution: Install Git
+# macOS: brew install git
+# Ubuntu: sudo apt install git
+# Windows: Download from git-scm.com
+```
+
+### Supabase Connection Issues
+
+**Problem**: Can't access Supabase dashboard or project
+
+**Solutions:**
+1. Check internet connection
+2. Verify account email is confirmed
+3. Try incognito/private browsing mode
+4. Clear browser cache and cookies
+5. Contact Supabase support if issues persist
+
+## Ready to Proceed?
+
+Once you've verified all prerequisites:
+
+**Node.js 18+** installed and working  
+**npm** functioning correctly  
+**Git** available for repository operations  
+**Supabase account** created and verified  
+**Supabase project** set up with database  
+**Project credentials** located and secured  
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation Guide"
+    icon="download"
+    href="/mcp/installation"
+  >
+    Ready to install Tablr MCP
+  </Card>
+  <Card
+    title="Configuration Setup"
+    icon="gear"
+    href="/mcp/configuration"
+  >
+    Configure your environment
+  </Card>
+</CardGroup>
+
+## Getting Help
+
+If you encounter issues during prerequisite setup:
+
+1. **Check System Requirements**: Ensure your OS supports the required software versions
+2. **Review Error Messages**: Most installation errors include helpful guidance
+3. **Use Official Documentation**: Node.js, Git, and Supabase have comprehensive setup guides
+4. **Community Resources**: Stack Overflow, GitHub issues, and community forums
+5. **Start Simple**: Verify each component individually before combining them
+
+<Note>
+These prerequisites form the foundation of your Tablr MCP installation. Taking time to set them up correctly will ensure a smooth installation and operation experience.
+</Note>

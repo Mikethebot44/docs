@@ -1,0 +1,900 @@
+---
+title: 'Other MCP Clients & Custom Apps'
+description: 'Integrate Tablr MCP with Cursor IDE, custom applications, and other MCP-compatible clients'
+icon: 'code'
+---
+
+# Other MCP Clients & Custom Apps
+
+Tablr MCP is built on the open Model Context Protocol standard, making it compatible with any MCP-supporting client. This guide covers integration with popular development tools and custom applications.
+
+## Supported Client Types
+
+Tablr MCP works with:
+- **Code Editors**: Cursor IDE, VS Code with MCP extensions
+- **Custom Applications**: Node.js, Python, and other language clients
+- **Development Tools**: Any application implementing the MCP protocol
+- **AI Assistants**: Any MCP-compatible AI interface
+
+## Cursor IDE Integration
+
+Cursor IDE provides built-in support for MCP servers, making it an excellent choice for database-driven development.
+
+### Setup Configuration
+
+<Steps>
+### Step 1: Configure Cursor Settings
+
+Open Cursor's settings and add your MCP server configuration:
+
+```json cursor-settings.json
+{
+  "mcp": {
+    "servers": {
+      "tablr-mcp": {
+        "command": "node",
+        "args": ["/absolute/path/to/tablr-mcp/dist/index.js"],
+        "env": {
+          "SUPABASE_URL": "https://your-project-id.supabase.co",
+          "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key",
+          "SUPABASE_PROJECT_NAME": "your-project-name"
+        }
+      }
+    }
+  }
+}
+```
+
+### Step 2: Verify Integration
+
+1. **Restart Cursor IDE**
+2. **Open a new chat session**
+3. **Test the connection**: Ask "What database tools are available?"
+4. **Verify tools are loaded**: You should see all Tablr MCP functions listed
+
+### Step 3: Start Database Development
+
+Begin using Tablr MCP in your development workflow:
+
+```
+You: "Show me the schema for my users table"
+Cursor: [Displays table structure with columns and types]
+
+You: "Generate a TypeScript interface for this table"
+Cursor: [Creates interface based on database schema]
+
+You: "Create a new table for user preferences"
+Cursor: [Uses create_table tool and generates the table]
+```
+
+</Steps>
+
+### Development Workflow
+
+With Cursor and Tablr MCP, you can:
+
+#### Database-First Development
+```
+You: "List all tables and their relationships"
+Cursor: [Shows database structure]
+
+You: "Generate models for all tables"
+Cursor: [Creates TypeScript/JavaScript models based on schemas]
+```
+
+#### Schema Evolution
+```
+You: "Add a 'last_login' timestamp to users table"
+Cursor: [Uses alter_table tool and updates the schema]
+
+You: "Update the User interface to include this field"
+Cursor: [Modifies TypeScript interfaces accordingly]
+```
+
+#### Data Analysis
+```
+You: "Show me users who haven't logged in recently"
+Cursor: [Queries data and displays results]
+
+You: "Create a migration to clean up old data"
+Cursor: [Generates migration scripts based on analysis]
+```
+
+## Custom Application Integration
+
+### Node.js/JavaScript Applications
+
+Integrate Tablr MCP directly into your Node.js applications:
+
+<CodeGroup>
+
+```javascript ES Modules
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+
+class DatabaseManager {
+  constructor() {
+    this.client = null;
+    this.transport = null;
+  }
+
+  async connect() {
+    // Create transport to Tablr MCP server
+    this.transport = new StdioClientTransport({
+      command: 'node',
+      args: ['/path/to/tablr-mcp/dist/index.js'],
+      env: {
+        SUPABASE_URL: process.env.SUPABASE_URL,
+        SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        SUPABASE_PROJECT_NAME: process.env.SUPABASE_PROJECT_NAME
+      }
+    });
+
+    // Create MCP client
+    this.client = new Client(
+      { name: "my-app", version: "1.0.0" },
+      { capabilities: {} }
+    );
+
+    // Connect to the server
+    await this.client.connect(this.transport);
+    console.log('Connected to Tablr MCP server');
+  }
+
+  async listTables() {
+    const result = await this.client.callTool({
+      name: 'list_tables',
+      arguments: {}
+    });
+    return result.content;
+  }
+
+  async queryUsers(filters = {}) {
+    const result = await this.client.callTool({
+      name: 'query_records',
+      arguments: {
+        table_name: 'users',
+        filters: filters,
+        limit: 100
+      }
+    });
+    return result.content;
+  }
+
+  async createTable(tableName, columns) {
+    const result = await this.client.callTool({
+      name: 'create_table',
+      arguments: {
+        table_name: tableName,
+        columns: columns,
+        enable_rls: true
+      }
+    });
+    return result.content;
+  }
+
+  async disconnect() {
+    if (this.transport) {
+      await this.transport.close();
+    }
+  }
+}
+
+// Usage example
+async function main() {
+  const db = new DatabaseManager();
+  
+  try {
+    await db.connect();
+    
+    // List all tables
+    const tables = await db.listTables();
+    console.log('Available tables:', tables);
+    
+    // Query users
+    const users = await db.queryUsers({
+      status: { eq: 'active' }
+    });
+    console.log('Active users:', users);
+    
+  } catch (error) {
+    console.error('Database operation failed:', error);
+  } finally {
+    await db.disconnect();
+  }
+}
+
+main();
+```
+
+```javascript CommonJS
+const { Client } = require('@modelcontextprotocol/sdk/client/index.js');
+const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio.js');
+
+class DatabaseManager {
+  constructor() {
+    this.client = null;
+    this.transport = null;
+  }
+
+  async connect() {
+    this.transport = new StdioClientTransport({
+      command: 'node',
+      args: ['/path/to/tablr-mcp/dist/index.js'],
+      env: process.env
+    });
+
+    this.client = new Client(
+      { name: "my-app", version: "1.0.0" },
+      { capabilities: {} }
+    );
+
+    await this.client.connect(this.transport);
+  }
+
+  // ... other methods same as ES modules example
+}
+
+module.exports = { DatabaseManager };
+```
+
+</CodeGroup>
+
+### Python Applications
+
+Use Tablr MCP from Python applications:
+
+```python python-client.py
+import asyncio
+import subprocess
+import json
+from typing import Dict, List, Any
+
+class TablrMCPClient:
+    def __init__(self, tablr_path: str, env_vars: Dict[str, str]):
+        self.tablr_path = tablr_path
+        self.env_vars = env_vars
+        self.process = None
+
+    async def start_server(self):
+        """Start the Tablr MCP server process"""
+        self.process = await asyncio.create_subprocess_exec(
+            'node', self.tablr_path,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            env=self.env_vars
+        )
+
+    async def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict:
+        """Call a Tablr MCP tool"""
+        request = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {
+                "name": tool_name,
+                "arguments": arguments
+            }
+        }
+        
+        # Send request
+        request_json = json.dumps(request) + '\n'
+        self.process.stdin.write(request_json.encode())
+        await self.process.stdin.drain()
+        
+        # Read response
+        response_line = await self.process.stdout.readline()
+        response = json.loads(response_line.decode())
+        
+        return response.get('result', {})
+
+    async def list_tables(self) -> List[Dict]:
+        """List all database tables"""
+        result = await self.call_tool('list_tables', {})
+        return result.get('data', [])
+
+    async def query_records(self, table_name: str, filters: Dict = None, limit: int = 100) -> List[Dict]:
+        """Query records from a table"""
+        arguments = {
+            'table_name': table_name,
+            'limit': limit
+        }
+        if filters:
+            arguments['filters'] = filters
+            
+        result = await self.call_tool('query_records', arguments)
+        return result.get('data', [])
+
+    async def insert_record(self, table_name: str, record: Dict) -> Dict:
+        """Insert a new record"""
+        arguments = {
+            'table_name': table_name,
+            'records': [record],
+            'return_records': True
+        }
+        
+        result = await self.call_tool('insert_records', arguments)
+        return result
+
+    async def close(self):
+        """Close the connection"""
+        if self.process:
+            self.process.terminate()
+            await self.process.wait()
+
+# Usage example
+async def main():
+    client = TablrMCPClient(
+        tablr_path='/path/to/tablr-mcp/dist/index.js',
+        env_vars={
+            'SUPABASE_URL': 'https://your-project.supabase.co',
+            'SUPABASE_SERVICE_ROLE_KEY': 'your-service-key',
+            'SUPABASE_PROJECT_NAME': 'your-project'
+        }
+    )
+    
+    try:
+        await client.start_server()
+        
+        # List tables
+        tables = await client.list_tables()
+        print(f"Available tables: {tables}")
+        
+        # Query users
+        users = await client.query_records('users', limit=10)
+        print(f"Users: {users}")
+        
+        # Insert a new user
+        new_user = await client.insert_record('users', {
+            'email': 'new@example.com',
+            'name': 'New User'
+        })
+        print(f"Created user: {new_user}")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        await client.close()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## Advanced Integration Patterns
+
+### Microservices Architecture
+
+Use Tablr MCP as a database service layer:
+
+```javascript microservice-integration.js
+import express from 'express';
+import { DatabaseManager } from './database-manager.js';
+
+const app = express();
+app.use(express.json());
+
+const db = new DatabaseManager();
+
+// Initialize database connection
+app.listen(3000, async () => {
+  await db.connect();
+  console.log('API server started with Tablr MCP integration');
+});
+
+// RESTful endpoints using Tablr MCP
+app.get('/api/tables', async (req, res) => {
+  try {
+    const tables = await db.listTables();
+    res.json(tables);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/tables/:tableName/records', async (req, res) => {
+  try {
+    const { tableName } = req.params;
+    const { limit = 100, ...filters } = req.query;
+    
+    const records = await db.queryRecords(tableName, filters, parseInt(limit));
+    res.json(records);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/tables/:tableName/records', async (req, res) => {
+  try {
+    const { tableName } = req.params;
+    const record = req.body;
+    
+    const result = await db.insertRecord(tableName, record);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  await db.disconnect();
+  process.exit(0);
+});
+```
+
+### Event-Driven Architecture
+
+Integrate with event systems:
+
+```javascript event-driven.js
+import { EventEmitter } from 'events';
+import { DatabaseManager } from './database-manager.js';
+
+class DatabaseEventHandler extends EventEmitter {
+  constructor() {
+    super();
+    this.db = new DatabaseManager();
+  }
+
+  async initialize() {
+    await this.db.connect();
+    this.setupEventHandlers();
+  }
+
+  setupEventHandlers() {
+    // User creation event
+    this.on('user:created', async (userData) => {
+      try {
+        const result = await this.db.createUser(userData);
+        console.log('User created:', result);
+        this.emit('user:created:success', result);
+      } catch (error) {
+        console.error('User creation failed:', error);
+        this.emit('user:created:error', error);
+      }
+    });
+
+    // Data sync event
+    this.on('data:sync', async (tableName) => {
+      try {
+        const records = await this.db.queryRecords(tableName);
+        this.emit('data:synced', { tableName, records });
+      } catch (error) {
+        this.emit('data:sync:error', error);
+      }
+    });
+
+    // Schema update event
+    this.on('schema:update', async (changes) => {
+      try {
+        for (const change of changes) {
+          await this.db.alterTable(change.table, change.operations);
+        }
+        this.emit('schema:updated', changes);
+      } catch (error) {
+        this.emit('schema:update:error', error);
+      }
+    });
+  }
+}
+
+// Usage
+const dbHandler = new DatabaseEventHandler();
+await dbHandler.initialize();
+
+// Trigger events
+dbHandler.emit('user:created', {
+  email: 'user@example.com',
+  name: 'New User'
+});
+
+dbHandler.emit('data:sync', 'users');
+```
+
+## Development Tools Integration
+
+### VS Code Extension
+
+Create a VS Code extension that uses Tablr MCP:
+
+```json package.json
+{
+  "name": "tablr-mcp-extension",
+  "displayName": "Tablr MCP Database Tools",
+  "description": "Database management through Tablr MCP",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onCommand:tablr.listTables"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "tablr.listTables",
+        "title": "List Database Tables"
+      },
+      {
+        "command": "tablr.queryTable", 
+        "title": "Query Table Data"
+      },
+      {
+        "command": "tablr.showSchema",
+        "title": "Show Table Schema"
+      }
+    ]
+  }
+}
+```
+
+### CLI Tool
+
+Build a command-line interface:
+
+```javascript cli-tool.js
+#!/usr/bin/env node
+
+import { Command } from 'commander';
+import { DatabaseManager } from './database-manager.js';
+
+const program = new Command();
+const db = new DatabaseManager();
+
+program
+  .name('tablr-cli')
+  .description('Command-line interface for Tablr MCP')
+  .version('1.0.0');
+
+program
+  .command('list-tables')
+  .description('List all database tables')
+  .action(async () => {
+    await db.connect();
+    const tables = await db.listTables();
+    console.table(tables);
+    await db.disconnect();
+  });
+
+program
+  .command('query <table>')
+  .description('Query records from a table')
+  .option('-l, --limit <number>', 'Limit number of results', '10')
+  .option('-f, --filter <filter>', 'JSON filter object')
+  .action(async (table, options) => {
+    await db.connect();
+    
+    const filters = options.filter ? JSON.parse(options.filter) : {};
+    const records = await db.queryRecords(table, filters, parseInt(options.limit));
+    
+    console.table(records);
+    await db.disconnect();
+  });
+
+program
+  .command('schema <table>')
+  .description('Show table schema')
+  .action(async (table) => {
+    await db.connect();
+    const schema = await db.getTableSchema(table);
+    console.log(JSON.stringify(schema, null, 2));
+    await db.disconnect();
+  });
+
+program.parse();
+```
+
+## Testing & Quality Assurance
+
+### Unit Testing
+
+Test your MCP integration:
+
+```javascript test-integration.js
+import { describe, it, before, after } from 'mocha';
+import { expect } from 'chai';
+import { DatabaseManager } from '../src/database-manager.js';
+
+describe('Tablr MCP Integration', () => {
+  let db;
+
+  before(async () => {
+    db = new DatabaseManager();
+    await db.connect();
+  });
+
+  after(async () => {
+    await db.disconnect();
+  });
+
+  it('should list available tables', async () => {
+    const tables = await db.listTables();
+    expect(tables).to.be.an('array');
+    expect(tables.length).to.be.greaterThan(0);
+  });
+
+  it('should query records from a table', async () => {
+    const records = await db.queryRecords('users', {}, 5);
+    expect(records).to.be.an('array');
+    expect(records.length).to.be.lessThanOrEqual(5);
+  });
+
+  it('should handle errors gracefully', async () => {
+    try {
+      await db.queryRecords('nonexistent_table');
+      expect.fail('Should have thrown an error');
+    } catch (error) {
+      expect(error.message).to.include('table not found');
+    }
+  });
+});
+```
+
+### Performance Monitoring
+
+Monitor your MCP integration performance:
+
+```javascript performance-monitor.js
+import { DatabaseManager } from './database-manager.js';
+
+class PerformanceMonitor {
+  constructor(db) {
+    this.db = db;
+    this.metrics = new Map();
+  }
+
+  async measureOperation(operationName, operation) {
+    const startTime = Date.now();
+    
+    try {
+      const result = await operation();
+      const duration = Date.now() - startTime;
+      
+      this.recordMetric(operationName, duration, 'success');
+      return result;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.recordMetric(operationName, duration, 'error');
+      throw error;
+    }
+  }
+
+  recordMetric(operation, duration, status) {
+    if (!this.metrics.has(operation)) {
+      this.metrics.set(operation, []);
+    }
+    
+    this.metrics.get(operation).push({
+      duration,
+      status,
+      timestamp: new Date()
+    });
+  }
+
+  getAverageTime(operation) {
+    const data = this.metrics.get(operation) || [];
+    const successfulOps = data.filter(m => m.status === 'success');
+    
+    if (successfulOps.length === 0) return 0;
+    
+    const totalTime = successfulOps.reduce((sum, m) => sum + m.duration, 0);
+    return totalTime / successfulOps.length;
+  }
+
+  getReport() {
+    const report = {};
+    
+    for (const [operation, data] of this.metrics) {
+      report[operation] = {
+        totalCalls: data.length,
+        successfulCalls: data.filter(m => m.status === 'success').length,
+        averageTime: this.getAverageTime(operation),
+        errorRate: (data.filter(m => m.status === 'error').length / data.length) * 100
+      };
+    }
+    
+    return report;
+  }
+}
+
+// Usage
+const db = new DatabaseManager();
+const monitor = new PerformanceMonitor(db);
+
+await db.connect();
+
+// Monitored operations
+const tables = await monitor.measureOperation('list_tables', () => 
+  db.listTables()
+);
+
+const users = await monitor.measureOperation('query_users', () =>
+  db.queryRecords('users', {}, 100)
+);
+
+// Get performance report
+console.log(monitor.getReport());
+```
+
+## Best Practices
+
+### Error Handling
+
+Implement robust error handling:
+
+```javascript error-handling.js
+class RobustDatabaseManager extends DatabaseManager {
+  async safeOperation(operation, maxRetries = 3) {
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        
+        if (this.isRetryableError(error) && attempt < maxRetries) {
+          const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+          await this.sleep(delay);
+          continue;
+        }
+        
+        throw error;
+      }
+    }
+    
+    throw lastError;
+  }
+
+  isRetryableError(error) {
+    // Define which errors are worth retrying
+    const retryableMessages = [
+      'connection timeout',
+      'network error',
+      'server temporarily unavailable'
+    ];
+    
+    return retryableMessages.some(msg => 
+      error.message.toLowerCase().includes(msg)
+    );
+  }
+
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+```
+
+### Connection Pooling
+
+Manage multiple connections efficiently:
+
+```javascript connection-pool.js
+class DatabasePool {
+  constructor(maxConnections = 5) {
+    this.maxConnections = maxConnections;
+    this.connections = [];
+    this.activeConnections = 0;
+    this.waitingQueue = [];
+  }
+
+  async getConnection() {
+    if (this.connections.length > 0) {
+      return this.connections.pop();
+    }
+
+    if (this.activeConnections < this.maxConnections) {
+      const db = new DatabaseManager();
+      await db.connect();
+      this.activeConnections++;
+      return db;
+    }
+
+    // Wait for an available connection
+    return new Promise((resolve) => {
+      this.waitingQueue.push(resolve);
+    });
+  }
+
+  releaseConnection(db) {
+    if (this.waitingQueue.length > 0) {
+      const resolve = this.waitingQueue.shift();
+      resolve(db);
+    } else {
+      this.connections.push(db);
+    }
+  }
+
+  async closeAll() {
+    for (const db of this.connections) {
+      await db.disconnect();
+    }
+    this.connections = [];
+    this.activeConnections = 0;
+  }
+}
+```
+
+## Security Considerations
+
+### Access Control
+
+Implement proper access controls:
+
+```javascript access-control.js
+class SecureTableAccess {
+  constructor(db, userRole) {
+    this.db = db;
+    this.userRole = userRole;
+    this.permissions = this.loadPermissions(userRole);
+  }
+
+  loadPermissions(role) {
+    const rolePermissions = {
+      'admin': ['read', 'write', 'delete', 'schema'],
+      'editor': ['read', 'write'],
+      'viewer': ['read']
+    };
+    
+    return rolePermissions[role] || [];
+  }
+
+  async queryRecords(tableName, filters = {}, limit = 100) {
+    if (!this.permissions.includes('read')) {
+      throw new Error('Insufficient permissions for read operation');
+    }
+
+    if (this.isRestrictedTable(tableName) && this.userRole !== 'admin') {
+      throw new Error(`Access denied to table: ${tableName}`);
+    }
+
+    return await this.db.queryRecords(tableName, filters, limit);
+  }
+
+  async insertRecords(tableName, records) {
+    if (!this.permissions.includes('write')) {
+      throw new Error('Insufficient permissions for write operation');
+    }
+
+    // Sanitize data before insertion
+    const sanitizedRecords = this.sanitizeRecords(records);
+    
+    return await this.db.insertRecords(tableName, sanitizedRecords);
+  }
+
+  isRestrictedTable(tableName) {
+    const restrictedTables = ['admin_users', 'system_config', 'audit_logs'];
+    return restrictedTables.includes(tableName);
+  }
+
+  sanitizeRecords(records) {
+    // Remove potentially dangerous fields
+    const dangerousFields = ['__proto__', 'constructor', 'prototype'];
+    
+    return records.map(record => {
+      const sanitized = {};
+      for (const [key, value] of Object.entries(record)) {
+        if (!dangerousFields.includes(key)) {
+          sanitized[key] = value;
+        }
+      }
+      return sanitized;
+    });
+  }
+}
+```
+
+## Next Steps
+
+After integrating Tablr MCP with your preferred client:
+
+1. **Explore advanced features** like custom SQL execution and schema migrations
+2. **Set up monitoring** to track performance and usage patterns
+3. **Implement security best practices** for production deployments
+4. **Create automated workflows** for common database tasks
+5. **Build custom tools** that leverage the MCP protocol
+
+<Card title="Need help with testing?" icon="flask">
+Learn about comprehensive testing strategies with [MCP Inspector](/mcp/integration/testing).
+</Card>

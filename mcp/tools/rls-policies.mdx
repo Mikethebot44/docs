@@ -1,0 +1,578 @@
+---
+title: "RLS Policy Management"
+description: "Comprehensive Row Level Security (RLS) policy management tools for fine-grained database access control"
+icon: "shield-check"
+---
+
+## Overview
+
+Row Level Security (RLS) is a PostgreSQL security feature that enables fine-grained access control at the database level. The Tablr MCP RLS policy management tools provide a comprehensive suite for creating, managing, and monitoring RLS policies in your Supabase database.
+
+RLS policies act as filters that determine which rows a user can see or modify based on SQL expressions. These policies are enforced at the database level, providing security even when accessed through different clients or interfaces.
+
+<Warning>
+RLS policies control data access at the database level. Improperly configured policies can **block legitimate access** or **expose sensitive data**. Always test policies thoroughly before deploying to production.
+</Warning>
+
+## Available Tools
+
+The RLS policy management toolkit includes four specialized tools:
+
+| Tool | Purpose | Description |
+|------|---------|-------------|
+| `create_rls_policy` | Policy Creation | Create new RLS policies with comprehensive validation |
+| `list_rls_policies` | Policy Discovery | List and inspect existing RLS policies |
+| `enable_rls` | RLS Activation | Enable Row Level Security on tables |
+| `disable_rls` | RLS Deactivation | Disable Row Level Security on tables |
+
+---
+
+## create_rls_policy
+
+Create new RLS policies for tables with full support for all PostgreSQL policy features.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `table_name` | string | Yes | - | Name of the table to create the policy for |
+| `policy_name` | string | Yes | - | Unique name for the RLS policy |
+| `definition` | string | Yes | - | SQL expression that defines when the policy applies |
+| `action` | string | Yes | - | Database action: SELECT, INSERT, UPDATE, DELETE, or ALL |
+| `roles` | array | No | ["authenticated"] | Database roles the policy applies to |
+| `with_check` | string | No | - | Additional expression for INSERT/UPDATE validation |
+
+### Request Format
+
+<CodeGroup>
+
+```json Basic User-Owned Records
+{
+  "table_name": "profiles",
+  "policy_name": "users_view_own_profile", 
+  "definition": "auth.uid() = user_id",
+  "action": "SELECT"
+}
+```
+
+```json Admin-Only Access
+{
+  "table_name": "admin_settings",
+  "policy_name": "admin_full_access",
+  "definition": "auth.role() = 'admin'",
+  "action": "ALL",
+  "roles": ["admin", "service_role"]
+}
+```
+
+```json INSERT with Validation
+{
+  "table_name": "posts",
+  "policy_name": "users_create_drafts",
+  "definition": "auth.uid() = author_id",
+  "action": "INSERT",
+  "with_check": "auth.uid() = author_id AND status = 'draft'"
+}
+```
+
+```json Team-Based Access
+{
+  "table_name": "documents",
+  "policy_name": "team_members_access",
+  "definition": "auth.uid() IN (SELECT user_id FROM team_members WHERE team_id = documents.team_id)",
+  "action": "SELECT"
+}
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "policy_name": "users_view_own_profile",
+    "table_name": "profiles",
+    "action": "SELECT",
+    "definition": "auth.uid() = user_id",
+    "roles": ["authenticated"],
+    "created": true
+  },
+  "message": "Successfully created RLS policy 'users_view_own_profile' on table 'profiles'",
+  "metadata": {
+    "execution_time": 156,
+    "operation_type": "create_rls_policy"
+  }
+}
+```
+
+---
+
+## list_rls_policies
+
+Discover and inspect existing RLS policies for a table, including their configuration and status.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Name of the table to list RLS policies for |
+
+### Request Format
+
+```json
+{
+  "table_name": "profiles"
+}
+```
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "policy_name": "users_view_own_profile",
+      "table_name": "profiles", 
+      "schema_name": "public",
+      "action": "SELECT",
+      "roles": ["authenticated"],
+      "definition": "auth.uid() = user_id",
+      "enabled": true
+    },
+    {
+      "policy_name": "users_update_own_profile",
+      "table_name": "profiles",
+      "schema_name": "public", 
+      "action": "UPDATE",
+      "roles": ["authenticated"],
+      "definition": "auth.uid() = user_id",
+      "with_check": "auth.uid() = user_id",
+      "enabled": true
+    }
+  ],
+  "message": "Found 2 RLS policies for table 'profiles'",
+  "metadata": {
+    "execution_time": 89,
+    "operation_type": "list_rls_policies"
+  }
+}
+```
+
+---
+
+## enable_rls
+
+Enable Row Level Security on a table, allowing RLS policies to take effect.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Name of the table to enable RLS on |
+
+### Request Format
+
+```json
+{
+  "table_name": "profiles"
+}
+```
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "table_name": "profiles",
+    "rls_enabled": true,
+    "previous_status": false,
+    "message": "RLS successfully enabled on table 'profiles'"
+  },
+  "message": "Successfully enabled RLS on table 'profiles'",
+  "metadata": {
+    "execution_time": 134,
+    "operation_type": "enable_rls"
+  }
+}
+```
+
+---
+
+## disable_rls
+
+Disable Row Level Security on a table, making all data accessible regardless of policies.
+
+<Warning>
+Disabling RLS removes all access restrictions, potentially exposing sensitive data. Existing policies remain defined but become inactive.
+</Warning>
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Name of the table to disable RLS on |
+
+### Request Format
+
+```json
+{
+  "table_name": "public_data"
+}
+```
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "table_name": "public_data",
+    "rls_enabled": false,
+    "previous_status": true,
+    "message": "RLS successfully disabled on table 'public_data'. Warning: 3 policies will become inactive."
+  },
+  "message": "Successfully disabled RLS on table 'public_data'. Warning: 3 policies will become inactive.",
+  "metadata": {
+    "execution_time": 98,
+    "operation_type": "disable_rls"
+  }
+}
+```
+
+---
+
+## Security Considerations
+
+### Authentication Context
+
+RLS policies commonly use Supabase auth functions:
+
+- `auth.uid()` - Current user's UUID
+- `auth.role()` - Current user's role (authenticated, anon, service_role)
+- `auth.jwt()` - Access to JWT claims
+
+### Policy Design Best Practices
+
+<CardGroup cols={2}>
+
+<Card title="Principle of Least Privilege" icon="lock">
+Grant minimum necessary access. Start restrictive and expand as needed.
+</Card>
+
+<Card title="Test Thoroughly" icon="flask">
+Test policies with different user roles and edge cases before production deployment.
+</Card>
+
+<Card title="Performance Awareness" icon="gauge-high">
+Complex policies can impact query performance. Monitor and optimize as needed.
+</Card>
+
+<Card title="Audit Regularly" icon="search">
+Review policies periodically to ensure they match current business requirements.
+</Card>
+
+</CardGroup>
+
+### Common Security Patterns
+
+```sql
+-- User owns record
+auth.uid() = user_id
+
+-- Role-based access
+auth.role() = 'admin'
+
+-- Team membership
+auth.uid() IN (
+  SELECT user_id FROM team_members 
+  WHERE team_id = documents.team_id
+)
+
+-- Time-based restrictions
+created_at > NOW() - INTERVAL '30 days'
+
+-- Conditional access
+(visibility = 'public') OR (auth.uid() = owner_id)
+```
+
+---
+
+## Common Patterns
+
+### User-Owned Resources
+
+Create policies for user-owned data like profiles, posts, or documents:
+
+<CodeGroup>
+
+```json Enable RLS
+{
+  "table_name": "user_posts"
+}
+```
+
+```json SELECT Policy
+{
+  "table_name": "user_posts",
+  "policy_name": "users_view_own_posts",
+  "definition": "auth.uid() = author_id",
+  "action": "SELECT"
+}
+```
+
+```json INSERT Policy
+{
+  "table_name": "user_posts", 
+  "policy_name": "users_create_posts",
+  "definition": "auth.uid() = author_id",
+  "action": "INSERT",
+  "with_check": "auth.uid() = author_id"
+}
+```
+
+```json UPDATE Policy
+{
+  "table_name": "user_posts",
+  "policy_name": "users_edit_own_posts",
+  "definition": "auth.uid() = author_id",
+  "action": "UPDATE",
+  "with_check": "auth.uid() = author_id"
+}
+```
+
+</CodeGroup>
+
+### Multi-Tenant Applications
+
+Implement tenant isolation using RLS:
+
+<CodeGroup>
+
+```json Tenant Data Access
+{
+  "table_name": "tenant_data",
+  "policy_name": "tenant_isolation",
+  "definition": "tenant_id = (auth.jwt() ->> 'tenant_id')::uuid",
+  "action": "ALL"
+}
+```
+
+```json Organization Members
+{
+  "table_name": "organization_documents",
+  "policy_name": "org_member_access",
+  "definition": "organization_id IN (SELECT organization_id FROM user_organizations WHERE user_id = auth.uid())",
+  "action": "SELECT"
+}
+```
+
+</CodeGroup>
+
+### Public/Private Content
+
+Control visibility of content:
+
+<CodeGroup>
+
+```json Public Read Access
+{
+  "table_name": "blog_posts",
+  "policy_name": "public_published_posts",
+  "definition": "published = true AND visibility = 'public'",
+  "action": "SELECT",
+  "roles": ["anon", "authenticated"]
+}
+```
+
+```json Owner Full Access
+{
+  "table_name": "blog_posts",
+  "policy_name": "authors_full_access",
+  "definition": "auth.uid() = author_id",
+  "action": "ALL"
+}
+```
+
+</CodeGroup>
+
+### Role-Based Access Control
+
+Implement role-based restrictions:
+
+<CodeGroup>
+
+```json Admin Access
+{
+  "table_name": "system_settings",
+  "policy_name": "admin_only",
+  "definition": "auth.role() = 'service_role' OR (auth.jwt() ->> 'role') = 'admin'",
+  "action": "ALL"
+}
+```
+
+```json Moderator Permissions
+{
+  "table_name": "user_reports",
+  "policy_name": "moderator_access",
+  "definition": "(auth.jwt() ->> 'role') IN ('admin', 'moderator')",
+  "action": "SELECT"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Integration
+
+### Workflow Integration
+
+RLS policy tools integrate seamlessly with other Tablr MCP tools:
+
+1. **Table Creation**: Use `create_table` with `enable_rls: true`
+2. **Policy Creation**: Use `create_rls_policy` to define access rules
+3. **Schema Discovery**: Use `get_table_schema` to view RLS status
+4. **Policy Management**: Use `list_rls_policies` for monitoring
+
+### Development Workflow
+
+<Steps>
+
+<Step title="Enable RLS">
+Enable Row Level Security on your table using `enable_rls`.
+</Step>
+
+<Step title="Create Policies">
+Define access policies using `create_rls_policy` for each required action.
+</Step>
+
+<Step title="Test Access">
+Verify policies work correctly with different user contexts using `execute_sql`.
+</Step>
+
+<Step title="Monitor Policies">
+Use `list_rls_policies` to review and audit your security configuration.
+</Step>
+
+</Steps>
+
+### Error Handling
+
+All RLS tools provide comprehensive error handling:
+
+- **Permission Issues**: Clear guidance on required database privileges
+- **Syntax Errors**: Detailed feedback on policy definition problems
+- **Dependency Issues**: Validation of table existence and RLS status
+- **Conflict Detection**: Prevention of duplicate policy names
+
+### Performance Considerations
+
+- **Index Optimization**: Ensure columns used in policies are properly indexed
+- **Policy Complexity**: Simple policies perform better than complex joins
+- **Query Planning**: Use `EXPLAIN` to analyze query plans with RLS enabled
+- **Monitoring**: Track query performance after implementing RLS policies
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+<AccordionGroup>
+
+<Accordion title="RLS Not Enabled Error">
+**Error**: "Row Level Security is not enabled on table"
+
+**Solution**: Run `enable_rls` on the table before creating policies.
+
+```json
+{
+  "table_name": "your_table"
+}
+```
+</Accordion>
+
+<Accordion title="Policy Already Exists">
+**Error**: "Policy 'policy_name' already exists on table"
+
+**Solution**: Choose a different policy name or drop the existing policy first.
+
+Use `list_rls_policies` to see existing policy names.
+</Accordion>
+
+<Accordion title="Column Not Found">
+**Error**: "Referenced column does not exist"
+
+**Solution**: Verify column names in your policy definition using `get_table_schema`.
+
+```json
+{
+  "table_name": "your_table"
+}
+```
+</Accordion>
+
+<Accordion title="Permission Denied">
+**Error**: "Insufficient permissions to create RLS policies"
+
+**Solution**: Ensure your service role key has sufficient database privileges. RLS operations require elevated permissions.
+</Accordion>
+
+<Accordion title="No Data Returned">
+**Issue**: RLS policies blocking legitimate access
+
+**Solution**: Review policy definitions and test with different user contexts. Use `auth.uid()` and `auth.role()` to debug authentication context.
+</Accordion>
+
+</AccordionGroup>
+
+### Debugging RLS Issues
+
+Use these queries to debug RLS problems:
+
+```sql
+-- Check current user context
+SELECT auth.uid(), auth.role();
+
+-- Test policy logic manually
+SELECT * FROM your_table WHERE auth.uid() = user_id;
+
+-- View policy definitions
+SELECT * FROM pg_policies WHERE tablename = 'your_table';
+```
+
+---
+
+## Best Practices
+
+<CardGroup cols={1}>
+
+<Card title="Start Simple">
+Begin with basic user-owned record policies before implementing complex access patterns.
+</Card>
+
+<Card title="Policy Naming">
+Use descriptive policy names that clearly indicate their purpose and scope.
+</Card>
+
+<Card title="Documentation">
+Document your RLS policies and their business logic for future maintenance.
+</Card>
+
+<Card title="Testing Strategy">
+Test policies with various user roles and edge cases before production deployment.
+</Card>
+
+<Card title="Performance Monitoring">
+Monitor query performance after implementing RLS policies and optimize as needed.
+</Card>
+
+<Card title="Regular Audits">
+Periodically review and audit your RLS policies to ensure they match current requirements.
+</Card>
+
+</CardGroup>

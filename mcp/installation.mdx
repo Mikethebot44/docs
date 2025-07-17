@@ -1,0 +1,98 @@
+---
+title: "Installation & Setup"
+description: "Install Tablr MCP and start managing your Supabase database"
+icon: "download"
+---
+
+Install Tablr MCP to enable database management through AI assistants. Choose the method that works best for your environment.
+
+<Note>
+Before proceeding, ensure you have [Node.js 18+](/mcp/prerequisites) installed and a Supabase account.
+</Note>
+
+## Method 1: Global Installation (Recommended)
+
+Install Tablr MCP globally for easy access from any project:
+
+```bash
+npm install -g tablr-mcp
+```
+
+This method is recommended for most users as it provides:
+- Easy access from any directory
+- Automatic updates via npm
+- Simplified MCP configuration
+
+## Method 2: Local Installation
+
+Install locally in your project directory:
+
+```bash
+# In your project directory
+npm install tablr-mcp
+
+# Use with npx
+npx tablr-mcp
+```
+
+## Verification
+
+Verify your installation:
+
+```bash
+# Check if tablr-mcp is accessible
+tablr-mcp --help
+
+# Expected output:
+# Tablr MCP Server - Database management for Supabase
+# Usage: tablr-mcp [options]
+```
+
+## System Requirements
+
+- **Node.js**: Version 18.0.0 or higher
+- **npm**: Latest version recommended
+- **Operating System**: Windows, macOS, or Linux
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion icon="exclamation-triangle" title="Command not found">
+    **Problem**: `tablr-mcp: command not found`
+    
+    **Solution**: 
+    - For global installation: Check npm global path with `npm config get prefix`
+    - For local installation: Use `npx tablr-mcp` instead
+    - Restart terminal after installation
+  </Accordion>
+  
+  <Accordion icon="warning" title="Permission errors">
+    **Problem**: Permission denied during installation
+    
+    **Solution**:
+    - Use `sudo npm install -g tablr-mcp` (Linux/macOS)
+    - Configure npm to use a different directory for global packages
+    - Consider using a Node.js version manager like nvm
+  </Accordion>
+  
+  <Accordion icon="x-circle" title="Network issues">
+    **Problem**: Installation fails due to network errors
+    
+    **Solution**:
+    - Clear npm cache: `npm cache clean --force`
+    - Try different npm registry: `npm install -g tablr-mcp --registry https://registry.npmjs.org/`
+    - Check firewall/proxy settings
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+After installation, you'll need to:
+
+1. **[Configure credentials](/mcp/configuration)** - Set up your Supabase and Tablr API keys
+2. **[Integrate with AI assistant](/mcp/integration/claude-desktop)** - Connect to Claude Desktop or other MCP clients
+3. **[Test the setup](/mcp/integration/testing)** - Verify everything works correctly
+
+<Tip>
+The installation process only sets up the Tablr MCP server. You'll need to configure your credentials before you can manage databases.
+</Tip>

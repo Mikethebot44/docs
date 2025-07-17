@@ -1,0 +1,499 @@
+---
+title: "Adding New Tools"
+description: "Learn how to create and integrate new database management tools"
+icon: "plus"
+---
+
+# Adding New Tools
+
+This guide walks you through creating new tools for Tablr MCP. Tools are the core building blocks that provide database functionality to AI assistants.
+
+## Tool Architecture
+
+Every tool in Tablr MCP follows a consistent pattern:
+
+<Steps>
+  <Step title="Extend BaseTool">
+    All tools inherit from the `BaseTool` class which provides common functionality
+  </Step>
+  <Step title="Define Schema">
+    Tools specify their input parameters using JSON Schema
+  </Step>
+  <Step title="Implement Logic">
+    Tools contain the actual database operation logic
+  </Step>
+  <Step title="Register Tool">
+    Tools are registered with the server to be available to clients
+  </Step>
+</Steps>
+
+## Creating a New Tool
+
+### Step 1: Create the Tool File
+
+Create a new file in `src/tools/` following the naming convention:
+
+```typescript
+// src/tools/my-new-tool.ts
+import { BaseTool } from '../core/base-tool.js';
+import { SupabaseConnectionManager } from '../supabase-client.js';
+
+export class MyNewTool extends BaseTool {
+  name = 'my_new_tool';
+  description = 'Description of what this tool does';
+
+  constructor(connectionManager: SupabaseConnectionManager) {
+    super(connectionManager);
+  }
+
+  getToolDefinition() {
+    return {
+      name: this.name,
+      description: this.description,
+      inputSchema: {
+        type: 'object',
+        properties: {
+          // Define your parameters here
+          table_name: {
+            type: 'string',
+            description: 'Name of the table to operate on'
+          },
+          limit: {
+            type: 'number',
+            description: 'Maximum number of records to return',
+            default: 100
+          }
+        },
+        required: ['table_name']
+      }
+    };
+  }
+
+  async execute(params: any) {
+    try {
+      // Validate connection
+      await this.ensureConnection();
+      
+      // Extract and validate parameters
+      const { table_name, limit = 100 } = params;
+      
+      // Implement your tool logic here
+      const result = await this.performOperation(table_name, limit);
+      
+      return this.formatSuccess(result, 'Operation completed successfully');
+    } catch (error) {
+      return this.formatError(error);
+    }
+  }
+
+  private async performOperation(tableName: string, limit: number) {
+    // Your actual database operation logic
+    const { data, error } = await this.supabase
+      .from(tableName)
+      .select('*')
+      .limit(limit);
+
+    if (error) {
+      throw new Error(`Database operation failed: ${error.message}`);
+    }
+
+    return data;
+  }
+}
+```
+
+### Step 2: Define the Input Schema
+
+The input schema defines what parameters your tool accepts. Use JSON Schema format:
+
+<CodeGroup>
+```typescript Simple Parameters
+inputSchema: {
+  type: 'object',
+  properties: {
+    table_name: {
+      type: 'string',
+      description: 'Name of the table'
+    }
+  },
+  required: ['table_name']
+}
+```
+
+```typescript Complex Parameters
+inputSchema: {
+  type: 'object',
+  properties: {
+    table_name: {
+      type: 'string',
+      description: 'Name of the table'
+    },
+    filters: {
+      type: 'object',
+      description: 'Filter conditions',
+      properties: {
+        column: { type: 'string' },
+        operator: { 
+          type: 'string',
+          enum: ['eq', 'neq', 'gt', 'lt', 'like']
+        },
+        value: { type: 'string' }
+      }
+    },
+    options: {
+      type: 'object',
+      properties: {
+        limit: { type: 'number', default: 100 },
+        offset: { type: 'number', default: 0 }
+      }
+    }
+  },
+  required: ['table_name']
+}
+```
+
+```typescript Array Parameters
+inputSchema: {
+  type: 'object',
+  properties: {
+    records: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          name: { type: 'string' }
+        }
+      },
+      minItems: 1
+    }
+  },
+  required: ['records']
+}
+```
+</CodeGroup>
+
+### Step 3: Implement the Execute Method
+
+The `execute` method contains your tool's main logic:
+
+```typescript
+async execute(params: any) {
+  try {
+    // 1. Ensure database connection
+    await this.ensureConnection();
+    
+    // 2. Validate and extract parameters
+    const { table_name, ...otherParams } = params;
+    this.validateTableName(table_name);
+    
+    // 3. Perform validation checks
+    await this.validateTableExists(table_name);
+    
+    // 4. Execute the main operation
+    const result = await this.performDatabaseOperation(params);
+    
+    // 5. Format and return success response
+    return this.formatSuccess(result, `Successfully processed ${table_name}`);
+    
+  } catch (error) {
+    // 6. Handle and format errors
+    return this.formatError(error);
+  }
+}
+```
+
+### Step 4: Add Validation and Safety Checks
+
+Always include appropriate validation:
+
+```typescript
+// Parameter validation
+private validateParameters(params: any) {
+  if (!params.table_name) {
+    throw new Error('table_name is required');
+  }
+  
+  if (params.limit && (params.limit < 1 || params.limit > 1000)) {
+    throw new Error('limit must be between 1 and 1000');
+  }
+}
+
+// Table existence check
+private async validateTableExists(tableName: string) {
+  const { data, error } = await this.supabase
+    .from('information_schema.tables')
+    .select('table_name')
+    .eq('table_name', tableName)
+    .eq('table_schema', 'public');
+    
+  if (error || !data?.length) {
+    throw new Error(`Table '${tableName}' does not exist`);
+  }
+}
+
+// Safety confirmation for destructive operations
+private requireConfirmation(params: any, operation: string) {
+  if (!params.confirm) {
+    throw new Error(
+      `This ${operation} operation requires confirmation. ` +
+      'Set confirm: true to proceed.'
+    );
+  }
+}
+```
+
+### Step 5: Register the Tool
+
+Add your tool to the server by modifying `src/server.ts`:
+
+```typescript
+// Import your new tool
+import { MyNewTool } from './tools/my-new-tool.js';
+
+// In the initializeTools() method:
+private initializeTools() {
+  // ... existing tools ...
+  
+  // Register your new tool
+  this.toolRegistry.registerTool(new MyNewTool(this.connectionManager));
+}
+```
+
+## Advanced Tool Patterns
+
+### Batch Operations
+
+For tools that handle multiple records:
+
+```typescript
+async execute(params: any) {
+  const { records, table_name } = params;
+  const results = [];
+  
+  for (const record of records) {
+    try {
+      const result = await this.processSingleRecord(record, table_name);
+      results.push({ success: true, data: result });
+    } catch (error) {
+      results.push({ success: false, error: error.message });
+    }
+  }
+  
+  return this.formatSuccess(results, `Processed ${records.length} records`);
+}
+```
+
+### Transaction Support
+
+For operations that need atomicity:
+
+```typescript
+async execute(params: any) {
+  const { operations } = params;
+  
+  // Start transaction
+  const { data, error } = await this.supabase.rpc('begin_transaction');
+  
+  try {
+    for (const operation of operations) {
+      await this.executeOperation(operation);
+    }
+    
+    // Commit transaction
+    await this.supabase.rpc('commit_transaction');
+    return this.formatSuccess(data, 'All operations completed successfully');
+    
+  } catch (error) {
+    // Rollback on error
+    await this.supabase.rpc('rollback_transaction');
+    throw error;
+  }
+}
+```
+
+### Performance Optimization
+
+For performance-critical tools:
+
+```typescript
+async execute(params: any) {
+  const startTime = Date.now();
+  
+  try {
+    const result = await this.optimizedOperation(params);
+    
+    const executionTime = Date.now() - startTime;
+    return this.formatSuccess(result, `Operation completed in ${executionTime}ms`);
+    
+  } catch (error) {
+    return this.formatError(error);
+  }
+}
+
+private async optimizedOperation(params: any) {
+  // Use select() with specific columns
+  // Use limit() for large datasets
+  // Use proper indexing
+  return await this.supabase
+    .from(params.table_name)
+    .select('id, name, created_at') // Only needed columns
+    .order('created_at', { ascending: false })
+    .limit(params.limit || 100);
+}
+```
+
+## Testing Your Tool
+
+### Step 1: Build and Start
+
+```bash
+# Build the project
+npm run build
+
+# Start the server
+npm start
+```
+
+### Step 2: Test with MCP Inspector
+
+```bash
+# Launch MCP Inspector
+npx @modelcontextprotocol/inspector node dist/index.js
+```
+
+### Step 3: Test Parameters
+
+Create test cases for your tool:
+
+<CodeGroup>
+```json Valid Input
+{
+  "table_name": "users",
+  "limit": 50
+}
+```
+
+```json Invalid Input (for error testing)
+{
+  "table_name": "",
+  "limit": -1
+}
+```
+
+```json Edge Cases
+{
+  "table_name": "nonexistent_table",
+  "limit": 1000
+}
+```
+</CodeGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Error Handling" icon="exclamation-triangle">
+    - Always catch and format errors properly
+    - Provide helpful error messages with suggestions
+    - Include relevant context in error responses
+    - Use appropriate HTTP status codes
+  </Accordion>
+  
+  <Accordion title="Input Validation" icon="shield-check">
+    - Validate all parameters before use
+    - Check for required parameters
+    - Validate data types and ranges
+    - Sanitize string inputs
+  </Accordion>
+  
+  <Accordion title="Performance" icon="tachometer-alt">
+    - Use specific column selection
+    - Implement reasonable limits
+    - Consider pagination for large datasets
+    - Log execution times
+  </Accordion>
+  
+  <Accordion title="Security" icon="lock">
+    - Use parameterized queries
+    - Require confirmation for destructive operations
+    - Validate table and column names
+    - Respect Row Level Security policies
+  </Accordion>
+</AccordionGroup>
+
+## Common Tool Examples
+
+### Query Tool Pattern
+
+```typescript
+export class CustomQueryTool extends BaseTool {
+  name = 'custom_query';
+  description = 'Execute a custom query with filters';
+
+  getToolDefinition() {
+    return {
+      name: this.name,
+      description: this.description,
+      inputSchema: {
+        type: 'object',
+        properties: {
+          table_name: { type: 'string' },
+          columns: { 
+            type: 'array', 
+            items: { type: 'string' }
+          },
+          where_clause: { type: 'string' },
+          order_by: { type: 'string' },
+          limit: { type: 'number', default: 100 }
+        },
+        required: ['table_name']
+      }
+    };
+  }
+}
+```
+
+### Modification Tool Pattern
+
+```typescript
+export class UpdateTool extends BaseTool {
+  name = 'update_records';
+  description = 'Update records in a table';
+
+  async execute(params: any) {
+    const { table_name, filters, updates, confirm } = params;
+    
+    // Require confirmation for updates
+    if (!confirm) {
+      throw new Error('This operation requires confirmation. Set confirm: true');
+    }
+    
+    // Build and execute update
+    let query = this.supabase.from(table_name).update(updates);
+    
+    // Apply filters
+    for (const [column, condition] of Object.entries(filters)) {
+      query = query.eq(column, condition);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    return this.formatSuccess(data, `Updated records in ${table_name}`);
+  }
+}
+```
+
+## Next Steps
+
+After creating your tool:
+
+1. **Test thoroughly** with various inputs and edge cases
+2. **Update documentation** to describe the new functionality
+3. **Add to the tools index** for proper organization
+4. **Consider integration tests** with real MCP clients
+5. **Submit a pull request** if contributing to the project
+
+<Note>
+Remember to follow the established patterns and maintain consistency with existing tools for the best developer and user experience.
+</Note>

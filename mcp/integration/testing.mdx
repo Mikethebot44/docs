@@ -1,0 +1,864 @@
+---
+title: 'Testing with MCP Inspector'
+description: 'Comprehensive guide to testing and debugging Tablr MCP using the MCP Inspector web interface'
+icon: 'flask'
+---
+
+# Testing with MCP Inspector
+
+The MCP Inspector is a powerful web-based tool for testing, debugging, and exploring MCP servers like Tablr MCP. It provides an interactive interface to test all available tools without needing to set up a full client integration.
+
+## Overview
+
+MCP Inspector offers:
+- **Interactive Testing**: Web-based GUI for all MCP tools
+- **Real-time Debugging**: Immediate feedback and error messages
+- **Parameter Validation**: Form-based input with validation
+- **Response Analysis**: Detailed view of tool outputs and errors
+- **Session History**: Track of all requests and responses
+
+## Getting Started
+
+### Prerequisites
+
+Before using MCP Inspector, ensure you have:
+- **Tablr MCP server** properly built and configured
+- **Node.js 18+** installed on your system
+- **Supabase credentials** configured in your environment
+- **Terminal access** for running commands
+
+<Steps>
+### Step 1: Install MCP Inspector
+
+Install the inspector tool globally or use npx for one-time usage:
+
+<CodeGroup>
+
+```bash Global Installation
+# Install globally for repeated use
+npm install -g @modelcontextprotocol/inspector
+
+# Verify installation
+mcp-inspector --version
+```
+
+```bash NPX Usage (Recommended)
+# Use without installing (always gets latest version)
+npx @modelcontextprotocol/inspector --version
+```
+
+</CodeGroup>
+
+### Step 2: Build Tablr MCP Server
+
+Ensure your Tablr MCP server is properly built:
+
+```bash
+# Navigate to your Tablr MCP directory
+cd /path/to/tablr-mcp
+
+# Install dependencies (if not done already)
+npm install
+
+# Build the project
+npm run build
+
+# Verify build output
+ls dist/
+# Should show: index.js, server.js, types.js, etc.
+```
+
+### Step 3: Test Server Independently
+
+Before using the inspector, verify your server starts correctly:
+
+```bash
+# Test server startup
+npm start
+
+# You should see output like:
+# Starting Tablr MCP Server...
+# Auto-connecting to Supabase using environment variables...
+# Successfully connected to Supabase
+# MCP Server connected via stdio
+# Server started successfully
+```
+
+Press `Ctrl+C` to stop the server once you've confirmed it works.
+
+### Step 4: Launch MCP Inspector
+
+Start the inspector with your Tablr MCP server:
+
+```bash
+# Launch inspector with Tablr MCP
+npx @modelcontextprotocol/inspector node dist/index.js
+
+# Alternative: if you installed globally
+mcp-inspector node dist/index.js
+```
+
+### Step 5: Access Web Interface
+
+The inspector will automatically:
+1. **Start your MCP server** as a subprocess
+2. **Launch a web browser** pointing to the inspector interface
+3. **Display the URL** in the terminal (typically `http://localhost:6274`)
+
+If the browser doesn't open automatically, manually navigate to the displayed URL.
+
+</Steps>
+
+## Inspector Interface Overview
+
+### Main Dashboard
+
+When you open the inspector, you'll see:
+
+#### 1. **Server Status**
+- Connection status indicator
+- Server information and capabilities
+- Environment variable status
+
+#### 2. **Available Tools**
+All Tablr MCP tools will be listed:
+- `list_tables` - Database discovery
+- `get_table_schema` - Table structure inspection
+- `query_records` - Data querying with filters
+- `insert_records` - Data insertion
+- `update_records` - Data modification
+- `delete_records` - Data deletion
+- `create_table` - Table creation
+- `alter_table` - Schema modification
+- `drop_table` - Table removal
+- `execute_sql` - Custom SQL execution
+
+#### 3. **Tool Details Panel**
+- Input parameter forms
+- Parameter validation
+- Help text and examples
+- Execute button
+
+#### 4. **Response Panel**
+- JSON-formatted responses
+- Error messages and stack traces
+- Execution time tracking
+- Response history
+
+## Testing Workflow
+
+### Basic Database Discovery
+
+Start with safe, read-only operations to explore your database:
+
+<Steps>
+### Step 1: List Available Tables
+
+1. **Click on `list_tables`** in the tools panel
+2. **Review the parameters** (none required for this tool)
+3. **Click "Execute"** to run the tool
+4. **Examine the response** in the output panel
+
+Expected response format:
+```json
+{
+  "success": true,
+  "data": [
+    {"table_name": "users", "schema": "public"},
+    {"table_name": "posts", "schema": "public"},
+    {"table_name": "comments", "schema": "public"}
+  ],
+  "message": "Found 3 tables",
+  "execution_time": "45ms"
+}
+```
+
+### Step 2: Inspect Table Schema
+
+1. **Select `get_table_schema`** from the tools list
+2. **Enter a table name** (e.g., "users") in the parameter form
+3. **Execute the tool** to see detailed schema information
+4. **Review column definitions**, types, and constraints
+
+### Step 3: Query Table Data
+
+1. **Choose `query_records`** tool
+2. **Enter table name** (e.g., "users")
+3. **Set optional parameters**:
+   - `limit`: 10 (to limit results)
+   - `columns`: ["id", "email", "name"] (specific columns)
+4. **Execute and review** the returned data
+
+</Steps>
+
+### Advanced Testing Scenarios
+
+#### Complex Queries with Filters
+
+Test sophisticated data queries:
+
+<CodeGroup>
+
+```json User Filter Example
+{
+  "table_name": "users",
+  "filters": {
+    "age": {"gte": 18},
+    "status": {"eq": "active"},
+    "email": {"like": "%@gmail.com"}
+  },
+  "order_by": [
+    {"column": "created_at", "direction": "desc"}
+  ],
+  "limit": 50
+}
+```
+
+```json Date Range Query
+{
+  "table_name": "orders", 
+  "filters": {
+    "created_at": {
+      "gte": "2024-01-01T00:00:00Z",
+      "lte": "2024-12-31T23:59:59Z"
+    },
+    "status": {"in": ["completed", "shipped"]}
+  },
+  "columns": ["id", "total", "status", "created_at"],
+  "order_by": [{"column": "total", "direction": "desc"}],
+  "limit": 100
+}
+```
+
+```json Null Value Filters
+{
+  "table_name": "users",
+  "filters": {
+    "last_login": {"is_null": true},
+    "email_verified": {"eq": false}
+  },
+  "order_by": [{"column": "created_at", "direction": "asc"}]
+}
+```
+
+</CodeGroup>
+
+#### Data Modification Testing
+
+Test data manipulation operations safely:
+
+<CodeGroup>
+
+```json Insert New Record
+{
+  "table_name": "users",
+  "records": [
+    {
+      "email": "test@example.com",
+      "name": "Test User",
+      "age": 25,
+      "status": "active"
+    }
+  ],
+  "on_conflict": "abort",
+  "return_records": true
+}
+```
+
+```json Update Records
+{
+  "table_name": "users",
+  "filters": {
+    "email": {"eq": "test@example.com"}
+  },
+  "updates": {
+    "last_login": "2024-01-15T10:30:00Z",
+    "status": "active"
+  },
+  "return_records": true
+}
+```
+
+```json Safe Delete (with confirmation)
+{
+  "table_name": "users",
+  "filters": {
+    "email": {"eq": "test@example.com"}
+  },
+  "confirm": true,
+  "limit": 1,
+  "return_records": true
+}
+```
+
+</CodeGroup>
+
+#### Schema Management Testing
+
+Test table creation and modification:
+
+<CodeGroup>
+
+```json Create Test Table
+{
+  "table_name": "blog_posts",
+  "columns": [
+    {
+      "name": "id",
+      "type": "integer",
+      "primary_key": true,
+      "nullable": false
+    },
+    {
+      "name": "title",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "name": "content",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "name": "published",
+      "type": "boolean",
+      "default_value": false,
+      "nullable": false
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp",
+      "default_value": "now()",
+      "nullable": false
+    }
+  ],
+  "enable_rls": true
+}
+```
+
+```json Alter Table Structure
+{
+  "table_name": "blog_posts",
+  "operations": [
+    {
+      "type": "add_column",
+      "column": {
+        "name": "author_id",
+        "type": "integer",
+        "nullable": true
+      }
+    },
+    {
+      "type": "add_column",
+      "column": {
+        "name": "tags",
+        "type": "text[]",
+        "nullable": true
+      }
+    }
+  ]
+}
+```
+
+```json Drop Test Table (with confirmation)
+{
+  "table_name": "blog_posts",
+  "confirm": true,
+  "cascade": false
+}
+```
+
+</CodeGroup>
+
+#### Custom SQL Testing
+
+Test direct SQL execution:
+
+<CodeGroup>
+
+```json Safe Query
+{
+  "query": "SELECT COUNT(*) as user_count FROM users WHERE status = 'active'"
+}
+```
+
+```json Parameterized Query
+{
+  "query": "SELECT * FROM users WHERE created_at > $1 AND status = $2 ORDER BY created_at DESC LIMIT $3",
+  "params": ["2024-01-01T00:00:00Z", "active", 10]
+}
+```
+
+```json Analytics Query
+{
+  "query": "SELECT DATE(created_at) as date, COUNT(*) as registrations FROM users WHERE created_at >= CURRENT_DATE - INTERVAL '30 days' GROUP BY DATE(created_at) ORDER BY date"
+}
+```
+
+</CodeGroup>
+
+## Debugging and Error Analysis
+
+### Common Error Scenarios
+
+#### 1. **Connection Errors**
+
+**Symptoms**: Server fails to start or connect
+```json
+{
+  "error": "Failed to connect to Supabase",
+  "details": "Authentication failed or insufficient permissions"
+}
+```
+
+**Debugging Steps**:
+1. Verify environment variables in terminal
+2. Test Supabase credentials manually
+3. Check network connectivity
+4. Validate service role key permissions
+
+#### 2. **Table Not Found Errors**
+
+**Symptoms**: Tools can't locate specified tables
+```json
+{
+  "error": "Table 'nonexistent_table' not found",
+  "suggestion": "Use list_tables to see available tables"
+}
+```
+
+**Debugging Steps**:
+1. Run `list_tables` to see available tables
+2. Check table name spelling and case sensitivity
+3. Verify table exists in the `public` schema
+4. Confirm service role has table access
+
+#### 3. **Parameter Validation Errors**
+
+**Symptoms**: Invalid input parameters
+```json
+{
+  "error": "Invalid parameter format",
+  "details": "filters must be an object, received string"
+}
+```
+
+**Debugging Steps**:
+1. Review parameter documentation in the tool description
+2. Check JSON formatting for complex parameters
+3. Validate required vs optional parameters
+4. Use example payloads as templates
+
+#### 4. **Permission Errors**
+
+**Symptoms**: Insufficient database permissions
+```json
+{
+  "error": "Permission denied",
+  "details": "Row Level Security policy violation"
+}
+```
+
+**Debugging Steps**:
+1. Check Supabase RLS policies
+2. Verify service role key has appropriate permissions
+3. Test operation in Supabase dashboard
+4. Review table-level security settings
+
+### Using Debug Mode
+
+Enable detailed logging for comprehensive debugging:
+
+1. **Stop the inspector** if it's currently running
+2. **Set debug environment variables**:
+   ```bash
+   export DEBUG=true
+   export MCP_DEBUG=true
+   ```
+3. **Restart the inspector** with debug mode:
+   ```bash
+   npx @modelcontextprotocol/inspector node dist/index.js
+   ```
+4. **Check both browser console and terminal** for detailed logs
+
+### Response Analysis
+
+#### Successful Response Structure
+```json
+{
+  "success": true,
+  "data": [/* actual data */],
+  "message": "Operation completed successfully",
+  "execution_time": "123ms",
+  "metadata": {
+    "total_rows": 25,
+    "affected_rows": 1
+  }
+}
+```
+
+#### Error Response Structure
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "details": "Detailed error information",
+  "suggestion": "Suggested fix or next step",
+  "execution_time": "45ms"
+}
+```
+
+## Performance Testing
+
+### Load Testing
+
+Test performance with larger datasets:
+
+1. **Create test data**:
+   ```json
+   {
+     "table_name": "performance_test",
+     "records": [
+       /* Array of 1000+ test records */
+     ]
+   }
+   ```
+
+2. **Test query performance**:
+   ```json
+   {
+     "table_name": "performance_test",
+     "limit": 10000,
+     "order_by": [{"column": "created_at", "direction": "desc"}]
+   }
+   ```
+
+3. **Monitor execution times** in the response panel
+
+### Stress Testing
+
+Test error handling under various conditions:
+
+1. **Invalid table names**
+2. **Malformed filter objects**
+3. **Extremely large limit values**
+4. **Complex nested queries**
+5. **Concurrent operation simulation**
+
+## Best Practices
+
+### Testing Strategy
+
+#### 1. **Start with Read Operations**
+- Always begin with `list_tables` and `get_table_schema`
+- Test simple queries before complex ones
+- Verify data structure before modification
+
+#### 2. **Use Incremental Complexity**
+- Start with basic parameters
+- Add filters and sorting gradually
+- Test edge cases and boundary conditions
+
+#### 3. **Validate Before Modifying**
+- Test queries extensively before using insert/update/delete
+- Use small datasets for modification testing
+- Always verify results with follow-up queries
+
+#### 4. **Document Test Cases**
+- Save successful parameter sets for reuse
+- Document error scenarios and solutions
+- Create test scripts for regression testing
+
+### Security Testing
+
+#### 1. **SQL Injection Testing**
+Test various injection attempts:
+```json
+{
+  "query": "SELECT * FROM users WHERE name = 'test'; DROP TABLE users; --'"
+}
+```
+
+Verify that dangerous operations are blocked.
+
+#### 2. **Access Control Testing**
+- Test operations on restricted tables
+- Verify RLS policy enforcement
+- Check permission boundaries
+
+#### 3. **Data Validation Testing**
+- Test with invalid data types
+- Check constraint enforcement
+- Verify input sanitization
+
+### Automation and CI/CD
+
+#### Test Script Creation
+
+Create automated test scripts using the inspector's functionality:
+
+```javascript automated-test.js
+import { spawn } from 'child_process';
+import axios from 'axios';
+
+class TablrMCPTester {
+  constructor() {
+    this.inspectorProcess = null;
+    this.baseUrl = 'http://localhost:6274';
+  }
+
+  async startInspector() {
+    return new Promise((resolve, reject) => {
+      this.inspectorProcess = spawn('npx', [
+        '@modelcontextprotocol/inspector',
+        'node', 'dist/index.js'
+      ]);
+
+      // Wait for inspector to be ready
+      setTimeout(() => resolve(), 5000);
+    });
+  }
+
+  async runTest(toolName, parameters) {
+    try {
+      const response = await axios.post(`${this.baseUrl}/api/tools/call`, {
+        tool: toolName,
+        parameters
+      });
+      
+      return response.data;
+    } catch (error) {
+      throw new Error(`Test failed: ${error.message}`);
+    }
+  }
+
+  async runTestSuite() {
+    const tests = [
+      {
+        name: 'List Tables',
+        tool: 'list_tables',
+        params: {}
+      },
+      {
+        name: 'Query Users',
+        tool: 'query_records',
+        params: { table_name: 'users', limit: 5 }
+      }
+    ];
+
+    const results = [];
+    
+    for (const test of tests) {
+      try {
+        const result = await this.runTest(test.tool, test.params);
+        results.push({ test: test.name, status: 'passed', result });
+      } catch (error) {
+        results.push({ test: test.name, status: 'failed', error: error.message });
+      }
+    }
+
+    return results;
+  }
+
+  async cleanup() {
+    if (this.inspectorProcess) {
+      this.inspectorProcess.kill();
+    }
+  }
+}
+
+// Usage
+const tester = new TablrMCPTester();
+
+try {
+  await tester.startInspector();
+  const results = await tester.runTestSuite();
+  console.log('Test Results:', results);
+} finally {
+  await tester.cleanup();
+}
+```
+
+## Troubleshooting Guide
+
+### Inspector Won't Start
+
+<AccordionGroup>
+
+<Accordion title="Command not found error">
+**Problem**: `npx @modelcontextprotocol/inspector` command fails
+
+**Solutions**:
+- Verify Node.js and npm are properly installed
+- Check internet connection for package download
+- Try installing globally: `npm install -g @modelcontextprotocol/inspector`
+- Clear npm cache: `npm cache clean --force`
+</Accordion>
+
+<Accordion title="Server connection failures">
+**Problem**: Inspector can't connect to Tablr MCP server
+
+**Solutions**:
+- Ensure server builds successfully: `npm run build`
+- Verify `dist/index.js` exists and is executable
+- Check environment variables are properly set
+- Test server independently: `npm start`
+- Use absolute path to index.js: `npx @modelcontextprotocol/inspector node /full/path/to/dist/index.js`
+</Accordion>
+
+<Accordion title="Browser doesn't open automatically">
+**Problem**: Web interface doesn't launch
+
+**Solutions**:
+- Manually navigate to `http://localhost:6274`
+- Check if port 6274 is available
+- Look for URL in terminal output
+- Try different port: use `--port` flag if available
+- Check firewall settings
+</Accordion>
+
+</AccordionGroup>
+
+### Tool Execution Errors
+
+<AccordionGroup>
+
+<Accordion title="Tools not appearing in interface">
+**Problem**: MCP tools not visible in inspector
+
+**Solutions**:
+- Verify server starts without errors
+- Check server logs for initialization issues
+- Ensure all tools are properly registered in server.ts
+- Rebuild project: `npm run clean && npm run build`
+- Check MCP protocol compatibility
+</Accordion>
+
+<Accordion title="Parameter validation failures">
+**Problem**: Tool parameters not accepted
+
+**Solutions**:
+- Review tool documentation for parameter format
+- Check JSON syntax in parameter fields
+- Verify required vs optional parameters
+- Use example payloads as templates
+- Check data types match expected formats
+</Accordion>
+
+<Accordion title="Database operation errors">
+**Problem**: Database operations fail
+
+**Solutions**:
+- Test Supabase connection independently
+- Verify service role key permissions
+- Check table and column names for typos
+- Review Supabase RLS policies
+- Test operations in Supabase dashboard first
+</Accordion>
+
+</AccordionGroup>
+
+## Advanced Inspector Features
+
+### Custom Test Scenarios
+
+Create comprehensive test scenarios for your specific use cases:
+
+```json test-scenarios.json
+{
+  "scenarios": [
+    {
+      "name": "User Management Workflow",
+      "steps": [
+        {
+          "tool": "query_records",
+          "params": {"table_name": "users", "limit": 1},
+          "expect": "success"
+        },
+        {
+          "tool": "insert_records", 
+          "params": {
+            "table_name": "users",
+            "records": [{"email": "test@example.com", "name": "Test User"}]
+          },
+          "expect": "success"
+        },
+        {
+          "tool": "query_records",
+          "params": {
+            "table_name": "users",
+            "filters": {"email": {"eq": "test@example.com"}}
+          },
+          "expect": "data_exists"
+        },
+        {
+          "tool": "delete_records",
+          "params": {
+            "table_name": "users",
+            "filters": {"email": {"eq": "test@example.com"}},
+            "confirm": true
+          },
+          "expect": "success"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Response Validation
+
+Implement automated response validation:
+
+```javascript response-validator.js
+class ResponseValidator {
+  validateListTables(response) {
+    if (!response.success) return false;
+    if (!Array.isArray(response.data)) return false;
+    
+    return response.data.every(table => 
+      table.table_name && table.schema
+    );
+  }
+
+  validateQueryRecords(response) {
+    if (!response.success) return false;
+    if (!Array.isArray(response.data)) return false;
+    
+    // Check that all records have consistent structure
+    if (response.data.length > 0) {
+      const firstRecord = response.data[0];
+      const keys = Object.keys(firstRecord);
+      
+      return response.data.every(record => 
+        Object.keys(record).length === keys.length
+      );
+    }
+    
+    return true;
+  }
+
+  validateSchema(response) {
+    if (!response.success) return false;
+    if (!response.data.columns || !Array.isArray(response.data.columns)) return false;
+    
+    return response.data.columns.every(column =>
+      column.name && column.type && 'nullable' in column
+    );
+  }
+}
+```
+
+## Next Steps
+
+After mastering the MCP Inspector:
+
+1. **Create comprehensive test suites** for your specific database schema
+2. **Automate testing workflows** using CI/CD pipelines
+3. **Document common test scenarios** for team members
+4. **Set up monitoring** for production MCP server health
+5. **Explore advanced MCP features** like resource management
+
+<Card title="Ready to integrate with clients?" icon="plug">
+Learn how to set up Tablr MCP with [Claude Desktop](/mcp/integration/claude-desktop) or [other MCP clients](/mcp/integration/other-clients).
+</Card>
