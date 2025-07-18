@@ -55,39 +55,19 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 ## Step 5: Configure Your AI Assistant
 
-### For Claude Desktop
-
-Add this configuration to your Claude Desktop settings:
+Add this configuration to your Claude Desktop/Cursor/Windsurf/VS Code settings:
 
 ```json
 {
   "mcpServers": {
     "tablr": {
       "command": "tablr-mcp",
-      "args": ["/path/to/your/.env"]
+      "args": ["absolute/path/to/your/.env"]
     }
   }
 }
 ```
-
-### For Cursor IDE
-
-Add to your Cursor MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "tablr": {
-      "command": "tablr-mcp",
-      "env": {
-        "TABLR_API_KEY": "env:TABLR_API_KEY",
-        "SUPABASE_URL": "env:SUPABASE_URL",
-        "SUPABASE_SERVICE_ROLE_KEY": "env:SUPABASE_SERVICE_ROLE_KEY"
-      }
-    }
-  }
-}
-```
+Note: do not use backslashes for windows file paths
 
 ## Step 6: Start Using Tablr
 

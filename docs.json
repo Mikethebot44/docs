@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Tablr Documentation",
   "colors": {
-    "primary": "#3B82F6",
-    "light": "#60A5FA",
-    "dark": "#1E40AF"
+    "primary": "#000000",
+    "light": "#333333",
+    "dark": "#000000"
   },
   "favicon": "/favicon.svg",
   "navigation": {
