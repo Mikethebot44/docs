@@ -1,0 +1,366 @@
+---
+title: 'Testing with MCP Inspector'
+description: 'Test and debug Tablr MCP using the MCP Inspector web interface'
+icon: 'flask'
+---
+
+# Testing with MCP Inspector
+
+MCP Inspector provides a web-based interface for testing and debugging Tablr MCP servers.
+
+## Overview
+
+- **Interactive Testing**: Web GUI for all MCP tools
+- **Real-time Debugging**: Immediate feedback and error messages
+- **Parameter Validation**: Form-based input with validation
+- **Response Analysis**: Detailed view of outputs and errors
+
+## Quick Start
+
+<Steps>
+### Step 1: Build Tablr MCP
+
+```bash
+cd /path/to/tablr-mcp
+npm install
+npm run build
+
+# Verify build
+ls dist/
+```
+
+### Step 2: Test Server
+
+```bash
+# Verify server starts correctly
+npm start
+
+# Should see:
+# Starting Tablr MCP Server...
+# Successfully connected to PostgreSQL
+# MCP Server connected via stdio
+```
+
+Press `Ctrl+C` to stop.
+
+### Step 3: Launch Inspector
+
+```bash
+# Launch inspector with Tablr MCP
+npx @modelcontextprotocol/inspector node dist/index.js
+```
+
+### Step 4: Access Interface
+
+Browser opens automatically to `http://localhost:6274`. If not, navigate manually.
+
+</Steps>
+
+## Inspector Interface
+
+### Available Tools
+
+All Tablr MCP tools appear in the left panel:
+- `list_tables` - Database discovery
+- `get_table_schema` - Table structure
+- `query_records` - Data querying
+- `insert_records` - Data insertion
+- `update_records` - Data modification
+- `delete_records` - Data deletion
+- `create_table` - Table creation
+- `alter_table` - Schema modification
+- `drop_table` - Table removal
+- `execute_sql` - Custom SQL
+
+### Testing Workflow
+
+#### 1. Database Discovery
+
+Start with read-only operations:
+
+**List Tables**
+```json
+// Tool: list_tables
+// Parameters: (none)
+```
+
+**Get Schema**
+```json
+// Tool: get_table_schema
+{
+  "table_name": "users"
+}
+```
+
+#### 2. Query Data
+
+**Basic Query**
+```json
+// Tool: query_records
+{
+  "table_name": "users",
+  "limit": 10
+}
+```
+
+**Filtered Query**
+```json
+{
+  "table_name": "users",
+  "filters": {
+    "status": {"eq": "active"},
+    "age": {"gte": 18}
+  },
+  "order_by": [{"column": "created_at", "direction": "desc"}],
+  "limit": 50
+}
+```
+
+#### 3. Data Operations
+
+**Insert Records**
+```json
+{
+  "table_name": "users",
+  "records": [
+    {
+      "email": "test@example.com",
+      "name": "Test User",
+      "status": "active"
+    }
+  ],
+  "return_records": true
+}
+```
+
+**Update Records**
+```json
+{
+  "table_name": "users",
+  "filters": {"email": {"eq": "test@example.com"}},
+  "updates": {"last_login": "2024-01-15T10:30:00Z"},
+  "return_records": true
+}
+```
+
+**Delete Records**
+```json
+{
+  "table_name": "users",
+  "filters": {"email": {"eq": "test@example.com"}},
+  "confirm": true,
+  "limit": 1
+}
+```
+
+#### 4. Schema Management
+
+**Create Table**
+```json
+{
+  "table_name": "posts",
+  "columns": [
+    {
+      "name": "id",
+      "type": "serial",
+      "primary_key": true
+    },
+    {
+      "name": "title",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "name": "content",
+      "type": "text"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp",
+      "default_value": "now()"
+    }
+  ]
+}
+```
+
+**Alter Table**
+```json
+{
+  "table_name": "posts",
+  "operations": [
+    {
+      "type": "add_column",
+      "column": {
+        "name": "author_id",
+        "type": "integer"
+      }
+    }
+  ]
+}
+```
+
+**Drop Table**
+```json
+{
+  "table_name": "posts",
+  "confirm": true,
+  "cascade": false
+}
+```
+
+## Common Errors
+
+### Connection Issues
+```json
+{
+  "error": "Failed to connect to PostgreSQL",
+  "details": "Connection refused"
+}
+```
+
+**Solution**: Verify PostgreSQL connection string and server status.
+
+### Table Not Found
+```json
+{
+  "error": "Table 'unknown_table' not found"
+}
+```
+
+**Solution**: Use `list_tables` to verify available tables.
+
+### Permission Errors
+```json
+{
+  "error": "Permission denied",
+  "details": "Insufficient privileges"
+}
+```
+
+**Solution**: Check database user permissions and connection string.
+
+### Parameter Validation
+```json
+{
+  "error": "Invalid parameter format",
+  "details": "filters must be an object"
+}
+```
+
+**Solution**: Review parameter documentation and JSON formatting.
+
+## Debug Mode
+
+Enable detailed logging:
+
+```bash
+export DEBUG=true
+export MCP_DEBUG=true
+npx @modelcontextprotocol/inspector node dist/index.js
+```
+
+Check both browser console and terminal for detailed logs.
+
+## Response Analysis
+
+### Success Response
+```json
+{
+  "success": true,
+  "data": [/* results */],
+  "message": "Operation completed",
+  "execution_time": "45ms",
+  "metadata": {
+    "total_rows": 25,
+    "affected_rows": 1
+  }
+}
+```
+
+### Error Response
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "details": "Detailed information",
+  "suggestion": "Try this fix"
+}
+```
+
+## Testing Best Practices
+
+### Strategy
+1. **Start with reads**: Use `list_tables` and `get_table_schema`
+2. **Test incrementally**: Basic queries before complex filters
+3. **Validate first**: Check queries before modifications
+4. **Use small datasets**: Test with limited records
+
+### Security Testing
+- Test invalid table names
+- Verify parameter validation
+- Check permission boundaries
+- Test SQL injection prevention
+
+### Performance Testing
+- Test with large datasets
+- Monitor execution times
+- Test query limits
+- Check memory usage
+
+## Automated Testing
+
+### Test Script
+```javascript
+import { spawn } from 'child_process';
+import axios from 'axios';
+
+class TablrTester {
+  async runTest(toolName, parameters) {
+    const response = await axios.post('http://localhost:6274/api/tools/call', {
+      tool: toolName,
+      parameters
+    });
+    return response.data;
+  }
+
+  async runSuite() {
+    const tests = [
+      { name: 'List Tables', tool: 'list_tables', params: {} },
+      { name: 'Query Users', tool: 'query_records', params: { table_name: 'users', limit: 5 } }
+    ];
+
+    for (const test of tests) {
+      try {
+        const result = await this.runTest(test.tool, test.params);
+        console.log(`✓ ${test.name}: passed`);
+      } catch (error) {
+        console.log(`✗ ${test.name}: failed - ${error.message}`);
+      }
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+### Inspector Won't Start
+- Verify Node.js installation
+- Check `dist/index.js` exists
+- Ensure PostgreSQL connection is valid
+- Try absolute path: `npx @modelcontextprotocol/inspector node /full/path/to/dist/index.js`
+
+### Tools Not Visible
+- Rebuild project: `npm run build`
+- Check server startup logs
+- Verify environment variables
+- Test server independently
+
+### Browser Issues
+- Manually navigate to `http://localhost:6274`
+- Check port availability
+- Try different browser
+- Check firewall settings
+
+<Card title="Next Steps" icon="rocket">
+Once testing is complete, integrate with [Claude Desktop](/mcp/integration/claude-desktop) or [custom clients](/integration/custom-clients).
+</Card>

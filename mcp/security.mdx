@@ -6,310 +6,181 @@ icon: "shield"
 
 # Security
 
-Security is a top priority for Tablr MCP. This guide covers the built-in security features, best practices, and recommendations for secure deployment and usage.
+Security best practices and built-in safety features for Tablr MCP with PostgreSQL.
 
 ## Built-in Security Features
 
-Tablr MCP includes multiple layers of security protection:
-
 ### SQL Injection Protection
 
-<Card title="Parameterized Queries" icon="shield-check">
-All database operations use parameterized queries to prevent SQL injection attacks:
+All database operations use parameterized queries:
 
 ```typescript
-// Safe - Uses parameterized query
-const { data } = await supabase
-  .from('users')
-  .select('*')
-  .eq('email', userEmail); // Automatically sanitized
+// Safe - Parameterized query
+const result = await pool.query(
+  'SELECT * FROM users WHERE email = $1',
+  [userEmail]
+);
 
 // Dangerous - Never done in Tablr MCP
 const query = `SELECT * FROM users WHERE email = '${userEmail}'`;
 ```
-</Card>
 
 ### Unsafe Operation Blocking
 
-Tablr MCP automatically blocks dangerous SQL operations:
+Dangerous SQL operations are automatically blocked:
 
-<CodeGroup>
-```sql Blocked Operations
--- These operations are automatically blocked
-DROP DATABASE;
-TRUNCATE TABLE users;
-DELETE FROM users; -- Without WHERE clause
-ALTER SYSTEM;
-CREATE EXTENSION;
-```
+```typescript
+// Blocked operations
+const unsafePatterns = [
+  /DROP\s+DATABASE/i,
+  /TRUNCATE\s+TABLE/i,
+  /DELETE\s+FROM\s+\w+\s*;/i, // DELETE without WHERE
+  /ALTER\s+SYSTEM/i
+];
 
-```typescript Safety Check Implementation
-private validateSafeOperation(query: string) {
-  const unsafePatterns = [
-    /DROP\s+DATABASE/i,
-    /TRUNCATE\s+TABLE/i,
-    /DELETE\s+FROM\s+\w+\s*;/i, // DELETE without WHERE
-    /ALTER\s+SYSTEM/i,
-    /CREATE\s+EXTENSION/i
-  ];
-  
-  for (const pattern of unsafePatterns) {
-    if (pattern.test(query)) {
-      throw new Error('Unsafe operation blocked for security');
-    }
+for (const pattern of unsafePatterns) {
+  if (pattern.test(query)) {
+    throw new Error('Unsafe operation blocked');
   }
 }
 ```
-</CodeGroup>
 
 ### Confirmation Requirements
 
 Destructive operations require explicit confirmation:
 
-```typescript
+```json
 // Delete requires confirmation
 {
   "table_name": "users",
   "filters": {"status": "inactive"},
-  "confirm": true  // Must be explicitly set
+  "confirm": true
 }
 
 // Drop table requires confirmation
 {
   "table_name": "old_table",
-  "confirm": true,
-  "cascade": false
+  "confirm": true
 }
 ```
 
 ### Input Validation
 
-All inputs are validated before processing:
-
-<AccordionGroup>
-  <Accordion title="Parameter Validation" icon="check-circle">
-    ```typescript
-    // Table name validation
-    private validateTableName(name: string) {
-      if (!name || typeof name !== 'string') {
-        throw new Error('Table name must be a non-empty string');
-      }
-      
-      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
-        throw new Error('Invalid table name format');
-      }
-    }
-    
-    // Column validation
-    private validateColumnName(name: string) {
-      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
-        throw new Error('Invalid column name format');
-      }
-    }
-    ```
-  </Accordion>
+```typescript
+// Table name validation
+private validateTableName(name: string) {
+  if (!name || typeof name !== 'string') {
+    throw new Error('Table name required');
+  }
   
-  <Accordion title="Data Type Validation" icon="list-check">
-    ```typescript
-    // Type-specific validation
-    private validateFilterValue(value: any, operator: string) {
-      switch (operator) {
-        case 'eq':
-        case 'neq':
-          // Allow any value type
-          break;
-        case 'gt':
-        case 'gte':
-        case 'lt':
-        case 'lte':
-          if (typeof value !== 'number' && !Date.parse(value)) {
-            throw new Error('Numeric or date value required for comparison');
-          }
-          break;
-        case 'like':
-        case 'ilike':
-          if (typeof value !== 'string') {
-            throw new Error('String value required for pattern matching');
-          }
-          break;
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
+    throw new Error('Invalid table name format');
+  }
+}
+
+// Data type validation
+private validateFilterValue(value: any, operator: string) {
+  switch (operator) {
+    case 'gt': case 'gte': case 'lt': case 'lte':
+      if (typeof value !== 'number' && !Date.parse(value)) {
+        throw new Error('Numeric/date value required');
       }
-    }
-    ```
-  </Accordion>
-</AccordionGroup>
+      break;
+    case 'like': case 'ilike':
+      if (typeof value !== 'string') {
+        throw new Error('String value required');
+      }
+      break;
+  }
+}
+```
 
 ## Best Practices
 
 ### Credential Management
 
 <Warning>
-**Critical**: Never commit credentials to version control or share them publicly.
+Never commit credentials to version control.
 </Warning>
 
 #### Secure Storage
 
-<Steps>
-  <Step title="Use Environment Variables">
-    Store credentials in `.env` files, never in source code:
-    ```bash
-    # .env file (never commit this)
-    SUPABASE_URL=https://your-project.supabase.co
-    SUPABASE_SERVICE_ROLE_KEY=eyJhbG...your-key-here
-    ```
-  </Step>
-  
-  <Step title="Restrict File Permissions">
-    Set proper permissions on sensitive files:
-    ```bash
-    # Secure .env file permissions
-    chmod 600 .env
-    
-    # Only owner can read/write
-    ls -la .env
-    # -rw------- 1 user group size date .env
-    ```
-  </Step>
-  
-  <Step title="Use Different Keys for Different Environments">
-    Separate keys for development, staging, and production:
-    ```bash
-    # Development
-    SUPABASE_URL=https://dev-project.supabase.co
-    SUPABASE_SERVICE_ROLE_KEY=dev_key_here
-    
-    # Production
-    SUPABASE_URL=https://prod-project.supabase.co
-    SUPABASE_SERVICE_ROLE_KEY=prod_key_here
-    ```
-  </Step>
-  
-  <Step title="Rotate Keys Regularly">
-    Regenerate service role keys periodically:
-    - Go to Supabase Dashboard → Settings → API
-    - Generate new service role key
-    - Update all deployments
-    - Revoke old key
-  </Step>
-</Steps>
+```bash
+# Store in .env file (never commit)
+PG_CONNECTION_STRING=postgresql://user:password@host:port/database
 
-#### Service Role vs Anon Key
+# Secure file permissions
+chmod 600 .env
+
+# Verify permissions
+ls -la .env
+# -rw------- 1 user group size date .env
+```
+
+#### Environment Separation
+
+```bash
+# Development
+PG_CONNECTION_STRING=postgresql://user:pass@dev-host:5432/dev_db
+
+# Production  
+PG_CONNECTION_STRING=postgresql://user:pass@prod-host:5432/prod_db
+```
+
+#### Database User Permissions
 
 <Tip>
-**Always use the service_role key** for Tablr MCP, never the anon/public key.
+Use dedicated database user with minimal required permissions.
 </Tip>
 
-<Comparison>
-  <ComparisonItem title="Service Role Key" type="good">
-    - Full database access
-    - Bypasses Row Level Security
-    - Can perform admin operations
-    - Required for Tablr MCP functionality
-  </ComparisonItem>
-  
-  <ComparisonItem title="Anon/Public Key" type="bad">
-    - Limited by RLS policies
-    - Cannot access all tables
-    - Restricted permissions
-    - Will cause authentication errors
-  </ComparisonItem>
-</Comparison>
+```sql
+-- Create dedicated user
+CREATE USER tablr_mcp WITH PASSWORD 'secure_password';
+
+-- Grant minimal permissions
+GRANT CONNECT ON DATABASE your_db TO tablr_mcp;
+GRANT USAGE ON SCHEMA public TO tablr_mcp;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tablr_mcp;
+GRANT CREATE ON SCHEMA public TO tablr_mcp;
+```
 
 ### Database Security
 
-#### Row Level Security (RLS)
-
-Enable RLS on sensitive tables even when using service role:
+#### Access Control
 
 ```sql
--- Enable RLS on sensitive tables
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE financial_data ENABLE ROW LEVEL SECURITY;
+-- Enable Row Level Security
+ALTER TABLE sensitive_table ENABLE ROW LEVEL SECURITY;
 
--- Create policies for different access levels
-CREATE POLICY "Admin full access" ON users
-  FOR ALL TO service_role
-  USING (true);
+-- Create access policies
+CREATE POLICY "user_access" ON users
+  FOR ALL TO tablr_mcp
+  USING (user_id = current_user_id());
 
-CREATE POLICY "User read own data" ON users
-  FOR SELECT TO authenticated
-  USING (auth.uid() = id);
-```
-
-#### Database Policies
-
-Implement comprehensive database policies:
-
-<CodeGroup>
-```sql Read Policies
--- Allow reading public data
-CREATE POLICY "Public read access" ON blog_posts
-  FOR SELECT TO anon, authenticated
-  USING (published = true);
-
--- Restrict sensitive data
-CREATE POLICY "Admin only sensitive data" ON user_analytics
-  FOR SELECT TO service_role
+-- Restrict admin tables
+CREATE POLICY "admin_only" ON admin_logs
+  FOR ALL TO postgres
   USING (true);
 ```
 
-```sql Write Policies
--- Controlled data modification
-CREATE POLICY "Users update own profile" ON profiles
-  FOR UPDATE TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- Admin-only critical operations
-CREATE POLICY "Admin only user management" ON users
-  FOR ALL TO service_role
-  USING (true);
-```
-</CodeGroup>
-
-#### Regular Security Audits
+#### Regular Audits
 
 <Checklist>
-- [ ] Review RLS policies regularly
-- [ ] Audit database permissions
-- [ ] Monitor unusual query patterns
-- [ ] Check for unauthorized access attempts
+- [ ] Review database permissions
+- [ ] Monitor query patterns
+- [ ] Check access logs
 - [ ] Validate data integrity
-- [ ] Review backup and recovery procedures
+- [ ] Update security policies
 </Checklist>
 
 ### MCP Security Configuration
 
-#### Client Access Control
-
-Control which clients can access your MCP server:
-
-```json
-// Claude Desktop configuration with restricted access
-{
-  "mcpServers": {
-    "tablr-mcp": {
-      "command": "node",
-      "args": ["/secure/path/to/tablr-mcp/dist/index.js"],
-      "env": {
-        "SUPABASE_URL": "https://your-project.supabase.co",
-        "SUPABASE_SERVICE_ROLE_KEY": "your-key",
-        "ALLOWED_OPERATIONS": "read,write",
-        "MAX_QUERY_LIMIT": "1000"
-      }
-    }
-  }
-}
-```
-
-#### Tool Access Restrictions
-
-Implement tool-level access controls:
+#### Environment Restrictions
 
 ```typescript
-// Example: Restrict dangerous operations
+// Restrict operations by environment
 export class SecureDropTableTool extends BaseTool {
   async execute(params: any) {
-    // Additional security check
     if (process.env.NODE_ENV === 'production') {
       throw new Error('Drop table disabled in production');
     }
@@ -318,7 +189,6 @@ export class SecureDropTableTool extends BaseTool {
       throw new Error('Admin confirmation required');
     }
     
-    // Proceed with operation
     return super.execute(params);
   }
 }
@@ -326,106 +196,67 @@ export class SecureDropTableTool extends BaseTool {
 
 #### Network Security
 
-<Steps>
-  <Step title="Use HTTPS Only">
-    Always use HTTPS for Supabase connections (automatic with Supabase)
-  </Step>
-  
-  <Step title="Firewall Configuration">
-    Configure firewalls to restrict access:
-    ```bash
-    # Allow only necessary ports
-    ufw allow 22    # SSH
-    ufw allow 443   # HTTPS
-    ufw deny 3000   # Block direct MCP access
-    ```
-  </Step>
-  
-  <Step title="VPN Access">
-    Consider VPN access for production deployments
-  </Step>
-</Steps>
+```bash
+# Firewall configuration
+ufw allow 22    # SSH
+ufw allow 5432  # PostgreSQL
+ufw deny 3000   # Block direct MCP access
 
-## Production Deployment Security
+# Use SSL connections
+PG_CONNECTION_STRING=postgresql://user:pass@host:5432/db?sslmode=require
+```
+
+## Production Security
 
 ### Environment Hardening
 
-<CodeGroup>
-```bash Production Environment
-# Production-specific security settings
+```bash
+# Production settings
 NODE_ENV=production
 DEBUG=false
-MCP_DEBUG=false
-
-# Secure connection settings
-SUPABASE_URL=https://your-production-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-production-key
-
-# Security limitations
+PG_CONNECTION_STRING=postgresql://user:pass@host:5432/prod_db?sslmode=require
 MAX_QUERY_LIMIT=500
 ENABLE_DROP_TABLE=false
-REQUIRE_CONFIRMATION=true
-```
 
-```bash Development Environment
-# Development settings (more permissive)
+# Development settings
 NODE_ENV=development
 DEBUG=true
-MCP_DEBUG=true
-
-# Development database
-SUPABASE_URL=https://your-dev-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-dev-key
-
-# Relaxed limitations for testing
+PG_CONNECTION_STRING=postgresql://user:pass@localhost:5432/dev_db
 MAX_QUERY_LIMIT=10000
 ENABLE_DROP_TABLE=true
 ```
-</CodeGroup>
 
 ### Container Security
-
-When using Docker:
 
 ```dockerfile
 # Use non-root user
 FROM node:18-alpine
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN adduser -S tablr -u 1001
 
 # Copy files with proper ownership
-COPY --chown=nextjs:nodejs . .
+COPY --chown=tablr:tablr . .
+USER tablr
 
-# Switch to non-root user
-USER nextjs
-
-# Security headers
+# Security settings
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 ```
 
 ### Process Management
 
-Use process managers with security features:
-
 ```bash
-# PM2 with security settings
+# PM2 with security
 pm2 start dist/index.js \
   --name tablr-mcp \
   --user tablr-user \
-  --max-memory-restart 1G \
-  --log-file /var/log/tablr-mcp.log \
-  --error-file /var/log/tablr-mcp-error.log
+  --max-memory-restart 1G
 ```
 
-## Monitoring and Alerting
+## Monitoring
 
-### Security Monitoring
-
-Implement monitoring for security events:
+### Security Events
 
 ```typescript
-// Example security monitoring
 class SecurityMonitor {
   static logSecurityEvent(event: string, details: any) {
     const logEntry = {
@@ -435,86 +266,52 @@ class SecurityMonitor {
       source: 'tablr-mcp'
     };
     
-    // Log to security monitoring system
     console.log('SECURITY:', JSON.stringify(logEntry));
     
-    // Alert on critical events
-    if (event === 'unauthorized_access' || event === 'injection_attempt') {
+    if (event === 'unauthorized_access') {
       this.sendAlert(logEntry);
     }
-  }
-  
-  private static sendAlert(logEntry: any) {
-    // Send to monitoring service (Slack, email, etc.)
   }
 }
 ```
 
-### Usage Auditing
-
-Track all database operations:
+### Audit Logging
 
 ```typescript
-// Audit trail for database operations
 class AuditLogger {
-  static async logOperation(operation: string, table: string, user: string) {
-    await this.supabase.from('audit_log').insert({
-      operation,
-      table_name: table,
-      user_id: user,
-      timestamp: new Date().toISOString(),
-      source: 'tablr-mcp'
-    });
+  static async logOperation(operation: string, table: string) {
+    await pool.query(
+      'INSERT INTO audit_log (operation, table_name, timestamp) VALUES ($1, $2, $3)',
+      [operation, table, new Date()]
+    );
   }
 }
 ```
 
 ## Security Checklist
 
-Use this checklist to ensure secure deployment:
-
 <Checklist>
-- [ ] Service role key is secure and not committed to version control
-- [ ] Environment variables are properly configured
-- [ ] RLS is enabled on sensitive tables
-- [ ] Database policies are comprehensive and tested
-- [ ] Unsafe SQL operations are blocked
-- [ ] Confirmation is required for destructive operations
-- [ ] Input validation is comprehensive
-- [ ] Production environment is hardened
-- [ ] Monitoring and alerting are configured
-- [ ] Regular security audits are scheduled
-- [ ] Backup and recovery procedures are tested
-- [ ] Access logs are monitored
-- [ ] Network security is configured
-- [ ] Dependencies are regularly updated
-- [ ] Security patches are applied promptly
+- [ ] PostgreSQL credentials secure and not committed
+- [ ] Environment variables properly configured
+- [ ] Database permissions minimal and appropriate
+- [ ] RLS enabled on sensitive tables
+- [ ] Unsafe SQL operations blocked
+- [ ] Confirmation required for destructive operations
+- [ ] Input validation comprehensive
+- [ ] Production environment hardened
+- [ ] Monitoring and alerting configured
+- [ ] Regular security audits scheduled
+- [ ] Access logs monitored
+- [ ] Dependencies regularly updated
 </Checklist>
 
 ## Incident Response
 
-### Security Incident Plan
-
-1. **Immediate Response**:
-   - Stop the affected server
-   - Revoke compromised credentials
-   - Block suspicious access
-
-2. **Investigation**:
-   - Review audit logs
-   - Identify scope of compromise
-   - Document findings
-
-3. **Recovery**:
-   - Restore from secure backups
-   - Update credentials
-   - Apply security patches
-
-4. **Prevention**:
-   - Update security measures
-   - Improve monitoring
-   - Train team members
+1. **Immediate**: Stop server, revoke credentials, block access
+2. **Investigation**: Review logs, identify scope, document
+3. **Recovery**: Restore backups, update credentials, patch
+4. **Prevention**: Update measures, improve monitoring
 
 <Warning>
-**Remember**: Security is an ongoing process, not a one-time setup. Regularly review and update your security measures as your deployment grows and evolves.
+Security is ongoing. Regularly review and update measures.
 </Warning>

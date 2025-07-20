@@ -1,6 +1,6 @@
 ---
 title: 'Quick Start'
-description: 'Get Tablr running and managing your Supabase database in under 5 minutes'
+description: 'Get Tablr running and managing your PostgreSQL database in under 5 minutes'
 ---
 
 ## Prerequisites
@@ -8,34 +8,23 @@ description: 'Get Tablr running and managing your Supabase database in under 5 m
 Before you start, make sure you have:
 
 - **Node.js 18.0.0+** installed on your system
-- **Active Supabase project** with database access
+- **PostgreSQL database** with connection access
 - **MCP-compatible AI assistant** (Claude Desktop, Cursor, etc.)
 
-## Step 1: Get Your Tablr API Key
+## Step 1: Prepare Your PostgreSQL Database
 
-1. Visit the [Tablr Dashboard](https://tablr.vercel.app/dashboard/api-keys)
-2. Sign in with your account
-3. Click "Create New API Key"
-4. Copy your API key (starts with `tb_`)
+Ensure you have your PostgreSQL connection details:
+- **Host** (e.g., `localhost` or `your-db-host.com`)
+- **Port** (default: `5432`)
+- **Database name**
+- **Username** and **Password**
+- **SSL configuration** (if required)
 
 <Note>
-Your API key is used for usage tracking and billing. Keep it secure and don't share it publicly.
+You'll need a user account with sufficient privileges to create, modify, and query tables.
 </Note>
 
-## Step 2: Get Your Supabase Credentials
-
-1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
-2. Select your project
-3. Navigate to **Settings > API**
-4. Copy your:
-   - **Project URL** (e.g., `https://your-project.supabase.co`)
-   - **Service Role Key** (not the anon key)
-
-<Warning>
-Use the service role key, not the anon key. The service role key has full database access needed for Tablr operations.
-</Warning>
-
-## Step 3: Install Tablr MCP
+## Step 2: Install Tablr MCP
 
 Install the Tablr MCP server globally:
 
@@ -43,17 +32,20 @@ Install the Tablr MCP server globally:
 npm install -g tablr-mcp
 ```
 
-## Step 4: Configure Environment Variables
+## Step 3: Configure Environment Variables
 
 Create a `.env` file in your project directory:
 
 ```env
-TABLR_API_KEY=tb_your_api_key_here
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=your_database_name
+POSTGRES_USER=your_username
+POSTGRES_PASSWORD=your_password
+POSTGRES_SSL=false
 ```
 
-## Step 5: Configure Your AI Assistant
+## Step 4: Configure Your AI Assistant
 
 Add this configuration to your Claude Desktop/Cursor/Windsurf/VS Code settings:
 
@@ -69,7 +61,7 @@ Add this configuration to your Claude Desktop/Cursor/Windsurf/VS Code settings:
 ```
 Note: do not use backslashes for windows file paths
 
-## Step 6: Start Using Tablr
+## Step 5: Start Using Tablr
 
 Restart your AI assistant and start managing your database with natural language:
 
@@ -97,28 +89,28 @@ Restart your AI assistant and start managing your database with natural language
 To verify everything is working:
 
 1. **Test Connection**: Ask your AI assistant "List all tables"
-2. **Check API Key**: Verify usage appears in your Tablr dashboard
-3. **Test Operations**: Try creating a simple table or querying existing data
+2. **Test Operations**: Try creating a simple table or querying existing data
 
 ## Common Issues
 
 <AccordionGroup>
   <Accordion icon="exclamation-triangle" title="Authentication Failed">
-    **Problem**: "Invalid API key" or "Authentication failed"
+    **Problem**: "Authentication failed" or "Connection refused"
     
     **Solution**: 
-    - Verify your Tablr API key starts with `tb_`
-    - Check your Supabase service role key (not anon key)
-    - Ensure environment variables are properly set
+    - Verify your PostgreSQL connection details
+    - Check that PostgreSQL server is running
+    - Ensure network connectivity to database host
+    - Verify username and password are correct
   </Accordion>
   
   <Accordion icon="database" title="No Tables Found">
     **Problem**: "No tables found in database"
     
     **Solution**:
-    - Verify your Supabase project is active
-    - Check that tables exist in the public schema
-    - Ensure service role key has proper permissions
+    - Verify your PostgreSQL database contains tables
+    - Check that tables exist in the target schema
+    - Ensure user has proper permissions to view tables
   </Accordion>
   
   <Accordion icon="plug" title="Connection Issues">
@@ -146,7 +138,7 @@ To verify everything is working:
     icon="toolbox"
     href="/mcp/tools/index"
   >
-    Explore all 16 database management tools
+    Explore all database management tools
   </Card>
   <Card
     title="Integration Guide"

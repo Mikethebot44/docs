@@ -83,17 +83,14 @@
           {
             "group": "Development",
             "pages": [
-              "mcp/development/index",
-              "mcp/development/setup", 
-              "mcp/development/adding-tools"
+              "development/index"
             ]
           },
           {
             "group": "Advanced",
             "pages": [
               "mcp/troubleshooting",
-              "mcp/security", 
-              "mcp/contributing"
+              "mcp/security"
             ]
           }
         ]

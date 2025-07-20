@@ -1,6 +1,6 @@
 ---
-title: "Tablr MCP - Complete Supabase Database Management"
-description: "A comprehensive MCP server that provides full database management capabilities for Supabase projects through AI assistants"
+title: "Tablr MCP - Complete PostgreSQL Database Management"
+description: "A comprehensive MCP server that provides full database management capabilities for PostgreSQL databases through AI assistants"
 icon: "database"
 ---
 
@@ -17,7 +17,7 @@ icon: "database"
 
 ## What is Tablr MCP?
 
-Tablr MCP is a specialized Model Context Protocol (MCP) server that provides comprehensive database management for Supabase projects. It allows AI assistants to:
+Tablr MCP is a specialized Model Context Protocol (MCP) server that provides comprehensive database management for PostgreSQL databases. It allows AI assistants to:
 
 - **Explore** your database structure (tables, schemas, relationships)
 - **Query** data with complex filters and sorting
@@ -25,7 +25,35 @@ Tablr MCP is a specialized Model Context Protocol (MCP) server that provides com
 - **Execute** custom SQL safely
 - **Manage** database operations through natural language
 
-Instead of manually writing SQL or using the Supabase dashboard, you can simply ask your AI assistant: *"Show me all users created this week"* or *"Create a new table for storing blog posts"*.
+Instead of manually writing SQL or using database administration tools, you can simply ask your AI assistant: *"Show me all users created this week"* or *"Create a new table for storing blog posts"*.
+
+## Understanding Model Context Protocol (MCP)
+
+**Model Context Protocol (MCP)** is an open standard that enables AI assistants and applications to securely connect to external data sources and tools. Think of it as a bridge between AI models and your databases, APIs, or other services.
+
+### Key MCP Concepts
+
+**MCP Server** - A service that provides tools and data to AI clients. **Tablr MCP is an MCP server** that exposes database management capabilities to AI assistants.
+
+**MCP Client** - An application that uses MCP servers to extend its capabilities. Examples include Claude Desktop, Cursor IDE, and custom applications.
+
+**Tools** - Functions that the server exposes for the client to use. Tablr MCP provides comprehensive database management tools like `list_tables`, `query_records`, and `create_table`.
+
+**Transport** - How the client and server communicate via stdio, HTTP, or WebSocket protocols.
+
+### Why Use MCP?
+
+- **Standardized Interface** - Works with any MCP-compatible AI assistant
+- **Secure Access** - Controlled access to your data with proper authentication
+- **Extensible** - Easy to add new capabilities as your needs grow
+- **Interoperable** - One server can work with multiple AI clients simultaneously
+
+### How MCP Works
+
+1. **Connection Establishment** - The AI client connects to the MCP server
+2. **Capability Discovery** - The client discovers available tools and resources
+3. **Tool Execution** - When you ask the AI to perform a database operation, the client calls the appropriate tool
+4. **Response Handling** - The server processes requests, interacts with your database, and returns formatted results
 
 ## Key Features
 
@@ -64,10 +92,10 @@ Instead of manually writing SQL or using the Supabase dashboard, you can simply 
 - **Relationship Management**: Handle foreign keys and table relationships
 
 ### **Enterprise-Grade Security**
-- **Service Role Authentication**: Secure connection using Supabase service keys
+- **Database Authentication**: Secure connection using PostgreSQL credentials
 - **SQL Injection Protection**: Automatic query sanitization
 - **Operation Confirmation**: Safety prompts for destructive operations
-- **Access Control**: Respects Supabase Row Level Security (RLS) policies
+- **Access Control**: Respects database permissions and constraints
 
 ### **Superior Developer Experience**
 - **Comprehensive Error Handling**: Helpful error messages with suggestions
@@ -79,32 +107,32 @@ Instead of manually writing SQL or using the Supabase dashboard, you can simply 
 
 <CardGroup cols={2}>
   <Card
-    title="Learn About MCP"
-    icon="question-circle"
-    href="/mcp/what-is-mcp"
+    title="Setup Guide"
+    icon="gear"
+    href="/setup-guide"
   >
-    Understand the Model Context Protocol and how it works
+    Complete installation and configuration guide
   </Card>
   <Card
-    title="Check Prerequisites"
-    icon="list-check"
-    href="/mcp/prerequisites"
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
   >
-    Ensure you have everything needed to get started
-  </Card>
-  <Card
-    title="Installation Guide"
-    icon="download"
-    href="/mcp/installation"
-  >
-    Step-by-step setup instructions for your environment
+    Get up and running in 5 minutes
   </Card>
   <Card
     title="Browse All Tools"
     icon="toolbox"
     href="/mcp/tools"
   >
-    Explore all 16 available database management tools
+    Explore all available database management tools
+  </Card>
+  <Card
+    title="Integration Guide"
+    icon="plug"
+    href="/mcp/integration/claude-desktop"
+  >
+    Connect with your AI assistant
   </Card>
 </CardGroup>
 
@@ -113,11 +141,11 @@ Instead of manually writing SQL or using the Supabase dashboard, you can simply 
 Ready to dive in? Here's what you need:
 
 1. **Node.js 18+** and **npm** installed
-2. **Supabase account** with an active project
-3. **Service role key** from your Supabase dashboard
+2. **PostgreSQL database** with connection access
+3. **Database credentials** with appropriate permissions
 
 <Note>
-Tablr MCP provides 16 comprehensive database management functions that work with any MCP-compatible AI assistant, including Claude Desktop, Cursor IDE, and custom applications.
+Tablr MCP provides comprehensive database management functions that work with any MCP-compatible AI assistant, including Claude Desktop, Cursor IDE, and custom applications.
 </Note>
 
 ## Example Usage
@@ -140,35 +168,35 @@ AI: [Uses create_table with appropriate schema]
 
 ## Architecture Overview
 
-Tablr MCP acts as a bridge between AI assistants and your Supabase database:
+Tablr MCP acts as a bridge between AI assistants and your PostgreSQL database:
 
 - **MCP Client** (Claude Desktop, Cursor, etc.) sends requests
 - **Tablr MCP Server** processes requests and validates operations
-- **Supabase Database** executes the actual database operations
+- **PostgreSQL Database** executes the actual database operations
 - **Results** are formatted and returned to the AI assistant
 
 ## Next Steps
 
 <CardGroup cols={3}>
   <Card
-    title="Understanding MCP"
-    icon="graduation-cap"
-    href="/mcp/what-is-mcp"
+    title="Setup Guide"
+    icon="gear"
+    href="/setup-guide"
   >
-    Learn the fundamentals
+    Complete installation and configuration
   </Card>
   <Card
-    title="Prerequisites"
-    icon="clipboard-check"
-    href="/mcp/prerequisites"
-  >
-    Get ready to install
-  </Card>
-  <Card
-    title="Installation"
+    title="Quick Start"
     icon="rocket"
-    href="/mcp/installation"
+    href="/quickstart"
   >
-    Start building
+    Get up and running quickly
+  </Card>
+  <Card
+    title="Integration"
+    icon="plug"
+    href="/mcp/integration/claude-desktop"
+  >
+    Connect with AI assistants
   </Card>
 </CardGroup>

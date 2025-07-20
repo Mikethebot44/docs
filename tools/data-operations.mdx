@@ -1,0 +1,486 @@
+---
+title: "Data Operations"
+description: "Comprehensive guide to querying, inserting, updating, and deleting database records"
+icon: "database"
+---
+
+## Overview
+
+Tablr MCP provides powerful data manipulation tools that enable safe and efficient database operations. These tools support complex queries, batch processing, and comprehensive validation while maintaining data integrity.
+
+<Note>
+All data operations include built-in SQL injection protection, parameter validation, and detailed error reporting.
+</Note>
+
+---
+
+## list_tables
+
+Discover all tables in your database with automatic schema detection.
+
+### Parameters
+
+No parameters required - automatically discovers all accessible tables.
+
+### Usage Example
+
+```json
+{}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {"table_name": "users", "schema": "public"},
+    {"table_name": "products", "schema": "public"},
+    {"table_name": "orders", "schema": "public"}
+  ],
+  "message": "Found 3 tables"
+}
+```
+
+---
+
+## get_table_schema
+
+Get detailed column information, data types, constraints, and relationships for any table.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Name of the table to inspect |
+
+### Usage Example
+
+```json
+{
+  "table_name": "users"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "table_name": "users",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "id",
+        "type": "integer",
+        "nullable": false,
+        "primary_key": true,
+        "auto_increment": true
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "nullable": false,
+        "unique": true,
+        "max_length": 255
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "nullable": false,
+        "default_value": "now()"
+      }
+    ],
+    "constraints": [
+      {
+        "name": "users_pkey",
+        "type": "PRIMARY KEY",
+        "columns": ["id"]
+      }
+    ]
+  }
+}
+```
+
+---
+
+## query_records
+
+Advanced data retrieval with filtering, sorting, pagination, and complex query conditions.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `table_name` | string | Yes | - | Table to query |
+| `filters` | object | No | {} | Filter conditions |
+| `columns` | array | No | * | Specific columns to select |
+| `order_by` | array | No | [] | Sorting configuration |
+| `limit` | number | No | 100 | Maximum number of records |
+| `offset` | number | No | 0 | Number of records to skip |
+
+### Filter Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `eq` | Equal to | `{"status": {"eq": "active"}}` |
+| `neq` | Not equal to | `{"status": {"neq": "deleted"}}` |
+| `gt` | Greater than | `{"age": {"gt": 18}}` |
+| `gte` | Greater than or equal | `{"price": {"gte": 10.00}}` |
+| `lt` | Less than | `{"created_at": {"lt": "2023-12-01"}}` |
+| `lte` | Less than or equal | `{"quantity": {"lte": 100}}` |
+| `like` | Pattern matching | `{"name": {"like": "%John%"}}` |
+| `ilike` | Case insensitive pattern | `{"email": {"ilike": "%gmail.com"}}` |
+| `in` | Value in list | `{"category": {"in": ["books", "electronics"]}}` |
+| `not_in` | Value not in list | `{"status": {"not_in": ["deleted", "banned"]}}` |
+| `is_null` | Is null | `{"deleted_at": {"is_null": true}}` |
+| `not_null` | Is not null | `{"email": {"not_null": true}}` |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Basic Query
+{
+  "table_name": "products",
+  "limit": 10
+}
+```
+
+```json Filtered Query with PostgreSQL Syntax
+{
+  "table_name": "orders",
+  "filters": {
+    "status": {"eq": "completed"},
+    "total": {"gte": 100.00},
+    "created_at": {"gte": "2023-11-01T00:00:00Z"}
+  },
+  "order_by": [
+    {"column": "created_at", "direction": "desc"}
+  ],
+  "limit": 25
+}
+```
+
+```json Complex Search
+{
+  "table_name": "users",
+  "filters": {
+    "email": {"ilike": "%@company.com"},
+    "status": {"in": ["active", "pending"]},
+    "last_login": {"not_null": true}
+  },
+  "columns": ["id", "email", "status", "last_login"],
+  "order_by": [
+    {"column": "last_login", "direction": "desc"}
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## insert_records
+
+Add single or multiple records with validation, conflict handling, and batch processing.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `table_name` | string | Yes | - | Target table for insertion |
+| `records` | array | Yes | - | Array of records to insert |
+| `on_conflict` | string | No | "abort" | How to handle conflicts |
+| `return_records` | boolean | No | true | Whether to return inserted records |
+
+### Conflict Resolution Options
+
+| Option | Behavior | Use Case |
+|--------|----------|----------|
+| `"abort"` | Stop on first conflict (default) | Strict data integrity |
+| `"ignore"` | Skip conflicting records | Idempotent operations |
+| `"upsert"` | Update existing records | Merge/sync operations |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Single Record (PostgreSQL)
+{
+  "table_name": "products",
+  "records": [
+    {
+      "name": "Wireless Headphones",
+      "price": 99.99,
+      "category": "electronics",
+      "in_stock": true
+    }
+  ]
+}
+```
+
+```json Batch Insert
+{
+  "table_name": "orders",
+  "records": [
+    {
+      "customer_id": 123,
+      "total": 250.00,
+      "status": "pending"
+    },
+    {
+      "customer_id": 456,
+      "total": 75.50,
+      "status": "pending"
+    }
+  ],
+  "on_conflict": "ignore"
+}
+```
+
+```json Upsert Operation
+{
+  "table_name": "user_preferences",
+  "records": [
+    {
+      "user_id": 1,
+      "theme": "dark",
+      "notifications": true
+    }
+  ],
+  "on_conflict": "upsert"
+}
+```
+
+</CodeGroup>
+
+### PostgreSQL Data Types
+
+- **Numeric**: `integer`, `bigint`, `decimal(p,s)`, `real`, `serial`
+- **Text**: `text`, `varchar(n)`, `char(n)`
+- **Date/Time**: `timestamp`, `timestamptz`, `date`, `time`
+- **Other**: `boolean`, `uuid`, `jsonb`, `bytea`
+
+---
+
+## update_records
+
+Modify existing database records with flexible field mapping and safety checks.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Target table for updates |
+| `filters` | object | Yes | Conditions to match records for update |
+| `updates` | object | Yes | Field values to update |
+| `return_records` | boolean | No | Whether to return updated records |
+
+<Warning>
+The `filters` parameter is **required** to prevent accidental updates to all records in a table.
+</Warning>
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Single Record Update (PostgreSQL)
+{
+  "table_name": "users",
+  "filters": {
+    "email": {"eq": "john@example.com"}
+  },
+  "updates": {
+    "name": "John Smith",
+    "phone": "+1-555-0123",
+    "updated_at": "NOW()"
+  }
+}
+```
+
+```json Multiple Records Update
+{
+  "table_name": "products",
+  "filters": {
+    "category": {"eq": "electronics"},
+    "price": {"lt": 100.00}
+  },
+  "updates": {
+    "discount": 0.15,
+    "sale_active": true,
+    "updated_at": "NOW()"
+  }
+}
+```
+
+```json Status Update
+{
+  "table_name": "orders",
+  "filters": {
+    "status": {"eq": "pending"},
+    "created_at": {"lt": "2023-11-01T00:00:00Z"}
+  },
+  "updates": {
+    "status": "expired",
+    "expired_at": "NOW()"
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## delete_records
+
+Safely remove database records with confirmation prompts and comprehensive safety checks.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Target table for deletions |
+| `filters` | object | Yes | Conditions to match records for deletion |
+| `confirm` | boolean | Yes | Must be `true` to confirm deletion |
+| `limit` | number | No | Maximum number of records to delete |
+| `return_records` | boolean | No | Whether to return deleted records |
+
+<Warning>
+This tool **permanently deletes data**. Both `filters` and `confirm` are **mandatory** to prevent accidental data loss.
+</Warning>
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Single Record Deletion
+{
+  "table_name": "users",
+  "filters": {
+    "id": {"eq": 123}
+  },
+  "confirm": true
+}
+```
+
+```json Expired Records Cleanup (PostgreSQL)
+{
+  "table_name": "user_sessions",
+  "filters": {
+    "expires_at": {"lt": "NOW() - INTERVAL '7 days'"}
+  },
+  "confirm": true,
+  "limit": 1000,
+  "return_records": false
+}
+```
+
+```json Conditional Deletion
+{
+  "table_name": "temporary_uploads",
+  "filters": {
+    "created_at": {"lt": "2023-11-24T00:00:00Z"},
+    "status": {"eq": "temporary"}
+  },
+  "confirm": true,
+  "limit": 200
+}
+```
+
+</CodeGroup>
+
+---
+
+## Best Practices
+
+### 1. Always Check Schema First
+```bash
+# Recommended workflow
+1. get_table_schema      # Understand structure
+2. query_records         # Test filters
+3. insert/update/delete  # Execute operations
+4. query_records         # Verify changes
+```
+
+### 2. Use Proper PostgreSQL Syntax
+```json
+// PostgreSQL timestamptz
+"created_at": "2023-12-01T10:30:00Z"
+
+// PostgreSQL functions
+"updated_at": "NOW()"
+
+// PostgreSQL intervals
+"expires_at": "NOW() + INTERVAL '30 days'"
+```
+
+### 3. Handle Large Datasets Efficiently
+```json
+{
+  "limit": 100,
+  "offset": 0,
+  "return_records": false  // For bulk operations
+}
+```
+
+### 4. Use Appropriate Filters
+```json
+// Good: Specific filters
+{"id": {"eq": 123}}
+
+// Risky: Broad filters
+{"status": {"eq": "active"}}  // May affect many records
+```
+
+### 5. Batch Related Operations
+```json
+{
+  "records": [
+    {"name": "Product 1", "price": 10.00},
+    {"name": "Product 2", "price": 15.00}
+  ]
+}
+```
+
+---
+
+## Error Handling
+
+### Common Error Types
+
+- **ValidationError**: Invalid parameters or data types
+- **ConstraintError**: Foreign key or unique constraint violations
+- **PermissionError**: Insufficient database privileges
+- **SafetyError**: Missing required confirmation or filters
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "error": {
+    "type": "ValidationError",
+    "message": "Table 'users' not found",
+    "suggestions": [
+      "Check table name spelling",
+      "Use list_tables to see available tables"
+    ]
+  }
+}
+```
+
+---
+
+## Performance Optimization
+
+- **Use Indexes**: Filter on indexed columns when possible
+- **Limit Results**: Use appropriate `limit` values for large datasets
+- **Select Columns**: Specify only needed columns to reduce data transfer
+- **Batch Operations**: Group related operations together
+- **Parameter Binding**: Always use parameterized queries for security
+
+<Note>
+These tools are optimized for PostgreSQL and include built-in safety features to prevent data loss and security vulnerabilities.
+</Note>

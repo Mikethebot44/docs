@@ -1,0 +1,776 @@
+---
+title: "Schema Management"
+description: "Comprehensive tools for creating, modifying, and managing database schema elements"
+icon: "wrench"
+---
+
+## Overview
+
+Tablr MCP's schema management tools provide complete control over your database structure. These tools enable safe creation, modification, and removal of tables, columns, indexes, constraints, and security policies while maintaining data integrity.
+
+<Warning>
+Schema operations can be irreversible and may affect data integrity. Always backup important data and test changes in development environments first.
+</Warning>
+
+---
+
+## create_table
+
+Create new database tables with columns, constraints, relationships, and Row Level Security.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `table_name` | string | Yes | - | Name for the new table |
+| `columns` | array | Yes | - | Array of column definitions |
+| `enable_rls` | boolean | No | true | Enable Row Level Security |
+
+### Column Definition
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Column name |
+| `type` | string | Yes | PostgreSQL data type |
+| `nullable` | boolean | No | Whether column accepts NULL (default: true) |
+| `primary_key` | boolean | No | Whether column is primary key (default: false) |
+| `unique` | boolean | No | Whether column has unique constraint (default: false) |
+| `default_value` | string | No | Default value for the column |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Simple User Table
+{
+  "table_name": "users",
+  "columns": [
+    {
+      "name": "id",
+      "type": "serial",
+      "primary_key": true,
+      "nullable": false
+    },
+    {
+      "name": "email",
+      "type": "varchar(255)",
+      "nullable": false,
+      "unique": true
+    },
+    {
+      "name": "password_hash",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "default_value": "NOW()",
+      "nullable": false
+    }
+  ],
+  "enable_rls": true
+}
+```
+
+```json Product Catalog Table
+{
+  "table_name": "products",
+  "columns": [
+    {
+      "name": "id",
+      "type": "uuid",
+      "primary_key": true,
+      "default_value": "gen_random_uuid()",
+      "nullable": false
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "name": "price",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "category_id",
+      "type": "integer",
+      "nullable": false
+    },
+    {
+      "name": "metadata",
+      "type": "jsonb"
+    }
+  ]
+}
+```
+
+</CodeGroup>
+
+### PostgreSQL Data Types
+
+- **Numeric**: `integer`, `bigint`, `serial`, `bigserial`, `decimal(p,s)`, `real`, `double precision`
+- **Text**: `text`, `varchar(n)`, `char(n)`
+- **Date/Time**: `timestamp`, `timestamptz`, `date`, `time`, `interval`
+- **Other**: `boolean`, `uuid`, `jsonb`, `json`, `bytea`
+
+---
+
+## alter_table
+
+Modify existing table structures by adding columns, constraints, or renaming elements safely.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Table to modify |
+| `operations` | array | Yes | List of operations to perform |
+
+### Operation Types
+
+#### Add Column
+```json
+{
+  "type": "add_column",
+  "column_name": "new_column",
+  "data_type": "varchar(255)",
+  "nullable": true,
+  "default_value": null
+}
+```
+
+#### Drop Column
+```json
+{
+  "type": "drop_column", 
+  "column_name": "old_column"
+}
+```
+
+#### Rename Column
+```json
+{
+  "type": "rename_column",
+  "old_name": "old_column_name",
+  "new_name": "new_column_name"
+}
+```
+
+#### Add Constraint
+```json
+{
+  "type": "add_constraint",
+  "constraint_name": "unique_email",
+  "constraint_type": "UNIQUE",
+  "columns": ["email"]
+}
+```
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Add Multiple Columns
+{
+  "table_name": "products",
+  "operations": [
+    {
+      "type": "add_column",
+      "column_name": "sku",
+      "data_type": "varchar(50)",
+      "nullable": false
+    },
+    {
+      "type": "add_column",
+      "column_name": "weight",
+      "data_type": "decimal(8,2)",
+      "nullable": true
+    },
+    {
+      "type": "add_column", 
+      "column_name": "last_updated",
+      "data_type": "timestamptz",
+      "default_value": "NOW()",
+      "nullable": false
+    }
+  ]
+}
+```
+
+```json Rename and Restructure
+{
+  "table_name": "old_user_accounts",
+  "operations": [
+    {
+      "type": "rename_column",
+      "old_name": "user_email",
+      "new_name": "email"
+    },
+    {
+      "type": "add_constraint",
+      "constraint_name": "users_email_unique",
+      "constraint_type": "UNIQUE",
+      "columns": ["email"]
+    }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## alter_column
+
+Modify column properties and data types safely.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Target table name |
+| `column_name` | string | Yes | Column to modify |
+| `operation` | string | Yes | Type of alteration |
+| `new_type` | string | No | New data type (for type changes) |
+| `new_default` | string | No | New default value |
+| `nullable` | boolean | No | Whether column should accept NULL |
+
+### Operations
+
+- `"change_type"`: Change column data type
+- `"set_default"`: Set or change default value
+- `"drop_default"`: Remove default value
+- `"set_not_null"`: Make column NOT NULL
+- `"drop_not_null"`: Allow NULL values
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Change Data Type
+{
+  "table_name": "users",
+  "column_name": "phone",
+  "operation": "change_type",
+  "new_type": "varchar(20)"
+}
+```
+
+```json Set Default Value
+{
+  "table_name": "products",
+  "column_name": "status",
+  "operation": "set_default",
+  "new_default": "'active'"
+}
+```
+
+```json Make Column NOT NULL
+{
+  "table_name": "orders",
+  "column_name": "customer_id",
+  "operation": "set_not_null"
+}
+```
+
+</CodeGroup>
+
+---
+
+## rename_table
+
+Rename tables with dependency handling.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Current table name |
+| `new_name` | string | Yes | New table name |
+
+### Usage Example
+
+```json
+{
+  "table_name": "old_customers",
+  "new_name": "customers"
+}
+```
+
+---
+
+## drop_table
+
+Safely remove database tables with confirmation prompts and cascade options.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `table_name` | string | Yes | - | Name of the table to drop |
+| `confirm` | boolean | Yes | - | Must be `true` to confirm deletion |
+| `cascade` | boolean | No | false | Drop dependent objects |
+
+<Warning>
+This operation **permanently deletes** the table and all its data. This action **cannot be undone**.
+</Warning>
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Simple Table Drop
+{
+  "table_name": "temporary_data",
+  "confirm": true
+}
+```
+
+```json Drop with Cascade
+{
+  "table_name": "categories", 
+  "confirm": true,
+  "cascade": true
+}
+```
+
+</CodeGroup>
+
+---
+
+## add_index
+
+Create indexes for improved query performance.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Target table name |
+| `index_name` | string | Yes | Name for the index |
+| `columns` | array | Yes | Columns to include in index |
+| `unique` | boolean | No | Whether index enforces uniqueness |
+| `method` | string | No | Index method (btree, hash, gin, gist) |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Basic Index
+{
+  "table_name": "users",
+  "index_name": "idx_users_email",
+  "columns": ["email"]
+}
+```
+
+```json Unique Index
+{
+  "table_name": "products",
+  "index_name": "idx_products_sku_unique",
+  "columns": ["sku"],
+  "unique": true
+}
+```
+
+```json Composite Index
+{
+  "table_name": "orders",
+  "index_name": "idx_orders_customer_date",
+  "columns": ["customer_id", "created_at"]
+}
+```
+
+```json GIN Index for JSONB
+{
+  "table_name": "products",
+  "index_name": "idx_products_metadata_gin",
+  "columns": ["metadata"],
+  "method": "gin"
+}
+```
+
+</CodeGroup>
+
+---
+
+## drop_index
+
+Remove indexes that are no longer needed.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `index_name` | string | Yes | Name of the index to drop |
+| `cascade` | boolean | No | Drop dependent objects |
+
+### Usage Example
+
+```json
+{
+  "index_name": "old_index_name",
+  "cascade": false
+}
+```
+
+---
+
+## add_constraint
+
+Add constraints to enforce data integrity.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table_name` | string | Yes | Target table name |
+| `constraint_name` | string | Yes | Name for the constraint |
+| `constraint_type` | string | Yes | Type of constraint |
+| `columns` | array | No | Columns involved in constraint |
+| `references_table` | string | No | Referenced table (for foreign keys) |
+| `references_columns` | array | No | Referenced columns (for foreign keys) |
+| `check_expression` | string | No | Expression for CHECK constraints |
+
+### Constraint Types
+
+#### Primary Key
+```json
+{
+  "table_name": "users",
+  "constraint_name": "users_pkey",
+  "constraint_type": "PRIMARY KEY",
+  "columns": ["id"]
+}
+```
+
+#### Foreign Key
+```json
+{
+  "table_name": "orders",
+  "constraint_name": "orders_customer_fkey",
+  "constraint_type": "FOREIGN KEY",
+  "columns": ["customer_id"],
+  "references_table": "customers",
+  "references_columns": ["id"]
+}
+```
+
+#### Unique
+```json
+{
+  "table_name": "users",
+  "constraint_name": "users_email_unique",
+  "constraint_type": "UNIQUE",
+  "columns": ["email"]
+}
+```
+
+#### Check
+```json
+{
+  "table_name": "products",
+  "constraint_name": "products_price_positive",
+  "constraint_type": "CHECK",
+  "check_expression": "price > 0"
+}
+```
+
+---
+
+## execute_sql
+
+Execute custom SQL queries with safety checks and parameter binding.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | Yes | SQL query to execute |
+| `params` | array | No | Query parameters for prepared statements |
+
+### Safety Features
+
+The tool automatically blocks dangerous operations:
+- `DROP DATABASE`
+- `DROP SCHEMA` 
+- `TRUNCATE TABLE` (without confirmation)
+- `ALTER SYSTEM`
+- File system operations
+
+### Usage Examples
+
+<CodeGroup>
+
+```json DDL Operation
+{
+  "query": "CREATE INDEX CONCURRENTLY idx_users_email_domain ON users USING btree (split_part(email, '@', 2))"
+}
+```
+
+```json Parameterized Query
+{
+  "query": "SELECT id, name, email FROM users WHERE created_at > $1 AND status = $2",
+  "params": ["2023-11-01", "active"]
+}
+```
+
+```json View Creation
+{
+  "query": "CREATE OR REPLACE VIEW active_users AS SELECT id, name, email FROM users WHERE status = 'active' AND deleted_at IS NULL"
+}
+```
+
+```json Function Creation
+{
+  "query": "CREATE OR REPLACE FUNCTION calculate_total_orders(customer_id INTEGER) RETURNS INTEGER AS $$ SELECT COUNT(*) FROM orders WHERE customer_id = $1; $$ LANGUAGE SQL"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Row Level Security (RLS)
+
+Comprehensive Row Level Security policy management for fine-grained access control.
+
+### enable_rls
+
+Enable Row Level Security on a table.
+
+```json
+{
+  "table_name": "profiles"
+}
+```
+
+### disable_rls
+
+Disable Row Level Security on a table.
+
+<Warning>
+Disabling RLS removes all access restrictions, potentially exposing sensitive data.
+</Warning>
+
+```json
+{
+  "table_name": "public_data"
+}
+```
+
+### create_rls_policy
+
+Create new RLS policies for tables.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `table_name` | string | Yes | - | Name of the table |
+| `policy_name` | string | Yes | - | Unique name for the policy |
+| `definition` | string | Yes | - | SQL expression for when policy applies |
+| `action` | string | Yes | - | Database action (SELECT, INSERT, UPDATE, DELETE, ALL) |
+| `roles` | array | No | ["authenticated"] | Database roles the policy applies to |
+| `with_check` | string | No | - | Additional expression for INSERT/UPDATE validation |
+
+#### Usage Examples
+
+<CodeGroup>
+
+```json User-Owned Records
+{
+  "table_name": "profiles",
+  "policy_name": "users_view_own_profile", 
+  "definition": "auth.uid() = user_id",
+  "action": "SELECT"
+}
+```
+
+```json Admin-Only Access
+{
+  "table_name": "admin_settings",
+  "policy_name": "admin_full_access",
+  "definition": "auth.role() = 'admin'",
+  "action": "ALL",
+  "roles": ["admin", "service_role"]
+}
+```
+
+```json Team-Based Access
+{
+  "table_name": "documents",
+  "policy_name": "team_members_access",
+  "definition": "auth.uid() IN (SELECT user_id FROM team_members WHERE team_id = documents.team_id)",
+  "action": "SELECT"
+}
+```
+
+```json Public/Private Content
+{
+  "table_name": "blog_posts",
+  "policy_name": "public_published_posts",
+  "definition": "published = true AND visibility = 'public'",
+  "action": "SELECT",
+  "roles": ["anon", "authenticated"]
+}
+```
+
+</CodeGroup>
+
+### list_rls_policies
+
+List existing RLS policies for a table.
+
+```json
+{
+  "table_name": "profiles"
+}
+```
+
+#### Response Example
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "policy_name": "users_view_own_profile",
+      "table_name": "profiles", 
+      "action": "SELECT",
+      "roles": ["authenticated"],
+      "definition": "auth.uid() = user_id",
+      "enabled": true
+    }
+  ]
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Planning Schema Changes
+
+```bash
+# Recommended workflow
+1. get_table_schema      # Understand current structure
+2. Plan operations       # Design changes carefully  
+3. Test in development   # Verify changes work
+4. Execute in production # Apply modifications
+5. Verify results        # Confirm changes applied
+```
+
+### 2. Safe Column Addition
+
+```json
+// Good: Add nullable column first
+{
+  "type": "add_column",
+  "column_name": "email",
+  "data_type": "varchar(255)",
+  "nullable": true
+}
+
+// Then populate data and add constraints
+{
+  "type": "add_constraint",
+  "constraint_name": "users_email_not_null",
+  "constraint_type": "NOT NULL",
+  "columns": ["email"]
+}
+```
+
+### 3. Index Strategy
+
+```json
+// Create indexes for frequently queried columns
+{
+  "table_name": "orders",
+  "index_name": "idx_orders_customer_date",
+  "columns": ["customer_id", "created_at"]
+}
+
+// Use partial indexes for filtered queries
+{
+  "query": "CREATE INDEX idx_active_users ON users (email) WHERE status = 'active'"
+}
+```
+
+### 4. Constraint Naming
+
+```json
+{
+  "constraint_name": "users_email_unique",  // Good: descriptive
+  "constraint_name": "constraint_1"         // Bad: generic
+}
+```
+
+### 5. RLS Security Patterns
+
+```sql
+-- User owns record
+auth.uid() = user_id
+
+-- Role-based access
+auth.role() = 'admin'
+
+-- Team membership
+auth.uid() IN (SELECT user_id FROM team_members WHERE team_id = documents.team_id)
+
+-- Time-based restrictions
+created_at > NOW() - INTERVAL '30 days'
+```
+
+---
+
+## Performance Considerations
+
+- **Index Creation**: Use `CONCURRENTLY` for large tables to avoid blocking
+- **Constraint Addition**: May require table scans for validation
+- **RLS Policies**: Simple policies perform better than complex joins
+- **Column Changes**: Some operations may require table rewrites
+
+### Example Concurrent Index Creation
+
+```json
+{
+  "query": "CREATE INDEX CONCURRENTLY idx_large_table_column ON large_table (important_column)"
+}
+```
+
+---
+
+## Error Handling
+
+### Common Error Types
+
+- **ValidationError**: Invalid parameters or syntax
+- **ConstraintError**: Constraint violations during operations
+- **DependencyError**: Objects depend on the element being modified
+- **PermissionError**: Insufficient database privileges
+- **SafetyError**: Missing required confirmations
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "error": {
+    "type": "ValidationError",
+    "message": "Column 'email' already exists in table 'users'",
+    "suggestions": [
+      "Check existing table schema with get_table_schema",
+      "Use a different column name",
+      "Use rename_column if you want to change an existing column name"
+    ]
+  }
+}
+```
+
+<Note>
+All schema management tools are designed for PostgreSQL and include comprehensive safety features to prevent data loss and maintain database integrity.
+</Note>

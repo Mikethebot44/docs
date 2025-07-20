@@ -1,0 +1,311 @@
+---
+title: "Setup Guide"
+description: "Complete setup guide for Tablr MCP with PostgreSQL database integration"
+icon: "gear"
+---
+
+## Overview
+
+This guide will walk you through setting up Tablr MCP with your PostgreSQL database. You'll install the MCP server, configure your database connection, and integrate with your AI assistant.
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+### Required Software
+
+**Node.js (Version 18.0.0 or Higher)**
+- Download from [nodejs.org](https://nodejs.org/)
+- Choose the LTS (Long Term Support) version
+
+**Verification:**
+```bash
+node --version  # Should show v18.x.x or higher
+npm --version   # Should show 8.x.x or higher
+```
+
+**Git (Version Control)**
+- Download from [git-scm.com](https://git-scm.com/)
+
+**Verification:**
+```bash
+git --version  # Should show git version 2.x.x
+```
+
+### Database Requirements
+
+**PostgreSQL Database Access**
+- PostgreSQL server (local or remote)
+- Database connection details:
+  - Host and port
+  - Database name
+  - Username and password
+  - SSL configuration (if required)
+- User account with sufficient privileges to create, modify, and query tables
+
+<Note>
+You can use any PostgreSQL provider: self-hosted, AWS RDS, Google Cloud SQL, Azure Database, or other cloud providers.
+</Note>
+
+## Installation
+
+### Method 1: Global Installation (Recommended)
+
+Install Tablr MCP globally for easy access:
+
+```bash
+npm install -g tablr-mcp
+```
+
+### Method 2: Local Installation
+
+Install locally in your project directory:
+
+```bash
+npm install tablr-mcp
+# Use with npx
+npx tablr-mcp
+```
+
+### Verification
+
+Test your installation:
+
+```bash
+tablr-mcp --help
+# Expected output: Tablr MCP Server - Database management for PostgreSQL
+```
+
+## Configuration
+
+### Environment Setup
+
+Create a `.env` file in your project root directory:
+
+```bash
+# Create .env file
+touch .env  # Unix/macOS/Linux
+# or
+type nul > .env  # Windows
+```
+
+### Database Connection
+
+Add your PostgreSQL credentials to the `.env` file:
+
+```env
+# Required: PostgreSQL connection details
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=your_database_name
+POSTGRES_USER=your_username
+POSTGRES_PASSWORD=your_password
+
+# Optional: SSL configuration
+POSTGRES_SSL=false
+
+# Optional: Connection pool settings
+POSTGRES_MAX_CONNECTIONS=10
+POSTGRES_IDLE_TIMEOUT=30000
+```
+
+<Warning>
+**Security**: Never commit your `.env` file to version control. Add it to your `.gitignore` file.
+</Warning>
+
+### Test Database Connection
+
+Verify your configuration:
+
+```bash
+# Start the server to test connection
+npm start
+```
+
+You should see:
+```
+Starting Tablr MCP Server...
+Connecting to PostgreSQL database...
+Successfully connected to PostgreSQL
+MCP Server connected via stdio
+Server started successfully
+```
+
+## AI Assistant Integration
+
+### Claude Desktop Configuration
+
+Add this configuration to your Claude Desktop settings:
+
+```json
+{
+  "mcpServers": {
+    "tablr": {
+      "command": "tablr-mcp",
+      "args": ["/absolute/path/to/your/.env"]
+    }
+  }
+}
+```
+
+### Other MCP Clients
+
+**Cursor IDE:**
+```json
+{
+  "mcp.servers": {
+    "tablr": {
+      "command": "tablr-mcp",
+      "args": ["/absolute/path/to/your/.env"]
+    }
+  }
+}
+```
+
+**VS Code with Continue:**
+```json
+{
+  "mcpServers": [
+    {
+      "name": "tablr",
+      "command": "tablr-mcp",
+      "args": ["/absolute/path/to/your/.env"]
+    }
+  ]
+}
+```
+
+<Note>
+Replace `/absolute/path/to/your/.env` with the actual absolute path to your environment file. Do not use relative paths or backslashes on Windows.
+</Note>
+
+## Verification
+
+### Test Basic Operations
+
+Restart your AI assistant and try these commands:
+
+```
+"List all tables in my database"
+"Show me the schema for the users table"
+"Create a test table with an id and name column"
+```
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion icon="exclamation-triangle" title="Connection Failed">
+    **Problem**: "Authentication failed" or "Connection refused"
+    
+    **Solutions**:
+    - Verify PostgreSQL server is running
+    - Check connection details in `.env` file
+    - Ensure network connectivity to database host
+    - Verify username and password are correct
+    - Check firewall settings
+  </Accordion>
+  
+  <Accordion icon="database" title="No Tables Found">
+    **Problem**: "No tables found in database"
+    
+    **Solutions**:
+    - Verify database contains tables
+    - Check user has permission to view tables
+    - Ensure connecting to correct database/schema
+  </Accordion>
+  
+  <Accordion icon="plug" title="MCP Server Issues">
+    **Problem**: MCP server won't start
+    
+    **Solutions**:
+    - Check Node.js version (18.0.0+)
+    - Verify file paths in MCP configuration
+    - Restart AI assistant after configuration changes
+    - Check for port conflicts
+  </Accordion>
+</AccordionGroup>
+
+## Security Best Practices
+
+### Credential Management
+
+```bash .gitignore
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Database credentials
+*.key
+*.pem
+config/secrets.json
+```
+
+### Database Permissions
+
+Grant minimal required permissions:
+
+```sql
+-- Create dedicated user for Tablr MCP
+CREATE USER tablr_user WITH PASSWORD 'secure_password';
+
+-- Grant necessary permissions
+GRANT CONNECT ON DATABASE your_database TO tablr_user;
+GRANT USAGE ON SCHEMA public TO tablr_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tablr_user;
+GRANT CREATE ON SCHEMA public TO tablr_user;
+```
+
+### Connection Security
+
+For production environments:
+- Use SSL/TLS connections (`POSTGRES_SSL=true`)
+- Implement connection pooling
+- Use strong passwords
+- Regularly rotate credentials
+- Monitor database access logs
+
+## Advanced Configuration
+
+### Environment-Specific Settings
+
+**Development:**
+```env
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=myapp_development
+DEBUG=true
+```
+
+**Production:**
+```env
+POSTGRES_HOST=prod-db.example.com
+POSTGRES_PORT=5432
+POSTGRES_DB=myapp_production
+POSTGRES_SSL=true
+NODE_ENV=production
+```
+
+### Performance Tuning
+
+```env
+# Connection pool settings
+POSTGRES_MAX_CONNECTIONS=20
+POSTGRES_IDLE_TIMEOUT=10000
+POSTGRES_CONNECTION_TIMEOUT=5000
+
+# Query timeout
+POSTGRES_QUERY_TIMEOUT=30000
+```
+
+## Next Steps
+
+After successful setup:
+
+1. **Explore Tools** - Try different database operations through your AI assistant
+2. **Read Documentation** - Learn about advanced features and best practices
+3. **Join Community** - Get help and share experiences
+
+<Tip>
+Your Tablr MCP server is now configured and ready to use! Start with simple operations like listing tables and gradually explore more advanced database management features.
+</Tip>

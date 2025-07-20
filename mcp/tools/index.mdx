@@ -1,12 +1,12 @@
 ---
 title: "Tools Reference Overview"
-description: "Complete overview of all 16 database management tools available in Tablr MCP, organized by category with usage examples"
+description: "Complete overview of all 15 database management tools available in Tablr MCP, organized by category"
 icon: "toolbox"
 ---
 
 ## Overview
 
-Tablr MCP provides **16 comprehensive database management tools** that enable AI assistants to perform complex database operations through natural language. Each tool is designed with safety, security, and ease of use in mind.
+Tablr MCP provides **15 comprehensive database management tools** that enable AI assistants to perform complex database operations through natural language. Each tool is designed with safety, security, and ease of use in mind.
 
 <Note>
 All tools include built-in validation, error handling, and security features like SQL injection protection and operation confirmations for destructive actions.
@@ -19,27 +19,45 @@ All tools include built-in validation, error handling, and security features lik
 Tools for exploring and understanding your database structure.
 
 <CardGroup cols={2}>
-  <Card title="list_tables" icon="table" href="/mcp/tools/list-tables">
+  <Card title="list_tables" icon="table" href="/tools/data-operations">
     Discover all tables in your database with automatic schema detection
   </Card>
-  <Card title="get_table_schema" icon="sitemap" href="/mcp/tools/get-table-schema">
+  <Card title="get_table_schema" icon="sitemap" href="/tools/data-operations">
     Get detailed column information, types, constraints, and relationships
   </Card>
 </CardGroup>
 
-### Table Structure Management
+### Schema Management
 
-Tools for creating, modifying, and removing database tables.
+Tools for creating, modifying, and removing database tables and schema elements.
 
-<CardGroup cols={3}>
-  <Card title="create_table" icon="plus" href="/mcp/tools/create-table">
+<CardGroup cols={4}>
+  <Card title="create_table" icon="plus" href="/tools/schema-management">
     Build new tables with columns, constraints, and relationships
   </Card>
-  <Card title="alter_table" icon="wrench" href="/mcp/tools/alter-table">
+  <Card title="alter_table" icon="wrench" href="/tools/schema-management">
     Modify existing table structures safely
   </Card>
-  <Card title="drop_table" icon="trash" href="/mcp/tools/drop-table">
+  <Card title="alter_column" icon="edit" href="/tools/schema-management">
+    Modify column properties and data types
+  </Card>
+  <Card title="rename_table" icon="tag" href="/tools/schema-management">
+    Rename tables with dependency handling
+  </Card>
+  <Card title="drop_table" icon="trash" href="/tools/schema-management">
     Remove tables with confirmation and cascade options
+  </Card>
+  <Card title="add_index" icon="bolt" href="/tools/schema-management">
+    Create indexes for improved query performance
+  </Card>
+  <Card title="drop_index" icon="bolt-slash" href="/tools/schema-management">
+    Remove indexes that are no longer needed
+  </Card>
+  <Card title="add_constraint" icon="link" href="/tools/schema-management">
+    Add constraints to enforce data integrity
+  </Card>
+  <Card title="execute_sql" icon="code" href="/tools/schema-management">
+    Run custom SQL queries with safety checks
   </Card>
 </CardGroup>
 
@@ -48,33 +66,17 @@ Tools for creating, modifying, and removing database tables.
 Tools for querying, inserting, updating, and deleting database records.
 
 <CardGroup cols={2}>
-  <Card title="query_records" icon="magnifying-glass" href="/mcp/tools/query-records">
+  <Card title="query_records" icon="magnifying-glass" href="/tools/data-operations">
     Advanced filtering, sorting, and pagination for data retrieval
   </Card>
-  <Card title="insert_records" icon="arrow-up" href="/mcp/tools/insert-records">
+  <Card title="insert_records" icon="arrow-up" href="/tools/data-operations">
     Add single or multiple records with validation and conflict handling
   </Card>
-  <Card title="update_records" icon="pen-to-square" href="/mcp/tools/update-records">
+  <Card title="update_records" icon="pen-to-square" href="/tools/data-operations">
     Modify existing data with flexible field mapping and safety checks
   </Card>
-  <Card title="delete_records" icon="minus" href="/mcp/tools/delete-records">
+  <Card title="delete_records" icon="minus" href="/tools/data-operations">
     Remove records with confirmation and limit safeguards
-  </Card>
-</CardGroup>
-
-### Advanced Operations
-
-Tools for custom SQL execution and specialized database operations.
-
-<CardGroup cols={2}>
-  <Card title="execute_sql" icon="code" href="/mcp/tools/execute-sql">
-    Run custom SQL queries with safety checks and parameter binding
-  </Card>
-  <Card title="call_function" icon="function" href="/mcp/tools/call-function">
-    Execute Supabase database functions with parameter handling
-  </Card>
-  <Card title="list_functions" icon="list" href="/mcp/tools/list-functions">
-    Discover available database functions and their signatures
   </Card>
 </CardGroup>
 
@@ -83,17 +85,8 @@ Tools for custom SQL execution and specialized database operations.
 Tools for managing Row Level Security (RLS) policies and database access.
 
 <CardGroup cols={2}>
-  <Card title="list_rls_policies" icon="shield-check" href="/mcp/tools/list-rls-policies">
-    View all RLS policies for tables and their configurations
-  </Card>
-  <Card title="create_rls_policy" icon="shield-plus" href="/mcp/tools/create-rls-policy">
-    Create new Row Level Security policies with custom rules
-  </Card>
-  <Card title="enable_rls" icon="lock" href="/mcp/tools/enable-rls">
-    Enable Row Level Security for specific tables
-  </Card>
-  <Card title="disable_rls" icon="unlock" href="/mcp/tools/disable-rls">
-    Disable Row Level Security with confirmation prompts
+  <Card title="RLS Policies" icon="shield-check" href="/tools/schema-management">
+    Comprehensive Row Level Security policy management
   </Card>
 </CardGroup>
 
@@ -107,162 +100,33 @@ Tools for managing Row Level Security (RLS) policies and database access.
 | `insert_records` | Data | Low | No | Add new data entries |
 | `update_records` | Data | Medium | No | Modify existing data |
 | `delete_records` | Data | High | Yes | Remove data records |
-| `create_table` | Structure | Medium | No | Build new tables |
-| `alter_table` | Structure | Medium | No | Modify table structure |
-| `drop_table` | Structure | High | Yes | Remove entire tables |
-| `execute_sql` | Advanced | Variable | No* | Custom database operations |
-| `call_function` | Advanced | Variable | No | Execute stored procedures |
-| `list_functions` | Advanced | Safe | No | Discover available functions |
-| `list_rls_policies` | Security | Safe | No | Review security policies |
-| `create_rls_policy` | Security | Medium | No | Implement access control |
-| `enable_rls` | Security | Medium | No | Activate table security |
-| `disable_rls` | Security | High | Yes | Remove table security |
+| `create_table` | Schema | Medium | No | Build new tables |
+| `alter_table` | Schema | Medium | No | Modify table structure |
+| `alter_column` | Schema | Medium | No | Modify column properties |
+| `rename_table` | Schema | Medium | No | Rename tables safely |
+| `drop_table` | Schema | High | Yes | Remove entire tables |
+| `add_index` | Schema | Low | No | Create performance indexes |
+| `drop_index` | Schema | Low | No | Remove unused indexes |
+| `add_constraint` | Schema | Medium | No | Enforce data integrity |
+| `execute_sql` | Schema | Variable | No* | Custom database operations |
 
 <sup>*</sup> `execute_sql` blocks dangerous operations automatically
 
-## Common Usage Patterns
+## Key Features
 
-### Database Exploration Workflow
-```mermaid
-graph TD
-    A[list_tables] --> B[get_table_schema]
-    B --> C[query_records]
-    C --> D[Data Analysis]
-```
-
-### Table Creation Workflow  
-```mermaid
-graph TD
-    A[Plan Table Structure] --> B[create_table]
-    B --> C[enable_rls]
-    C --> D[create_rls_policy]
-    D --> E[insert_records]
-```
-
-### Data Management Workflow
-```mermaid
-graph TD
-    A[query_records] --> B{Need Changes?}
-    B -->|Yes| C[update_records]
-    B -->|No| D[Analysis Complete]
-    C --> E[query_records]
-    E --> F[Verify Changes]
-```
-
-## Safety Features
-
-### Built-in Protections
-
-<CardGroup cols={2}>
-  <Card title="SQL Injection Prevention" icon="shield-virus">
-    All tools use parameterized queries to prevent injection attacks
-  </Card>
-  <Card title="Operation Confirmation" icon="circle-check">
-    Destructive operations require explicit confirmation parameters
-  </Card>
-  <Card title="Input Validation" icon="check-double">
-    Comprehensive validation of all parameters before execution
-  </Card>
-  <Card title="Error Handling" icon="triangle-exclamation">
-    Detailed error messages with suggestions for resolution
-  </Card>
-</CardGroup>
-
-### Destructive Operation Safeguards
-
-Tools that can permanently delete or modify data include additional safety measures:
-
-- **`delete_records`**: Requires `confirm: true` parameter
-- **`drop_table`**: Requires `confirm: true` parameter  
-- **`disable_rls`**: Requires `confirm: true` parameter
-- **`execute_sql`**: Automatically blocks dangerous operations like `DROP DATABASE`
-
-## Performance Considerations
-
-### Tool Execution Times
-
-| Tool Category | Typical Response Time | Factors Affecting Performance |
-|---------------|----------------------|------------------------------|
-| Discovery | < 100ms | Number of tables/columns |
-| Data Query | 100ms - 2s | Result set size, filters, indexes |
-| Data Modification | 50ms - 500ms | Number of records, constraints |
-| Structure Changes | 200ms - 1s | Table size, foreign keys |
-| SQL Execution | Variable | Query complexity, data size |
-
-### Optimization Tips
-
-<Tip>
-For large datasets, use `limit` and `offset` parameters with `query_records` to implement pagination and improve response times.
-</Tip>
-
-## Error Handling
-
-### Common Error Categories
-
-1. **Connection Errors**: Supabase connectivity issues
-2. **Authentication Errors**: Invalid service role keys
-3. **Permission Errors**: Insufficient database privileges  
-4. **Validation Errors**: Invalid parameters or data types
-5. **Constraint Errors**: Foreign key or unique constraint violations
-
-### Error Response Format
-
-All tools return consistent error responses:
-
-```json
-{
-  "success": false,
-  "error": {
-    "type": "ValidationError",
-    "message": "Table 'users' not found",
-    "suggestions": [
-      "Check table name spelling",
-      "Use list_tables to see available tables"
-    ]
-  }
-}
-```
+- **SQL Injection Prevention**: All tools use parameterized queries
+- **Operation Confirmation**: Destructive operations require explicit confirmation
+- **Input Validation**: Comprehensive parameter validation before execution
+- **Error Handling**: Detailed error messages with actionable suggestions
+- **Performance Monitoring**: Execution time tracking and optimization recommendations
 
 ## Getting Started
 
-<CardGroup cols={2}>
-  <Card
-    title="Installation Guide"
-    icon="download"
-    href="/mcp/installation"
-  >
-    Set up Tablr MCP on your system
-  </Card>
-  <Card
-    title="Configuration"
-    icon="gear"
-    href="/mcp/configuration"
-  >
-    Configure your Supabase connection
-  </Card>
-  <Card
-    title="Integration Guide"
-    icon="plug"
-    href="/mcp/integration"
-  >
-    Connect with Claude Desktop or other MCP clients
-  </Card>
-  <Card
-    title="Examples & Tutorials"
-    icon="graduation-cap"
-    href="/mcp/examples"
-  >
-    Learn through practical examples
-  </Card>
-</CardGroup>
-
-## Next Steps
-
-1. **Start with Discovery**: Use `list_tables` and `get_table_schema` to explore your database
-2. **Try Safe Operations**: Practice with `query_records` to understand the tool responses
-3. **Gradually Expand**: Move to data modification and structure management tools
-4. **Implement Security**: Set up RLS policies for production use
+1. **Database Discovery**: Use `list_tables` and `get_table_schema` to explore your database
+2. **Data Operations**: Start with safe `query_records` to understand tool responses  
+3. **Schema Management**: Use schema tools to create and modify database structures
+4. **Security**: Implement RLS policies for production applications
 
 <Note>
-Each tool has detailed documentation with parameters, examples, and best practices. Click on any tool card above to dive deeper into its specific functionality.
+For detailed documentation, visit [Data Operations](/tools/data-operations) and [Schema Management](/tools/schema-management) pages.
 </Note>

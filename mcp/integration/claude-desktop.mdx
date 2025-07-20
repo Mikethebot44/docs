@@ -1,39 +1,32 @@
 ---
 title: 'Claude Desktop Integration'
-description: 'Complete guide to integrating Tablr MCP with Claude Desktop application for AI-powered database management'
+description: 'Integrate Tablr MCP with Claude Desktop for AI-powered PostgreSQL database management'
 icon: 'desktop'
 ---
 
 # Claude Desktop Integration
 
-Claude Desktop is Anthropic's desktop application that supports MCP servers, allowing you to interact with your Supabase database through natural language conversations.
+Claude Desktop supports MCP servers, allowing natural language interaction with your PostgreSQL database.
 
 ## Overview
 
-With Claude Desktop integration, you can:
-- Ask questions about your database structure in natural language
-- Query data using conversational commands
-- Create and modify tables through AI assistance
-- Execute complex database operations safely
+- Query database structure conversationally
+- Execute data operations through AI assistance
+- Manage schemas and tables safely
+- Perform complex database operations
 
 ## Prerequisites
 
-Before setting up the integration, ensure you have:
-- **Tablr MCP server** properly installed and configured
-- **Claude Desktop application** installed on your system
-- **Valid Supabase credentials** configured in your environment
+- **Tablr MCP server** installed and configured
+- **Claude Desktop application** installed
+- **PostgreSQL connection string** configured
 
 <Steps>
 ### Step 1: Install Claude Desktop
 
-Download and install Claude Desktop from the official website:
-- Visit [claude.ai/download](https://claude.ai/download)
-- Download the version for your operating system
-- Install and create an account if you don't have one
+Download and install from [claude.ai/download](https://claude.ai/download).
 
 ### Step 2: Locate Configuration File
-
-Find the Claude Desktop configuration file for your platform:
 
 <CodeGroup>
 
@@ -53,8 +46,6 @@ Find the Claude Desktop configuration file for your platform:
 
 ### Step 3: Configure Tablr MCP Server
 
-Create or edit the configuration file with your Tablr MCP setup:
-
 ```json claude_desktop_config.json
 {
   "mcpServers": {
@@ -62,9 +53,7 @@ Create or edit the configuration file with your Tablr MCP setup:
       "command": "node",
       "args": ["/absolute/path/to/tablr-mcp/dist/index.js"],
       "env": {
-        "SUPABASE_URL": "https://your-project-id.supabase.co",
-        "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key",
-        "SUPABASE_PROJECT_NAME": "your-project-name"
+        "PG_CONNECTION_STRING": "postgresql://user:password@host:port/database"
       }
     }
   }
@@ -72,108 +61,74 @@ Create or edit the configuration file with your Tablr MCP setup:
 ```
 
 <Warning>
-**Important Configuration Notes:**
-- Use the **absolute path** to your `dist/index.js` file
-- Include your environment variables in the `env` section  
-- Make sure the path doesn't contain spaces or special characters
-- Restart Claude Desktop after making changes
+**Configuration Requirements:**
+- Use **absolute path** to `dist/index.js`
+- Include PostgreSQL connection string
+- Restart Claude Desktop after changes
 </Warning>
 
 ### Step 4: Verify Connection
 
-1. **Restart Claude Desktop** completely
-2. **Start a new conversation** 
-3. **Test the connection** by typing: "What database tools do you have available?"
-4. Claude should list all Tablr MCP tools available
+1. Restart Claude Desktop
+2. Start new conversation
+3. Ask: "What database tools are available?"
+4. Verify Tablr MCP tools are listed
 
 </Steps>
 
-## Platform-Specific Setup
+## Platform Setup
 
-### macOS Setup
+<CodeGroup>
 
-```bash
-# Navigate to configuration directory
-cd ~/Library/Application\ Support/Claude/
-
-# Create config file if it doesn't exist
-touch claude_desktop_config.json
-
-# Edit with your preferred editor
-nano claude_desktop_config.json
+```bash macOS
+# Create config directory and file
+mkdir -p ~/Library/Application\ Support/Claude
+touch ~/Library/Application\ Support/Claude/claude_desktop_config.json
 ```
 
-### Windows Setup
-
-```cmd
-# Navigate to configuration directory  
-cd %APPDATA%\Claude
-
-# Create config file if it doesn't exist
-type nul > claude_desktop_config.json
-
-# Edit with notepad
-notepad claude_desktop_config.json
+```cmd Windows
+# Create config directory and file
+mkdir %APPDATA%\Claude
+type nul > %APPDATA%\Claude\claude_desktop_config.json
 ```
 
-### Linux Setup
-
-```bash
-# Create configuration directory if needed
+```bash Linux
+# Create config directory and file
 mkdir -p ~/.config/Claude
-
-# Create and edit config file
-nano ~/.config/Claude/claude_desktop_config.json
+touch ~/.config/Claude/claude_desktop_config.json
 ```
+
+</CodeGroup>
 
 ## Usage Examples
 
-Once integrated, you can interact with your database using natural language:
-
-### Basic Queries
+### Basic Operations
 
 ```
-You: "Show me all tables in my database"
-Claude: [Uses list_tables tool and displays results]
-
-You: "Get the schema for the users table"  
-Claude: [Uses get_table_schema tool and shows column details]
-
-You: "Find all users created in the last week"
-Claude: [Uses query_records with date filters]
+"Show me all tables" → Claude uses list_tables
+"Get the users table schema" → Claude shows table structure
+"Find recent users" → Claude queries with date filters
 ```
 
-### Data Operations
+### Data Management
 
 ```
-You: "Add a new user with email 'john@example.com'"
-Claude: [Uses insert_records to add the user]
-
-You: "Update all inactive users to active status"
-Claude: [Uses update_records with appropriate filters]
-
-You: "Delete test users from the database"
-Claude: [Uses delete_records with confirmation]
+"Add a new user" → Claude uses insert_records
+"Update user status" → Claude uses update_records
+"Delete test data" → Claude uses delete_records with confirmation
 ```
 
-### Schema Management
+### Schema Operations
 
 ```
-You: "Create a new table for storing blog posts"
-Claude: [Uses create_table with appropriate schema]
-
-You: "Add an 'avatar_url' column to the users table"
-Claude: [Uses alter_table to modify the schema]
-
-You: "Drop the temporary_data table"
-Claude: [Uses drop_table with confirmation prompts]
+"Create a posts table" → Claude uses create_table
+"Add a column to users" → Claude uses alter_table
+"Drop old table" → Claude uses drop_table with confirmation
 ```
 
 ## Advanced Configuration
 
-### Multiple Database Projects
-
-You can configure multiple Tablr MCP instances for different projects:
+### Multiple Databases
 
 ```json
 {
@@ -182,27 +137,21 @@ You can configure multiple Tablr MCP instances for different projects:
       "command": "node",
       "args": ["/path/to/tablr-mcp/dist/index.js"],
       "env": {
-        "SUPABASE_URL": "https://prod-project.supabase.co",
-        "SUPABASE_SERVICE_ROLE_KEY": "prod-service-key",
-        "SUPABASE_PROJECT_NAME": "Production Database"
+        "PG_CONNECTION_STRING": "postgresql://user:pass@prod-host:5432/prod_db"
       }
     },
     "tablr-staging": {
       "command": "node", 
       "args": ["/path/to/tablr-mcp/dist/index.js"],
       "env": {
-        "SUPABASE_URL": "https://staging-project.supabase.co",
-        "SUPABASE_SERVICE_ROLE_KEY": "staging-service-key",
-        "SUPABASE_PROJECT_NAME": "Staging Database"
+        "PG_CONNECTION_STRING": "postgresql://user:pass@staging-host:5432/staging_db"
       }
     }
   }
 }
 ```
 
-### Environment Variable Management
-
-For better security, you can reference environment variables:
+### Environment Variables
 
 ```json
 {
@@ -211,9 +160,7 @@ For better security, you can reference environment variables:
       "command": "node",
       "args": ["/path/to/tablr-mcp/dist/index.js"],
       "env": {
-        "SUPABASE_URL": "${SUPABASE_URL}",
-        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}",
-        "SUPABASE_PROJECT_NAME": "${SUPABASE_PROJECT_NAME}"
+        "PG_CONNECTION_STRING": "${PG_CONNECTION_STRING}"
       }
     }
   }
@@ -226,44 +173,30 @@ For better security, you can reference environment variables:
 
 <AccordionGroup>
 
-<Accordion title="Claude doesn't recognize database tools">
-**Solutions:**
-- Verify you're using **absolute paths** in the configuration
-- Check that the configuration file is in the correct location for your OS
-- Restart Claude Desktop completely after making changes
-- Ensure the `dist/index.js` file exists (run `npm run build`)
-- Check Claude Desktop logs for error messages
+<Accordion title="Tools not recognized">
+- Use **absolute paths** in configuration
+- Verify config file location matches your OS
+- Restart Claude Desktop after changes
+- Ensure `dist/index.js` exists (`npm run build`)
 </Accordion>
 
-<Accordion title="Configuration file not found">
-**Solutions:**
-- Create the directory structure manually if it doesn't exist
-- Verify the path matches your operating system
-- Check file permissions and ensure you can write to the directory
-- Try creating the file manually first
+<Accordion title="Configuration errors">
+- Create directory structure manually if needed
+- Check file permissions
+- Verify PostgreSQL connection string format
+- Test server independently: `npm start`
 </Accordion>
 
-<Accordion title="Environment variables not loading">
-**Solutions:**
-- Include environment variables directly in the `env` section
-- Verify your `.env` file is properly formatted
-- Check that Supabase credentials are correct
-- Test the server independently with `npm start`
-</Accordion>
-
-<Accordion title="Server connection failures">
-**Solutions:**
-- Ensure Node.js is properly installed and accessible
-- Verify the path to `dist/index.js` is correct
-- Build the project: `npm run build`
-- Test with MCP Inspector first: `npx @modelcontextprotocol/inspector node dist/index.js`
+<Accordion title="Connection failures">
+- Verify Node.js installation
+- Check path to `dist/index.js`
+- Build project: `npm run build`
+- Test with MCP Inspector first
 </Accordion>
 
 </AccordionGroup>
 
 ### Debug Mode
-
-Enable detailed logging for troubleshooting:
 
 ```json
 {
@@ -272,8 +205,7 @@ Enable detailed logging for troubleshooting:
       "command": "node",
       "args": ["/path/to/tablr-mcp/dist/index.js"],
       "env": {
-        "SUPABASE_URL": "https://your-project.supabase.co",
-        "SUPABASE_SERVICE_ROLE_KEY": "your-key",
+        "PG_CONNECTION_STRING": "postgresql://...",
         "DEBUG": "true",
         "MCP_DEBUG": "true"
       }
@@ -282,49 +214,24 @@ Enable detailed logging for troubleshooting:
 }
 ```
 
-### Validation Steps
-
-To ensure everything is working correctly:
-
-1. **Test server independently**: `npm start` in the Tablr MCP directory
-2. **Verify build artifacts**: Check that `dist/` directory contains compiled files
-3. **Test with MCP Inspector**: Use the inspector tool before Claude Desktop
-4. **Check logs**: Look for error messages in Claude Desktop's console
-5. **Start simple**: Begin with basic queries like "list tables"
-
 ## Best Practices
 
-### Security Considerations
+### Security
+- Never commit credentials to version control
+- Use environment variables for connection strings
+- Limit database permissions appropriately
+- Monitor database operations
 
-- **Never commit** configuration files with credentials to version control
-- **Use environment variables** for sensitive information when possible
-- **Limit database access** using Supabase Row Level Security (RLS)
-- **Monitor database operations** performed through Claude Desktop
+### Performance
+- Use specific queries over broad scans
+- Limit result sets for large tables
+- Test complex operations with MCP Inspector first
 
-### Performance Tips
+### Workflow
+- Start with database discovery: "What tables are available?"
+- Review schema before modifications
+- Use confirmations for destructive operations
 
-- **Use specific queries** rather than broad table scans
-- **Limit result sets** when working with large tables
-- **Cache frequently accessed schema information**
-- **Test complex operations** with MCP Inspector first
-
-### Workflow Optimization
-
-- **Start conversations** with database discovery: "What tables are available?"
-- **Ask for schema** before modifying tables: "Show me the users table structure"
-- **Use confirmations** for destructive operations
-- **Save complex queries** as documentation for reuse
-
-## Next Steps
-
-Once you have Claude Desktop working with Tablr MCP:
-
-1. **Explore all available tools** by asking Claude to list them
-2. **Practice with safe operations** like querying and schema inspection
-3. **Set up multiple environments** for development, staging, and production
-4. **Create workflows** for common database management tasks
-5. **Integrate with your development process** for efficient database operations
-
-<Card title="Ready to explore more integrations?" icon="rocket">
-Learn about integrating Tablr MCP with [other MCP clients](/mcp/integration/other-clients) and [testing workflows](/mcp/integration/testing).
+<Card title="Next Steps" icon="rocket">
+Explore [custom client integration](/integration/custom-clients) and [testing workflows](/integration/testing).
 </Card>
