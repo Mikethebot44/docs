@@ -1,30 +1,17 @@
 ---
-title: 'Quick Start'
-description: 'Get Tablr running and managing your PostgreSQL database in under 5 minutes'
+title: "Quick Start"
+description: "Get Tablr running and managing your PostgreSQL database in under 5 minutes"
 ---
 
 ## Prerequisites
 
 Before you start, make sure you have:
 
-- **Node.js 18.0.0+** installed on your system
-- **PostgreSQL database** with connection access
+- **Node.js 18.0.0\+** installed on your system
+- **Supabase database**
 - **MCP-compatible AI assistant** (Claude Desktop, Cursor, etc.)
 
-## Step 1: Prepare Your PostgreSQL Database
-
-Ensure you have your PostgreSQL connection details:
-- **Host** (e.g., `localhost` or `your-db-host.com`)
-- **Port** (default: `5432`)
-- **Database name**
-- **Username** and **Password**
-- **SSL configuration** (if required)
-
-<Note>
-You'll need a user account with sufficient privileges to create, modify, and query tables.
-</Note>
-
-## Step 2: Install Tablr MCP
+## Step 1: Install Tablr MCP
 
 Install the Tablr MCP server globally:
 
@@ -32,18 +19,49 @@ Install the Tablr MCP server globally:
 npm install -g tablr-mcp
 ```
 
-## Step 3: Configure Environment Variables
+## Step 2: Configure Environment Variables
 
-Create a `.env` file in your project directory:
+Create a `.env` file in your project directory which you would like to use Tablr MCP with:
 
 ```env
+PG_CONNECTION_STRING=
 TABLR_API_KEY=
-PG_CONNECTION_STRING=postgresql://postgres.bivecvumemthweyubvja:[YOUR-PASSWORD-HERE]@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-## Step 4: Configure Your AI Assistant
+## Step 2: Prepare Your PostgreSQL Connection String
+
+1. Navigate to your Supabase project dashboard
+2. In the header, click 'Connect', it should bring up a dialog
+3. You'll see three connection types: Direct connection, Transaction pooler, and Session pooler
+4. Copy the 'Transaction pooler' connection string
+5. Replace `[YOUR-PASSWORD]` with your actual Supabase project password. If you cannot remember your project password, navigate to Project Settings -\> Database -\> Database password to reset it
+6. Add the PostgreSQL connection string to your `.env` file as `PG_CONNECTION_STRING`
+
+## Step 3: Prepare Your Tablr API Key
+
+1. Navigate to your Tablr Dashboard
+2. In the sidebar, click 'API Keys'
+3. Generate a new API key, adding a relevant title and description (optional)
+4. Copy the API key and add it to `.env` as `TABLR_API KEY`
+
+## Step 4: Prepare Your Supabase Variables
+
+1. Navigate to your Supabase project Dashboard
+2. In the sidebar, click 'Project Settings'
+3. Navigate to the 'Data API' page
+4. Copy your Supabase 'Project URL'
+5. Add it to your `.env` file as `SUPABASE_URL`
+6. Next, navigate to the 'API Keys' page
+7. Copy the 'Service Role Secret'
+8. Add it to your `.env` file as `SUPABASE_SERVICE_ROLE_KEY`
+
+<Warning>
+  IMPORTANT: Do not copy the Supabase Anon key, as it does not have the required permissions for use with Tablr MCP. Make sure you copy the Service Role Key
+</Warning>
+
+## Step 5: Configure Your AI Assistant
 
 Add this configuration to your Claude Desktop/Cursor/Windsurf/VS Code settings:
 
@@ -57,9 +75,10 @@ Add this configuration to your Claude Desktop/Cursor/Windsurf/VS Code settings:
   }
 }
 ```
+
 Note: do not use backslashes for windows file paths
 
-## Step 5: Start Using Tablr
+## Step 6: Start Using Tablr
 
 Restart your AI assistant and start managing your database with natural language:
 
@@ -92,30 +111,31 @@ To verify everything is working:
 ## Common Issues
 
 <AccordionGroup>
-  <Accordion icon="exclamation-triangle" title="Authentication Failed">
+  <Accordion title="Authentication Failed" icon="exclamation-triangle">
     **Problem**: "Authentication failed" or "Connection refused"
-    
-    **Solution**: 
+
+    **Solution**:
+
     - Verify your PostgreSQL connection details
     - Check that PostgreSQL server is running
     - Ensure network connectivity to database host
     - Verify username and password are correct
   </Accordion>
-  
-  <Accordion icon="database" title="No Tables Found">
+  <Accordion title="No Tables Found" icon="database">
     **Problem**: "No tables found in database"
-    
+
     **Solution**:
+
     - Verify your PostgreSQL database contains tables
     - Check that tables exist in the target schema
     - Ensure user has proper permissions to view tables
   </Accordion>
-  
-  <Accordion icon="plug" title="Connection Issues">
+  <Accordion title="Connection Issues" icon="plug">
     **Problem**: MCP server won't start
-    
+
     **Solution**:
-    - Verify Node.js version (18.0.0+)
+
+    - Verify Node.js version (18.0.0\+)
     - Check file paths in MCP configuration
     - Restart your AI assistant after configuration changes
   </Accordion>
@@ -124,36 +144,20 @@ To verify everything is working:
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card
-    title="Learn MCP"
-    icon="graduation-cap"
-    href="/mcp/what-is-mcp"
-  >
+  <Card title="Learn MCP" icon="graduation-cap" href="/mcp/what-is-mcp">
     Understand the Model Context Protocol
   </Card>
-  <Card
-    title="Browse Tools"
-    icon="toolbox"
-    href="/mcp/tools/index"
-  >
+  <Card title="Browse Tools" icon="toolbox" href="/mcp/tools/index">
     Explore all database management tools
   </Card>
-  <Card
-    title="Integration Guide"
-    icon="plug"
-    href="/mcp/integration/claude-desktop"
-  >
+  <Card title="Integration Guide" icon="plug" href="/mcp/integration/claude-desktop">
     Detailed setup for different AI assistants
   </Card>
-  <Card
-    title="Troubleshooting"
-    icon="wrench"
-    href="/mcp/troubleshooting"
-  >
+  <Card title="Troubleshooting" icon="wrench" href="/mcp/troubleshooting">
     Solutions for common issues
   </Card>
 </CardGroup>
 
 <Tip>
-Ready to explore more? Check out the [tools reference](/mcp/tools/index) to see all the database operations Tablr can perform.
+  Ready to explore more? Check out the [tools reference](/mcp/tools/index) to see all the database operations Tablr can perform.
 </Tip>
