@@ -28,7 +28,6 @@
               "tools/data-tools",
               "tools/auth-tools",
               "tools/import-export-tools",
-              "tools/ai-tools"
             ]
           },
           {
@@ -37,7 +36,6 @@
               "tools/schema-management",
               "tools/data-operations",
               "tools/authentication",
-              "tools/vector-operations"
             ]
           },
           {
