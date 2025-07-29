@@ -1,12 +1,23 @@
 ---
-title: "Development Guide"
-description: "Complete guide to developing and extending Tablr MCP server functionality"
+title: "Development Overview"
+description: "Guide to developing and extending Tablr MCP server functionality"
 icon: "code"
 ---
 
-# Development Guide
+# Development Overview
 
-Welcome to the Tablr MCP development guide. This comprehensive guide covers everything you need to know to contribute to, extend, or customize the Tablr MCP server for PostgreSQL databases.
+Welcome to the Tablr MCP development guide. This section provides comprehensive information for developers who want to contribute to, extend, or customize the Tablr MCP server.
+
+## What You'll Learn
+
+<CardGroup cols={2}>
+  <Card title="Development Setup" icon="wrench" href="/mcp/development/setup">
+    Set up your development environment and understand the project structure
+  </Card>
+  <Card title="Adding New Tools" icon="plus" href="/mcp/development/adding-tools">
+    Learn how to create and integrate new database management tools
+  </Card>
+</CardGroup>
 
 ## Development Philosophy
 
@@ -27,577 +38,52 @@ Tablr MCP is built with the following principles in mind:
 - **SQL injection protection** through parameterized queries
 - **Confirmation prompts** for destructive operations
 
-### PostgreSQL Focus
-- **Native PostgreSQL features** supported throughout
-- **Row Level Security** integration
-- **Advanced PostgreSQL types** and operations
-
-## Development Setup
-
-### Prerequisites
-
-<Checklist>
-- [ ] Node.js 18+ installed
-- [ ] Git for version control
-- [ ] Familiarity with TypeScript
-- [ ] Understanding of the MCP protocol
-- [ ] Access to a Supabase project for testing
-</Checklist>
-
-### IDE Setup (Recommended: Visual Studio Code)
-
-Install these VS Code extensions for the best development experience:
-
-```bash
-# TypeScript support
-code --install-extension ms-vscode.vscode-typescript-next
-
-# JSON formatting
-code --install-extension ms-vscode.vscode-json
-```
-
-Add these settings to your workspace:
-
-```json
-{
-  "typescript.preferences.noSemicolons": "off",
-  "typescript.suggest.autoImports": true,
-  "typescript.updateImportsOnFileMove.enabled": "always",
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": true
-  }
-}
-```
-
-### Project Setup
-
-<Steps>
-  <Step title="Clone and Install">
-    ```bash
-    git clone <repository-url>
-    cd tablr-mcp
-    npm install
-    ```
-  </Step>
-  
-  <Step title="Environment Configuration">
-    ```bash
-    # Create environment file
-    cp .env.example .env
-    # Edit .env with your PostgreSQL/Supabase credentials
-    ```
-  </Step>
-  
-  <Step title="Initial Build">
-    ```bash
-    npm run build
-    ```
-  </Step>
-</Steps>
-
-### Development Commands
-
-<CodeGroup>
-```bash Development Mode
-# Start development with auto-rebuild
-npm run dev
-
-# Watch for changes and rebuild automatically
-npm run watch
-```
-
-```bash Manual Build
-# Full TypeScript compilation
-npm run build
-
-# Clean build artifacts
-npm run clean
-
-# Clean and rebuild
-npm run clean && npm run build
-```
-
-```bash Testing
-# Start the server for testing
-npm start
-
-# Run with debug output
-DEBUG=true npm start
-
-# Test with MCP Inspector
-npx @modelcontextprotocol/inspector node dist/index.js
-```
-</CodeGroup>
-
-## Project Structure
-
-Understanding the codebase organization is crucial for effective development:
-
-```
-tablr-mcp/
-├── src/                    # Source code
-│   ├── core/              # Core infrastructure
-│   │   ├── base-tool.ts   # Base class for all tools
-│   │   ├── tool-registry.ts # Tool management
-│   │   └── response-formatter.ts # Response formatting
-│   ├── tools/             # Individual tool implementations
-│   │   ├── list-tables.ts
-│   │   ├── query-records.ts
-│   │   ├── create-table.ts
-│   │   ├── add-constraint.ts    # New: constraint management
-│   │   ├── add-index.ts         # New: index management
-│   │   ├── alter-column.ts      # New: column operations
-│   │   └── ... (other tools)
-│   ├── utils/             # Shared utilities
-│   │   ├── openapi-fetcher.ts
-│   │   ├── error-handler.ts
-│   │   └── usage-tracker.ts     # New: usage analytics
-│   ├── index.ts           # Main entry point
-│   ├── server.ts          # MCP server setup
-│   ├── types.ts           # TypeScript definitions
-│   └── postgres-connection.ts # Database connection
-├── dist/                  # Compiled JavaScript (auto-generated)
-├── .env                   # Environment variables (create this)
-├── package.json          # Dependencies and scripts
-├── tsconfig.json         # TypeScript configuration
-└── README.md             # Documentation
-```
-
-### Core Components
-
-<AccordionGroup>
-  <Accordion title="Base Tool Class" icon="gear">
-    All tools inherit from `BaseTool` which provides:
-    - Response formatting
-    - Error handling
-    - Connection management
-    - Validation helpers
-  </Accordion>
-  
-  <Accordion title="Tool Registry" icon="list">
-    Manages tool registration and discovery:
-    - Automatic tool loading
-    - Schema validation
-    - Runtime tool access
-  </Accordion>
-  
-  <Accordion title="Connection Manager" icon="database">
-    Handles PostgreSQL connections:
-    - Connection pooling
-    - Authentication
-    - Health checking
-    - Error recovery
-  </Accordion>
-</AccordionGroup>
-
-## Adding New Tools
-
-### Tool Architecture
-
-Every tool follows a consistent pattern:
-
-<Steps>
-  <Step title="Extend BaseTool">
-    All tools inherit from the `BaseTool` class which provides common functionality
-  </Step>
-  <Step title="Define Schema">
-    Tools specify their input parameters using JSON Schema
-  </Step>
-  <Step title="Implement Logic">
-    Tools contain the actual database operation logic
-  </Step>
-  <Step title="Register Tool">
-    Tools are registered with the server to be available to clients
-  </Step>
-</Steps>
-
-### Creating a New Tool
-
-#### Step 1: Create the Tool File
-
-```typescript
-// src/tools/my-new-tool.ts
-import { BaseTool } from '../core/base-tool.js';
-import { SupabaseConnectionManager } from '../postgres-connection.js';
-
-export class MyNewTool extends BaseTool {
-  name = 'my_new_tool';
-  description = 'Description of what this tool does';
-
-  constructor(connectionManager: SupabaseConnectionManager) {
-    super(connectionManager);
-  }
-
-  getToolDefinition() {
-    return {
-      name: this.name,
-      description: this.description,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          table_name: {
-            type: 'string',
-            description: 'Name of the table to operate on'
-          },
-          limit: {
-            type: 'number',
-            description: 'Maximum number of records to return',
-            default: 100
-          }
-        },
-        required: ['table_name']
-      }
-    };
-  }
-
-  async execute(params: any) {
-    try {
-      // Validate connection
-      await this.ensureConnection();
-      
-      // Extract and validate parameters
-      const { table_name, limit = 100 } = params;
-      
-      // Implement your tool logic here
-      const result = await this.performOperation(table_name, limit);
-      
-      return this.formatSuccess(result, 'Operation completed successfully');
-    } catch (error) {
-      return this.formatError(error);
-    }
-  }
-
-  private async performOperation(tableName: string, limit: number) {
-    // Your actual database operation logic
-    const { data, error } = await this.supabase
-      .from(tableName)
-      .select('*')
-      .limit(limit);
-
-    if (error) {
-      throw new Error(`Database operation failed: ${error.message}`);
-    }
-
-    return data;
-  }
-}
-```
-
-#### Step 2: Advanced Tool Patterns
-
-<CodeGroup>
-```typescript Schema Management Tool
-export class AddConstraintTool extends BaseTool {
-  name = 'add_constraint';
-  description = 'Add constraints to PostgreSQL tables';
-
-  getToolDefinition() {
-    return {
-      name: this.name,
-      description: this.description,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          table_name: { type: 'string' },
-          constraint_type: { 
-            type: 'string',
-            enum: ['primary_key', 'foreign_key', 'unique', 'check']
-          },
-          constraint_name: { type: 'string' },
-          columns: { 
-            type: 'array',
-            items: { type: 'string' }
-          },
-          reference_table: { type: 'string' },
-          reference_columns: { 
-            type: 'array',
-            items: { type: 'string' }
-          },
-          check_expression: { type: 'string' }
-        },
-        required: ['table_name', 'constraint_type', 'constraint_name']
-      }
-    };
-  }
-}
-```
-
-```typescript Index Management Tool
-export class AddIndexTool extends BaseTool {
-  name = 'add_index';
-  description = 'Create indexes on PostgreSQL tables';
-
-  getToolDefinition() {
-    return {
-      name: this.name,
-      description: this.description,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          table_name: { type: 'string' },
-          index_name: { type: 'string' },
-          columns: { 
-            type: 'array',
-            items: { type: 'string' }
-          },
-          index_type: {
-            type: 'string',
-            enum: ['btree', 'hash', 'gin', 'gist', 'spgist', 'brin']
-          },
-          unique: { type: 'boolean', default: false },
-          partial_expression: { type: 'string' }
-        },
-        required: ['table_name', 'columns']
-      }
-    };
-  }
-}
-```
-
-```typescript Column Management Tool
-export class AlterColumnTool extends BaseTool {
-  name = 'alter_column';
-  description = 'Modify column properties in PostgreSQL tables';
-
-  getToolDefinition() {
-    return {
-      name: this.name,
-      description: this.description,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          table_name: { type: 'string' },
-          column_name: { type: 'string' },
-          operation: {
-            type: 'string',
-            enum: ['rename', 'change_type', 'set_default', 'drop_default', 'set_not_null', 'drop_not_null']
-          },
-          new_name: { type: 'string' },
-          new_type: { type: 'string' },
-          default_value: { type: 'string' }
-        },
-        required: ['table_name', 'column_name', 'operation']
-      }
-    };
-  }
-}
-```
-</CodeGroup>
-
-#### Step 3: Register the Tool
-
-Add your tool to the server by modifying `src/server.ts`:
-
-```typescript
-// Import your new tool
-import { MyNewTool } from './tools/my-new-tool.js';
-
-// In the initializeTools() method:
-private initializeTools() {
-  // ... existing tools ...
-  
-  // Register your new tool
-  this.toolRegistry.registerTool(new MyNewTool(this.connectionManager));
-}
-```
-
-### Validation and Safety
-
-Always include comprehensive validation:
-
-```typescript
-// Parameter validation
-private validateParameters(params: any) {
-  if (!params.table_name) {
-    throw new Error('table_name is required');
-  }
-  
-  if (params.limit && (params.limit < 1 || params.limit > 1000)) {
-    throw new Error('limit must be between 1 and 1000');
-  }
-}
-
-// PostgreSQL-specific validation
-private async validateTableExists(tableName: string) {
-  const { data, error } = await this.supabase
-    .from('information_schema.tables')
-    .select('table_name')
-    .eq('table_name', tableName)
-    .eq('table_schema', 'public');
-    
-  if (error || !data?.length) {
-    throw new Error(`Table '${tableName}' does not exist`);
-  }
-}
-
-// Safety confirmation for destructive operations
-private requireConfirmation(params: any, operation: string) {
-  if (!params.confirm) {
-    throw new Error(
-      `This ${operation} operation requires confirmation. ` +
-      'Set confirm: true to proceed.'
-    );
-  }
-}
-```
-
-## Testing and Development Workflow
-
-### Development Workflow
-
-<Steps>
-  <Step title="Development Mode">
-    ```bash
-    # Start development mode
-    npm run dev
-    ```
-  </Step>
-  
-  <Step title="Testing with Inspector">
-    ```bash
-    # In another terminal, test with inspector
-    npx @modelcontextprotocol/inspector node dist/index.js
-    ```
-  </Step>
-  
-  <Step title="Integration Testing">
-    Test with Claude Desktop or other MCP clients
-  </Step>
-</Steps>
-
-### Test Coverage Areas
-
-<Checklist>
-- [ ] **Happy Path**: Normal operation with valid inputs
-- [ ] **Error Handling**: Invalid inputs and edge cases
-- [ ] **PostgreSQL Features**: Test advanced PostgreSQL functionality
-- [ ] **Security**: Injection attempts and unauthorized access
-- [ ] **Performance**: Large datasets and complex queries
-- [ ] **Integration**: Works with different MCP clients
-</Checklist>
-
-## Best Practices
-
-### Code Standards
-
-<AccordionGroup>
-  <Accordion title="TypeScript Guidelines" icon="code">
-    - Always use explicit types and avoid `any`
-    - Use proper type guards for validation
-    - Implement generic constraints where appropriate
-    - Follow established naming conventions
-  </Accordion>
-  
-  <Accordion title="Error Handling" icon="exclamation-triangle">
-    - Always catch and format errors properly
-    - Provide helpful error messages with suggestions
-    - Include relevant context in error responses
-    - Handle PostgreSQL-specific error codes
-  </Accordion>
-  
-  <Accordion title="Performance" icon="tachometer-alt">
-    - Use specific column selection
-    - Implement reasonable limits
-    - Consider pagination for large datasets
-    - Log execution times for monitoring
-  </Accordion>
-  
-  <Accordion title="Security" icon="lock">
-    - Use parameterized queries exclusively
-    - Require confirmation for destructive operations
-    - Validate table and column names
-    - Respect Row Level Security policies
-  </Accordion>
-</AccordionGroup>
-
-### PostgreSQL-Specific Considerations
-
-- **Data Types**: Support PostgreSQL-specific types (JSON, arrays, enums)
-- **Constraints**: Implement proper constraint management
-- **Indexes**: Support various PostgreSQL index types
-- **Schema Management**: Handle public and custom schemas
-- **Row Level Security**: Integrate with RLS policies
-
-## Contributing
-
-### Development Guidelines
-
-<Steps>
-  <Step title="Fork and Clone">
-    Create your own fork and clone it locally
-  </Step>
-  
-  <Step title="Create Feature Branch">
-    ```bash
-    git checkout -b feature/amazing-feature
-    ```
-  </Step>
-  
-  <Step title="Implement Changes">
-    Follow established patterns and code standards
-  </Step>
-  
-  <Step title="Test Thoroughly">
-    Test with MCP Inspector and Claude Desktop
-  </Step>
-  
-  <Step title="Submit Pull Request">
-    Create a detailed pull request with your changes
-  </Step>
-</Steps>
-
-### Code of Conduct
-
-- **Be Respectful**: Treat all contributors with respect and kindness
-- **Be Constructive**: Provide helpful feedback and suggestions
-- **Be Collaborative**: Work together to improve the project
-- **Be Patient**: Understand that everyone has different experience levels
-
-## Debugging Tips
-
-### Enable Debug Logging
-
-```bash
-# Add to .env
-DEBUG=true
-MCP_DEBUG=true
-NODE_ENV=development
-```
-
-### Common Debug Scenarios
-
-<CodeGroup>
-```bash Connection Issues
-# Test PostgreSQL connection directly
-node -e "
-const { createClient } = require('@supabase/supabase-js');
-const client = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-client.from('_test').select('*').then(console.log);
-"
-```
-
-```bash Tool Registration
-# Check if tools are properly registered
-node -e "
-const server = require('./dist/server.js');
-console.log('Registered tools:', server.getTools());
-"
-```
-
-```bash TypeScript Errors
-# Detailed type checking
-npx tsc --noEmit --listFiles
-```
-</CodeGroup>
+### Developer Experience
+- **Clear error messages** with actionable suggestions
+- **Comprehensive logging** for debugging
+- **Hot reload** during development
+- **Extensive documentation** and examples
+
+## Core Components
+
+### Base Tool Class
+All tools inherit from `BaseTool` which provides:
+- Response formatting
+- Error handling
+- Connection management
+- Validation helpers
+
+### Tool Registry
+Manages tool registration and discovery:
+- Automatic tool loading
+- Schema validation
+- Runtime tool access
+
+### Connection Manager
+Handles Supabase connections:
+- Connection pooling
+- Authentication
+- Health checking
+- Error recovery
+
+### Response Formatter
+Standardizes all tool responses:
+- Success/error formatting
+- Performance metrics
+- Message consistency
+
+## Development Workflow
+
+1. **Environment Setup**: Configure your development environment
+2. **Code Changes**: Make your modifications following established patterns
+3. **Testing**: Test with MCP Inspector and Claude Desktop
+4. **Documentation**: Update documentation as needed
+5. **Contribution**: Submit pull requests following our guidelines
+
+## Getting Started
+
+Ready to start developing? Begin with the [Development Setup](/mcp/development/setup) guide to configure your environment and understand the project structure.
 
 <Note>
-**Prerequisites**: Ensure you have Node.js 18+, TypeScript knowledge, and familiarity with the MCP protocol and PostgreSQL before beginning development.
+**Prerequisites**: Ensure you have Node.js 18+, TypeScript knowledge, and familiarity with the MCP protocol before beginning development.
 </Note>
-
-<Warning>
-Always test your changes with both MCP Inspector and a real MCP client like Claude Desktop before submitting contributions.
-</Warning>
