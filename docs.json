@@ -23,11 +23,7 @@
           {
             "group": "Tools Reference",
             "pages": [
-              "tools/index",
-              "tools/database-tools",
-              "tools/data-tools",
-              "tools/auth-tools",
-              "tools/import-export-tools"
+              "tools/index"
             ]
           },
           {
@@ -36,12 +32,6 @@
               "tools/schema-management",
               "tools/data-operations",
               "tools/authentication"
-            ]
-          },
-          {
-            "group": "Advanced",
-            "pages": [
-              "troubleshooting"
             ]
           }
         ]
