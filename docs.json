@@ -27,7 +27,7 @@
               "tools/database-tools",
               "tools/data-tools",
               "tools/auth-tools",
-              "tools/import-export-tools",
+              "tools/import-export-tools"
             ]
           },
           {
@@ -35,7 +35,7 @@
             "pages": [
               "tools/schema-management",
               "tools/data-operations",
-              "tools/authentication",
+              "tools/authentication"
             ]
           },
           {
