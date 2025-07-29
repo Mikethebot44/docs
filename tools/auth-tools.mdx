@@ -1,0 +1,73 @@
+---
+title: "Authentication Management"
+description: "5 tools for managing Supabase Auth users and permissions"
+---
+
+## Supabase Authentication Management
+
+Complete user management capabilities for Supabase Auth. Create, retrieve, update, and delete user accounts with comprehensive metadata support.
+
+## User Management
+
+<CardGroup cols={3}>
+  <Card title="auth_create_user" icon="user-plus">
+    Create new users with email and password authentication
+  </Card>
+  <Card title="auth_list_users" icon="users">
+    List users with filtering and pagination support
+  </Card>
+  <Card title="auth_get_user" icon="user">
+    Retrieve specific user details by ID
+  </Card>
+  <Card title="auth_update_user" icon="user-edit">
+    Update user properties, metadata, and authentication settings
+  </Card>
+  <Card title="auth_delete_user" icon="user-minus">
+    Remove users from the authentication system
+  </Card>
+</CardGroup>
+
+## Tools Reference
+
+| Tool | Risk Level | Confirmation | Purpose |
+|------|------------|--------------|---------|
+| `auth_create_user` | Medium | No | Create new authenticated users |
+| `auth_list_users` | Safe | No | Browse user accounts |
+| `auth_get_user` | Safe | No | Retrieve user details |
+| `auth_update_user` | Medium | No | Modify user properties |
+| `auth_delete_user` | High | Yes | Remove user accounts |
+
+## Key Features
+
+- **Email/Password Authentication**: Standard user creation with email verification
+- **Metadata Support**: Custom user and app metadata for profiles and preferences
+- **Filtering & Pagination**: Efficient user listing with search capabilities
+- **Security Controls**: Password requirements, email confirmation, ban management
+- **Integration Ready**: Seamless integration with Supabase Auth features
+
+## Best Practices
+
+- **Strong Passwords**: Enforce minimum 8 characters with mixed case, numbers, symbols
+- **Email Verification**: Always require email verification in production
+- **Metadata Structure**: Use organized, purposeful metadata for user profiles
+- **Safe Updates**: Update one property at a time for critical changes
+- **Proper Deletion**: Backup associated data before user deletion
+
+## Security Considerations
+
+- **Password Requirements**: Enforce strong passwords for all new users
+- **Email Verification**: Always require email verification in production environments
+- **Rate Limiting**: Implement rate limiting for creation and update operations
+- **Audit Logging**: Track all user management operations for security audits
+- **Data Privacy**: Never store sensitive information in user_metadata
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="AI & Vector Tools" icon="brain" href="/tools/ai-tools">
+    Research and semantic search capabilities
+  </Card>
+  <Card title="Authentication Guide" icon="book" href="/tools/authentication">
+    Detailed documentation and examples
+  </Card>
+</CardGroup>

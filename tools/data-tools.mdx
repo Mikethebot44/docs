@@ -1,0 +1,76 @@
+---
+title: "Data Operations"
+description: "5 tools for querying, inserting, updating, and deleting records"
+---
+
+## Data Manipulation & SQL Execution
+
+Core tools for querying, inserting, updating, and deleting database records. All operations include validation, error handling, and safety checks.
+
+## Query & Retrieval
+
+<CardGroup cols={1}>
+  <Card title="query_records" icon="magnifying-glass">
+    Advanced filtering, sorting, and pagination for data retrieval
+  </Card>
+</CardGroup>
+
+## Data Modification
+
+<CardGroup cols={3}>
+  <Card title="insert_records" icon="arrow-up">
+    Add single or multiple records with validation and conflict handling
+  </Card>
+  <Card title="update_records" icon="pen-to-square">
+    Modify existing data with flexible field mapping and safety checks
+  </Card>
+  <Card title="delete_records" icon="minus">
+    Remove records with confirmation and limit safeguards
+  </Card>
+</CardGroup>
+
+## SQL Execution
+
+<CardGroup cols={1}>
+  <Card title="execute_sql" icon="code">
+    Run custom SQL queries with safety checks and parameter binding
+  </Card>
+</CardGroup>
+
+## Tools Reference
+
+| Tool | Risk Level | Confirmation | Purpose |
+|------|------------|--------------|---------|
+| `query_records` | Safe | No | Retrieve and analyze data |
+| `insert_records` | Low | No | Add new data entries |
+| `update_records` | Medium | No | Modify existing data |
+| `delete_records` | High | Yes | Remove data records |
+| `execute_sql` | Variable | No* | Custom database operations |
+
+<sup>*</sup> `execute_sql` blocks dangerous operations automatically
+
+## Best Practices
+
+- **Check Schema First**: Use `get_table_schema` to understand structure
+- **Test Filters**: Use `query_records` to test filters before updates/deletes
+- **Use Appropriate Filters**: Be specific to avoid unintended changes
+- **Batch Operations**: Group related operations together
+- **Verify Changes**: Query data after modifications to confirm results
+
+## Safety Features
+
+- **SQL Injection Protection**: All tools use parameterized queries
+- **Required Filters**: Update and delete operations require filter conditions
+- **Confirmation Prompts**: Destructive operations need explicit confirmation
+- **Limit Safeguards**: Maximum record limits prevent accidental mass operations
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Import/Export Tools" icon="arrow-right-arrow-left" href="/tools/import-export-tools">
+    Transfer data with CSV/JSON
+  </Card>
+  <Card title="Data Operations Guide" icon="book" href="/tools/data-operations">
+    Detailed documentation and examples
+  </Card>
+</CardGroup>

@@ -1,7 +1,6 @@
 ---
-title: "Tablr MCP - Complete PostgreSQL Database Management"
-description: "A comprehensive MCP server that provides full database management capabilities for PostgreSQL databases through AI assistants"
-icon: "database"
+title: "Welcome to Tablr MCP"
+description: "AI-powered database management through Model Context Protocol"
 ---
 
 <img
@@ -15,169 +14,28 @@ icon: "database"
   alt="Tablr MCP Hero Dark"
 />
 
-## What is Tablr MCP?
+## Database Management for AI Assistants
 
-Tablr MCP is a specialized Model Context Protocol (MCP) server that provides comprehensive database management for PostgreSQL databases. It allows AI assistants to:
-
-- **Explore** your database structure (tables, schemas, relationships)
-- **Query** data with complex filters and sorting
-- **Modify** table structures and data
-- **Execute** custom SQL safely
-- **Manage** database operations through natural language
-
-Instead of manually writing SQL or using database administration tools, you can simply ask your AI assistant: *"Show me all users created this week"* or *"Create a new table for storing blog posts"*.
-
-## Understanding Model Context Protocol (MCP)
-
-**Model Context Protocol (MCP)** is an open standard that enables AI assistants and applications to securely connect to external data sources and tools. Think of it as a bridge between AI models and your databases, APIs, or other services.
-
-### Key MCP Concepts
-
-**MCP Server** - A service that provides tools and data to AI clients. **Tablr MCP is an MCP server** that exposes database management capabilities to AI assistants.
-
-**MCP Client** - An application that uses MCP servers to extend its capabilities. Examples include Claude Desktop, Cursor IDE, and custom applications.
-
-**Tools** - Functions that the server exposes for the client to use. Tablr MCP provides comprehensive database management tools like `list_tables`, `query_records`, and `create_table`.
-
-**Transport** - How the client and server communicate via stdio, HTTP, or WebSocket protocols.
-
-### Why Use MCP?
-
-- **Standardized Interface** - Works with any MCP-compatible AI assistant
-- **Secure Access** - Controlled access to your data with proper authentication
-- **Extensible** - Easy to add new capabilities as your needs grow
-- **Interoperable** - One server can work with multiple AI clients simultaneously
-
-### How MCP Works
-
-1. **Connection Establishment** - The AI client connects to the MCP server
-2. **Capability Discovery** - The client discovers available tools and resources
-3. **Tool Execution** - When you ask the AI to perform a database operation, the client calls the appropriate tool
-4. **Response Handling** - The server processes requests, interacts with your database, and returns formatted results
-
-## Key Features
+Tablr MCP enables AI assistants to manage PostgreSQL databases through natural language. Instead of writing SQL, simply ask: *"Show me users created this week"* or *"Create a table for blog posts"*.
 
 <CardGroup cols={2}>
-  <Card title="Table Management" icon="table">
-    List tables, get schemas, create new tables, and safely drop existing ones with confirmation prompts
+  <Card title="27+ Database Tools" icon="toolbox">
+    Complete PostgreSQL management, Supabase Auth, and AI-powered operations
   </Card>
-  <Card title="Data Operations" icon="chart-line">
-    Query records with advanced filtering, insert/update/delete data with validation and safety checks
+  <Card title="Natural Language" icon="message">
+    Talk to your database through AI assistants like Claude Desktop
   </Card>
-  <Card title="Schema Operations" icon="screwdriver-wrench">
-    Alter table structures, execute custom SQL, and manage relationships with built-in safety features
+  <Card title="Enterprise Security" icon="shield-check">
+    SQL injection protection, confirmations, and access control
   </Card>
-  <Card title="Security Features" icon="shield-check">
-    Service role authentication, SQL injection protection, and operation confirmations for destructive actions
-  </Card>
-</CardGroup>
-
-## Why Choose Tablr MCP?
-
-### **Comprehensive Table Management**
-- **List Tables**: Discover all tables in your database
-- **Table Schema**: Get detailed column information, types, and constraints
-- **Create Tables**: Build new tables with proper relationships and constraints
-- **Drop Tables**: Safely remove tables with confirmation prompts
-
-### **Advanced Data Operations**
-- **Query Records**: Filter, sort, and paginate data with complex conditions
-- **Insert Records**: Add single or multiple records with validation
-- **Update Records**: Modify existing data with flexible field mapping
-- **Delete Records**: Remove records with safety confirmations
-
-### **Powerful Schema Operations**
-- **Alter Tables**: Modify columns, add constraints, rename tables
-- **Execute SQL**: Run custom SQL queries with safety checks
-- **Relationship Management**: Handle foreign keys and table relationships
-
-### **Enterprise-Grade Security**
-- **Database Authentication**: Secure connection using PostgreSQL credentials
-- **SQL Injection Protection**: Automatic query sanitization
-- **Operation Confirmation**: Safety prompts for destructive operations
-- **Access Control**: Respects database permissions and constraints
-
-### **Superior Developer Experience**
-- **Comprehensive Error Handling**: Helpful error messages with suggestions
-- **Performance Monitoring**: Execution time tracking for all operations
-- **Auto-Discovery**: Automatic table and schema detection
-- **Type Safety**: Full TypeScript support with proper type definitions
-
-## Getting Started
-
-<CardGroup cols={2}>
-  <Card
-    title="Setup Guide"
-    icon="gear"
-    href="/setup-guide"
-  >
-    Complete installation and configuration guide
-  </Card>
-  <Card
-    title="Quick Start"
-    icon="rocket"
-    href="/quickstart"
-  >
-    Get up and running in 5 minutes
-  </Card>
-  <Card
-    title="Browse All Tools"
-    icon="toolbox"
-    href="/mcp/tools"
-  >
-    Explore all available database management tools
-  </Card>
-  <Card
-    title="Integration Guide"
-    icon="plug"
-    href="/mcp/integration/claude-desktop"
-  >
-    Connect with your AI assistant
+  <Card title="Easy Integration" icon="plug">
+    Works with any MCP-compatible AI assistant or application
   </Card>
 </CardGroup>
 
 ## Quick Start
 
-Ready to dive in? Here's what you need:
-
-1. **Node.js 18+** and **npm** installed
-2. **PostgreSQL database** with connection access
-3. **Database credentials** with appropriate permissions
-
-<Note>
-Tablr MCP provides comprehensive database management functions that work with any MCP-compatible AI assistant, including Claude Desktop, Cursor IDE, and custom applications.
-</Note>
-
-## Example Usage
-
-Once set up, you can interact with your database through natural language:
-
-```
-You: "Show me all tables in my database"
-AI: [Uses list_tables tool and shows results]
-
-You: "Get the schema for the users table"
-AI: [Uses get_table_schema tool]
-
-You: "Find all users created in the last week"
-AI: [Uses query_records with date filters]
-
-You: "Create a new table for storing blog posts"
-AI: [Uses create_table with appropriate schema]
-```
-
-## Architecture Overview
-
-Tablr MCP acts as a bridge between AI assistants and your PostgreSQL database:
-
-- **MCP Client** (Claude Desktop, Cursor, etc.) sends requests
-- **Tablr MCP Server** processes requests and validates operations
-- **PostgreSQL Database** executes the actual database operations
-- **Results** are formatted and returned to the AI assistant
-
-## Next Steps
-
-<CardGroup cols={3}>
+<CardGroup cols={2}>
   <Card
     title="Setup Guide"
     icon="gear"
@@ -186,17 +44,55 @@ Tablr MCP acts as a bridge between AI assistants and your PostgreSQL database:
     Complete installation and configuration
   </Card>
   <Card
-    title="Quick Start"
+    title="5-Minute Quickstart"
     icon="rocket"
     href="/quickstart"
   >
-    Get up and running quickly
+    Get running immediately
+  </Card>
+</CardGroup>
+
+## Learn More
+
+<CardGroup cols={3}>
+  <Card
+    title="What is Tablr MCP?"
+    icon="info"
+    href="/what-is-tablr"
+  >
+    Core concepts and capabilities
   </Card>
   <Card
-    title="Integration"
-    icon="plug"
-    href="/mcp/integration/claude-desktop"
+    title="Understanding MCP"
+    icon="network"
+    href="/mcp-concepts"
   >
-    Connect with AI assistants
+    Model Context Protocol basics
+  </Card>
+  <Card
+    title="Key Features"
+    icon="star"
+    href="/features"
+  >
+    Why choose Tablr MCP
+  </Card>
+</CardGroup>
+
+## Browse Tools
+
+<CardGroup cols={2}>
+  <Card
+    title="All Tools Overview"
+    icon="list"
+    href="/tools"
+  >
+    Quick reference for all 27+ tools
+  </Card>
+  <Card
+    title="Integration Examples"
+    icon="code"
+    href="/integration/claude-desktop"
+  >
+    Connect with Claude Desktop
   </Card>
 </CardGroup>

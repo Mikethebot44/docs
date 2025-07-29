@@ -1,132 +1,66 @@
 ---
-title: "Tools Reference Overview"
-description: "Complete overview of all 15 database management tools available in Tablr MCP, organized by category"
-icon: "toolbox"
+title: "Tools Overview"
+description: "Complete reference for all 27+ database management tools"
 ---
 
-## Overview
+## 27+ Database Management Tools
 
-Tablr MCP provides **15 comprehensive database management tools** that enable AI assistants to perform complex database operations through natural language. Each tool is designed with safety, security, and ease of use in mind.
+Tablr MCP provides comprehensive database management through natural language. All tools include validation, error handling, and security features.
 
-<Note>
-All tools include built-in validation, error handling, and security features like SQL injection protection and operation confirmations for destructive actions.
-</Note>
-
-## Tools by Category
-
-### Database Discovery
-
-Tools for exploring and understanding your database structure.
+## Tool Categories
 
 <CardGroup cols={2}>
-  <Card title="list_tables" icon="table" href="/tools/data-operations">
-    Discover all tables in your database with automatic schema detection
+  <Card title="Database & Schema Tools" icon="database" href="/tools/database-tools">
+    10 tools for exploring, creating, and managing database structures
   </Card>
-  <Card title="get_table_schema" icon="sitemap" href="/tools/data-operations">
-    Get detailed column information, types, constraints, and relationships
+  <Card title="Data Operations" icon="chart-line" href="/tools/data-tools">
+    5 tools for querying, inserting, updating, and deleting records
   </Card>
-</CardGroup>
-
-### Schema Management
-
-Tools for creating, modifying, and removing database tables and schema elements.
-
-<CardGroup cols={4}>
-  <Card title="create_table" icon="plus" href="/tools/schema-management">
-    Build new tables with columns, constraints, and relationships
+  <Card title="Authentication Management" icon="user-shield" href="/tools/auth-tools">
+    5 tools for managing Supabase Auth users and permissions
   </Card>
-  <Card title="alter_table" icon="wrench" href="/tools/schema-management">
-    Modify existing table structures safely
+  <Card title="Import & Export" icon="arrow-right-arrow-left" href="/tools/import-export-tools">
+    4 tools for CSV/JSON data import and export with streaming
   </Card>
-  <Card title="alter_column" icon="edit" href="/tools/schema-management">
-    Modify column properties and data types
-  </Card>
-  <Card title="rename_table" icon="tag" href="/tools/schema-management">
-    Rename tables with dependency handling
-  </Card>
-  <Card title="drop_table" icon="trash" href="/tools/schema-management">
-    Remove tables with confirmation and cascade options
-  </Card>
-  <Card title="add_index" icon="bolt" href="/tools/schema-management">
-    Create indexes for improved query performance
-  </Card>
-  <Card title="drop_index" icon="bolt-slash" href="/tools/schema-management">
-    Remove indexes that are no longer needed
-  </Card>
-  <Card title="add_constraint" icon="link" href="/tools/schema-management">
-    Add constraints to enforce data integrity
-  </Card>
-  <Card title="execute_sql" icon="code" href="/tools/schema-management">
-    Run custom SQL queries with safety checks
+  <Card title="AI & Vector Operations" icon="brain" href="/tools/ai-tools">
+    3 tools for research, semantic search, and vector index management
   </Card>
 </CardGroup>
 
-### Data Operations
+## Quick Reference
 
-Tools for querying, inserting, updating, and deleting database records.
+| Category | Tools | Risk Level | Use Cases |
+|----------|-------|------------|-----------|
+| **Database & Schema** | 10 | Safe-High | Table management, structure changes |
+| **Data Operations** | 5 | Safe-High | Query, insert, update, delete records |
+| **Authentication** | 5 | Safe-High | User management, Supabase Auth |
+| **Import/Export** | 4 | Safe-Medium | Data transfer, backup/restore |
+| **AI & Vector** | 3 | Safe | Research, semantic search |
 
-<CardGroup cols={2}>
-  <Card title="query_records" icon="magnifying-glass" href="/tools/data-operations">
-    Advanced filtering, sorting, and pagination for data retrieval
-  </Card>
-  <Card title="insert_records" icon="arrow-up" href="/tools/data-operations">
-    Add single or multiple records with validation and conflict handling
-  </Card>
-  <Card title="update_records" icon="pen-to-square" href="/tools/data-operations">
-    Modify existing data with flexible field mapping and safety checks
-  </Card>
-  <Card title="delete_records" icon="minus" href="/tools/data-operations">
-    Remove records with confirmation and limit safeguards
-  </Card>
-</CardGroup>
+## Safety Features
 
-### Security & Access Control
-
-Tools for managing Row Level Security (RLS) policies and database access.
-
-<CardGroup cols={2}>
-  <Card title="RLS Policies" icon="shield-check" href="/tools/schema-management">
-    Comprehensive Row Level Security policy management
-  </Card>
-</CardGroup>
-
-## Tools Matrix
-
-| Tool | Category | Risk Level | Confirmation Required | Primary Use Case |
-|------|----------|------------|----------------------|------------------|
-| `list_tables` | Discovery | Safe | No | Explore database structure |
-| `get_table_schema` | Discovery | Safe | No | Understand table definitions |
-| `query_records` | Data | Safe | No | Retrieve and analyze data |
-| `insert_records` | Data | Low | No | Add new data entries |
-| `update_records` | Data | Medium | No | Modify existing data |
-| `delete_records` | Data | High | Yes | Remove data records |
-| `create_table` | Schema | Medium | No | Build new tables |
-| `alter_table` | Schema | Medium | No | Modify table structure |
-| `alter_column` | Schema | Medium | No | Modify column properties |
-| `rename_table` | Schema | Medium | No | Rename tables safely |
-| `drop_table` | Schema | High | Yes | Remove entire tables |
-| `add_index` | Schema | Low | No | Create performance indexes |
-| `drop_index` | Schema | Low | No | Remove unused indexes |
-| `add_constraint` | Schema | Medium | No | Enforce data integrity |
-| `execute_sql` | Schema | Variable | No* | Custom database operations |
-
-<sup>*</sup> `execute_sql` blocks dangerous operations automatically
-
-## Key Features
-
-- **SQL Injection Prevention**: All tools use parameterized queries
+- **SQL Injection Prevention**: All database tools use parameterized queries
 - **Operation Confirmation**: Destructive operations require explicit confirmation
 - **Input Validation**: Comprehensive parameter validation before execution
 - **Error Handling**: Detailed error messages with actionable suggestions
-- **Performance Monitoring**: Execution time tracking and optimization recommendations
+- **Performance Monitoring**: Execution time tracking and optimization
+
+## Architecture
+
+**BaseTool**: Foundation for PostgreSQL database operations  
+**BaseVectorTool**: Specialized for AI operations via Tablr API  
+**SupabaseAuthManager**: Dedicated authentication management
 
 ## Getting Started
 
-1. **Database Discovery**: Use `list_tables` and `get_table_schema` to explore your database
-2. **Data Operations**: Start with safe `query_records` to understand tool responses  
-3. **Schema Management**: Use schema tools to create and modify database structures
-4. **Security**: Implement RLS policies for production applications
-
-<Note>
-For detailed documentation, visit [Data Operations](/tools/data-operations) and [Schema Management](/tools/schema-management) pages.
-</Note>
+<CardGroup cols={3}>
+  <Card title="Database Tools" icon="database" href="/tools/database-tools">
+    Start with table discovery and schema exploration
+  </Card>
+  <Card title="Data Operations" icon="chart-line" href="/tools/data-tools">
+    Query and manipulate your data safely
+  </Card>
+  <Card title="Authentication" icon="user-shield" href="/tools/auth-tools">
+    Manage users with Supabase Auth
+  </Card>
+</CardGroup>

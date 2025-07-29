@@ -1,0 +1,55 @@
+---
+title: "Understanding MCP"
+description: "Model Context Protocol basics and how it works"
+---
+
+## What is Model Context Protocol?
+
+**Model Context Protocol (MCP)** is an open standard enabling AI assistants to securely connect to external data sources and tools. Think of it as a bridge between AI models and your databases, APIs, or services.
+
+## Core MCP Components
+
+### MCP Server
+A service that provides tools and data to AI clients. **Tablr MCP is an MCP server** that exposes database management capabilities to AI assistants.
+
+### MCP Client  
+An application that uses MCP servers to extend capabilities. Examples include Claude Desktop, Cursor IDE, and custom applications.
+
+### Tools
+Functions the server exposes for client use. Tablr MCP provides database management tools like `list_tables`, `query_records`, and `create_table`.
+
+### Transport
+How client and server communicate via stdio, HTTP, or WebSocket protocols.
+
+## Why Use MCP?
+
+- **Standardized Interface** - Works with any MCP-compatible AI assistant
+- **Secure Access** - Controlled access to data with proper authentication  
+- **Extensible** - Easy to add new capabilities as needs grow
+- **Interoperable** - One server works with multiple AI clients simultaneously
+
+## How MCP Works
+
+1. **Connection** - AI client connects to MCP server
+2. **Discovery** - Client discovers available tools and resources
+3. **Execution** - When you ask AI to perform database operations, client calls appropriate tools
+4. **Response** - Server processes requests, interacts with database, returns formatted results
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Key Features"
+    icon="star"
+    href="/features"
+  >
+    Why choose Tablr MCP
+  </Card>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get running in 5 minutes
+  </Card>
+</CardGroup>

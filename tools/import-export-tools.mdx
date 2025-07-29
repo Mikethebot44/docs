@@ -1,0 +1,86 @@
+---
+title: "Import & Export Tools"
+description: "4 tools for CSV/JSON data import and export with streaming"
+---
+
+## Data Transfer & File Operations
+
+Efficient tools for importing and exporting data in CSV and JSON formats. Features intelligent type detection, streaming for large datasets, and flexible conflict handling.
+
+## Import Tools
+
+<CardGroup cols={2}>
+  <Card title="import_csv" icon="file-import">
+    Import CSV files with type detection, streaming, and conflict handling
+  </Card>
+  <Card title="import_json" icon="file-code">
+    Import JSON data with automatic schema mapping and validation
+  </Card>
+</CardGroup>
+
+## Export Tools
+
+<CardGroup cols={2}>
+  <Card title="export_csv" icon="file-export">
+    Export table data to CSV with filtering and streaming support
+  </Card>
+  <Card title="export_json" icon="file-arrow-down">
+    Export table data to JSON with flexible formatting options
+  </Card>
+</CardGroup>
+
+## Tools Reference
+
+| Tool | Risk Level | Purpose | Key Features |
+|------|------------|---------|--------------|
+| `import_csv` | Medium | Load CSV data | Type detection, conflict handling, batch processing |
+| `import_json` | Medium | Load JSON data | Schema mapping, validation, streaming |
+| `export_csv` | Safe | Export to CSV | Filtering, custom formatting, large dataset support |
+| `export_json` | Safe | Export to JSON | Array/NDJSON formats, pretty printing, streaming |
+
+## Key Features
+
+### Import Capabilities
+- **Intelligent Type Detection**: Automatically detect and convert data types
+- **Conflict Resolution**: Handle duplicate records with skip, replace, or error strategies
+- **Batch Processing**: Stream large files efficiently with configurable batch sizes
+- **Schema Creation**: Automatically create tables for new datasets
+- **Column Mapping**: Map source columns to different target column names
+
+### Export Capabilities  
+- **Flexible Filtering**: Export specific records using the same filters as query_records
+- **Format Options**: Choose between standard arrays or newline-delimited JSON
+- **Custom Formatting**: Configure delimiters, quotes, and encoding
+- **Large Dataset Support**: Stream exports to handle millions of records efficiently
+- **Selective Columns**: Export only the columns you need
+
+## Best Practices
+
+- **File Organization**: Use organized directory structure with descriptive filenames
+- **Batch Sizes**: Balance memory usage and performance (1000-5000 records)
+- **Type Detection**: Enable for imports to automatically handle data conversion
+- **Conflict Strategy**: Choose appropriate handling for your use case
+- **Export Filtering**: Only export necessary data to optimize file size
+
+## File Format Considerations
+
+### CSV Files
+- **Advantages**: Universal compatibility, smaller size, fast processing
+- **Best For**: Simple tabular data, external system integration
+- **Limitations**: No nested data, limited data types
+
+### JSON Files
+- **Advantages**: Rich data types, nested objects, self-describing
+- **Best For**: Complex structures, API integration, modern applications  
+- **Limitations**: Larger files, slower processing for simple data
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Database Tools" icon="database" href="/tools/database-tools">
+    Manage tables and schema
+  </Card>
+  <Card title="Data Operations Guide" icon="book" href="/tools/data-operations">
+    Complete import/export documentation
+  </Card>
+</CardGroup>

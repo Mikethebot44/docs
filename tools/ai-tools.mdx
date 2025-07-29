@@ -1,0 +1,102 @@
+---
+title: "AI & Vector Operations"
+description: "3 tools for research, semantic search, and vector index management"
+---
+
+## AI-Powered Database Operations
+
+Advanced capabilities for web research, semantic search, and vector index management. These tools integrate with the Tablr backend API to provide AI functionality beyond traditional database operations.
+
+<Note>
+Vector operations require a valid Tablr API key and communicate with the Tablr backend service.
+</Note>
+
+## Research & Search
+
+<CardGroup cols={2}>
+  <Card title="research_agent" icon="brain">
+    AI-powered web research with quick and deep analysis modes
+  </Card>
+  <Card title="search_index" icon="search">
+    Semantic search over indexed repositories, docs, and tables
+  </Card>
+</CardGroup>
+
+## Index Management
+
+<CardGroup cols={1}>
+  <Card title="manage_index" icon="database">
+    Create, manage, and maintain vector indexes for semantic search
+  </Card>
+</CardGroup>
+
+## Tools Reference
+
+| Tool | Risk Level | Purpose | Key Features |
+|------|------------|---------|--------------|
+| `research_agent` | Safe | Web research | Quick/deep modes, structured analysis, source citations |
+| `search_index` | Safe | Semantic search | Natural language queries, similarity scoring, metadata |
+| `manage_index` | Medium | Index management | Create, delete, rename, status, list operations |
+
+## Key Features
+
+### Research Agent
+- **Two Modes**: Quick (30 seconds) for fast facts, Deep (2-5 minutes) for analysis
+- **Structured Results**: Organized findings with source citations and relevance scores
+- **Current Information**: Access to real-time web data and recent developments
+- **Topic Analysis**: Compare technologies, market research, best practices
+
+### Semantic Search
+- **Natural Language**: Search using conversational queries instead of keywords
+- **Multi-Source**: Search repositories, documentation, and database tables
+- **Similarity Scoring**: Results ranked by relevance with confidence scores
+- **Metadata Rich**: Detailed information about search results and context
+
+### Vector Index Management
+- **Multiple Sources**: Index repositories, documentation, and database schemas
+- **Lifecycle Management**: Create, monitor, update, and delete indexes
+- **Performance Monitoring**: Track index status, size, and search performance
+- **Batch Operations**: List and manage multiple indexes efficiently
+
+## Configuration
+
+### Required Setup
+```bash
+# Tablr API Configuration
+TABLR_API_URL=https://www.tablr.dev
+TABLR_API_KEY=your_api_key_here
+
+# Performance Tuning (Optional)
+VECTOR_API_TIMEOUT=30000
+VECTOR_API_MAX_RETRIES=3
+```
+
+## Best Practices
+
+- **Specific Queries**: Use focused, specific research queries for better results
+- **Appropriate Thresholds**: Balance relevance vs completeness in search results
+- **Index Strategy**: Create indexes for frequently searched content
+- **API Key Security**: Store API keys in environment variables, never in code
+
+## Integration Patterns
+
+### Research-Driven Development
+1. **Research** current best practices and technologies
+2. **Deep Dive** into specific implementations and comparisons  
+3. **Search** existing codebase for similar patterns and solutions
+
+### Documentation Enhancement
+1. **Index** documentation sources for semantic search
+2. **Search** for specific examples and configuration patterns
+3. **Monitor** index status to keep content current
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="All Tools Overview" icon="list" href="/tools">
+    Return to tools overview
+  </Card>
+  <Card title="Vector Operations Guide" icon="book" href="/tools/vector-operations">
+    Detailed AI tools documentation
+  </Card>
+</CardGroup>

@@ -5,9 +5,7 @@ description: "Get Tablr running and managing your PostgreSQL database in under 5
 
 ## Prerequisites
 
-Before you start, make sure you have:
-
-- **Node.js 18.0.0\+** installed on your system
+- **Node.js 18.0.0\+** 
 - **Supabase database**
 - **MCP-compatible AI assistant** (Claude Desktop, Cursor, etc.)
 
@@ -25,7 +23,9 @@ Create a `.env` file in your project directory which you would like to use Tablr
 
 ```env
 PG_CONNECTION_STRING=your-postgres-connection-string
+
 TABLR_API_KEY=your-tablr-api-key
+
 SUPABASE_URL=your-supabase-url
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 ```
@@ -63,74 +63,131 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 
 ## Step 5: Configure Your AI Assistant
 
-Add this configuration to your Claude Desktop/Cursor/Windsurf/VS Code settings:
+Configure Tablr MCP in your preferred IDE or editor:
 
-```json
-{
-  "mcpServers": {
-    "tablr": {
-      "command": "tablr-mcp",
-      "args": ["absolute/path/to/your/.env"]
+<Tabs>
+  <Tab title="Claude Desktop">
+    **1. Locate your configuration file:**
+    - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
+    - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+    **2. Add this configuration:**
+    ```json
+    {
+      "mcpServers": {
+        "tablr": {
+          "command": "tablr-mcp",
+          "args": ["absolute/path/to/your/.env"]
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-Note: do not use backslashes for windows file paths
+    **3. Save the file and restart Claude Desktop**
+  </Tab>
+
+  <Tab title="Cursor">
+    **1. Open Cursor settings:**
+    - Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+    - Type "Open Settings (JSON)" and select it
+
+    **2. Add this configuration:**
+    ```json
+    {
+      "mcpServers": {
+        "tablr": {
+          "command": "tablr-mcp",
+          "args": ["absolute/path/to/your/.env"]
+        }
+      }
+    }
+    ```
+
+    **3. Save and restart Cursor**
+  </Tab>
+
+  <Tab title="Windsurf">
+    **1. Open Windsurf and click the Plugins icon in the sidebar**
+
+    **2. Go to "Manage plugins" → "View raw config"**
+
+    **3. Add this configuration:**
+    ```json
+    {
+      "mcpServers": {
+        "tablr": {
+          "command": "tablr-mcp",
+          "args": ["absolute/path/to/your/.env"]
+        }
+      }
+    }
+    ```
+
+    **4. Save the file and refresh Windsurf**
+  </Tab>
+
+  <Tab title="VS Code">
+    **1. Install the MCP extension:**
+    - Install "Copilot MCP" or "MCP Server Runner" from the VS Code marketplace
+
+    **2. Open VS Code settings:**
+    - Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+    - Type "Open Settings (JSON)" and select it
+
+    **3. Add this configuration:**
+    ```json
+    {
+      "mcp": {
+        "servers": {
+          "tablr": {
+            "command": "tablr-mcp",
+            "args": ["absolute/path/to/your/.env"]
+          }
+        }
+      }
+    }
+    ```
+
+    **4. Restart VS Code to apply changes**
+  </Tab>
+</Tabs>
+
+<Note>
+**Important**: 
+- Replace `absolute/path/to/your/.env` with the actual absolute path to your `.env` file
+- Do not use backslashes for Windows file paths - use forward slashes instead
+- Example: `C:/Users/username/project/.env` not `C:\Users\username\project\.env`
+</Note>
 
 ## Step 6: Start Using Tablr
 
 Restart your AI assistant and start managing your database with natural language:
 
-### Basic Commands
-
 ```
 "Show me all tables in my database"
 "What's the schema for the users table?"
-"Create a new table called 'posts' with title and content columns"
 "Find all users created in the last week"
-"Insert a new user with email john@example.com"
-```
-
-### Advanced Operations
-
-```
-"Add an index on the email column for better performance"
-"Update all inactive users to set their status to archived"
 "Execute this SQL: SELECT COUNT(*) FROM orders WHERE status = 'pending'"
-"Create a backup of the important_data table"
 ```
-
-## Verification
-
-To verify everything is working:
-
-1. **Test Connection**: Ask your AI assistant "List all tables"
-2. **Test Operations**: Try creating a simple table or querying existing data
-
 ## Common Issues
 
 <AccordionGroup>
-  <Accordion title="Authentication Failed" icon="exclamation-triangle">
-    **Problem**: "Authentication failed" or "Connection refused"
+  <Accordion title="Server Won't Start (red dot appears)">
+    **Problem**: Red dot appears in MCP server configuration (server isn't starting correctly)
 
     **Solution**:
-
-    - Verify your PostgreSQL connection details
-    - Check that PostgreSQL server is running
-    - Ensure network connectivity to database host
-    - Verify username and password are correct
+    This is a common issue, and there are multiple possible sources. Unfortunately there is no way to tell what your error is from the IDE:
+    1. **The MCP configuration you used was not correct for your IDE (see step 5)**
+    2. **The path to your .env file is incorrect**
+     - Make sure it is the absolute path, not the relative path
+     - Do not use backslashes for Windows
+     - Verify your path is correct by right-clicking on the .env file and clicking 'Copy Path'
+    3. **Environment Variables are incorrect**
+     - Check that the Postgres Connection string you connected was the 'Transaction Pooler', not 'Direct Connection' or 'Session Pooler'
+     - Make sure your Tablr API key is correct by checking in the Tablr dashboard API keys page
+     - Re-check your Supabase URL and Service Role Key, and verify you are not using the Anon Key (important)
   </Accordion>
-  <Accordion title="No Tables Found" icon="database">
-    **Problem**: "No tables found in database"
-
-    **Solution**:
-
-    - Verify your PostgreSQL database contains tables
-    - Check that tables exist in the target schema
-    - Ensure user has proper permissions to view tables
-  </Accordion>
-  <Accordion title="Connection Issues" icon="plug">
+  <Accordion title="Other Checks">
     **Problem**: MCP server won't start
 
     **Solution**:
@@ -140,24 +197,3 @@ To verify everything is working:
     - Restart your AI assistant after configuration changes
   </Accordion>
 </AccordionGroup>
-
-## Next Steps
-
-<CardGroup cols={2}>
-  <Card title="Learn MCP" icon="graduation-cap" href="/mcp/what-is-mcp">
-    Understand the Model Context Protocol
-  </Card>
-  <Card title="Browse Tools" icon="toolbox" href="/mcp/tools/index">
-    Explore all database management tools
-  </Card>
-  <Card title="Integration Guide" icon="plug" href="/mcp/integration/claude-desktop">
-    Detailed setup for different AI assistants
-  </Card>
-  <Card title="Troubleshooting" icon="wrench" href="/mcp/troubleshooting">
-    Solutions for common issues
-  </Card>
-</CardGroup>
-
-<Tip>
-  Ready to explore more? Check out the [tools reference](/mcp/tools/index) to see all the database operations Tablr can perform.
-</Tip>

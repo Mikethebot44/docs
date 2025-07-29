@@ -1,0 +1,62 @@
+---
+title: "What is Tablr MCP?"
+description: "Core concepts and capabilities of Tablr MCP database management"
+---
+
+## Database Management Through AI
+
+Tablr MCP is a specialized Model Context Protocol (MCP) server for comprehensive PostgreSQL database management. It enables AI assistants to:
+
+- **Explore** database structure (tables, schemas, relationships)
+- **Query** data with complex filters and sorting
+- **Modify** table structures and data
+- **Execute** custom SQL safely
+- **Manage** operations through natural language
+
+Instead of manually writing SQL or using database tools, ask your AI assistant: *"Show me all users created this week"* or *"Create a new table for storing blog posts"*.
+
+## Example Usage
+
+Once configured, interact with your database through natural language:
+
+```
+You: "Show me all tables in my database"
+AI: [Uses list_tables tool and displays results]
+
+You: "Get the schema for the users table"  
+AI: [Uses get_table_schema tool]
+
+You: "Find all users created in the last week"
+AI: [Uses query_records with date filters]
+
+You: "Create a new table for storing blog posts"
+AI: [Uses create_table with appropriate schema]
+```
+
+## Architecture
+
+Tablr MCP acts as a bridge between AI assistants and your PostgreSQL database:
+
+1. **MCP Client** (Claude Desktop, Cursor, etc.) sends requests
+2. **Tablr MCP Server** processes and validates operations  
+3. **PostgreSQL Database** executes database operations
+4. **Results** are formatted and returned to the AI assistant
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Understanding MCP"
+    icon="network"
+    href="/mcp-concepts"
+  >
+    Learn about Model Context Protocol
+  </Card>
+  <Card
+    title="Key Features"
+    icon="star"
+    href="/features"
+  >
+    Why choose Tablr MCP
+  </Card>
+</CardGroup>

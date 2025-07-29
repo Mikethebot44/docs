@@ -1,15 +1,14 @@
 ---
 title: "Data Operations"
-description: "Comprehensive guide to querying, inserting, updating, and deleting database records"
-icon: "database"
+description: "Query, insert, update, and delete database records"
 ---
 
 ## Overview
 
-Tablr MCP provides powerful data manipulation tools that enable safe and efficient database operations. These tools support complex queries, batch processing, and comprehensive validation while maintaining data integrity.
+Data manipulation tools for safe and efficient database operations. Support complex queries, batch processing, and validation while maintaining data integrity.
 
 <Note>
-All data operations include built-in SQL injection protection, parameter validation, and detailed error reporting.
+All operations include SQL injection protection, parameter validation, and detailed error reporting.
 </Note>
 
 ---
@@ -393,67 +392,549 @@ This tool **permanently deletes data**. Both `filters` and `confirm` are **manda
 
 ---
 
-## Best Practices
+## import_csv
 
-### 1. Always Check Schema First
-```bash
-# Recommended workflow
-1. get_table_schema      # Understand structure
-2. query_records         # Test filters
-3. insert/update/delete  # Execute operations
-4. query_records         # Verify changes
-```
+Import CSV data into tables with intelligent type detection, streaming processing, and flexible conflict resolution.
 
-### 2. Use Proper PostgreSQL Syntax
-```json
-// PostgreSQL timestamptz
-"created_at": "2023-12-01T10:30:00Z"
+### Parameters
 
-// PostgreSQL functions
-"updated_at": "NOW()"
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `file_path` | string | Yes | - | Path to the CSV file to import |
+| `table_name` | string | Yes | - | Name of the target table |
+| `delimiter` | string | No | "," | CSV delimiter character |
+| `has_headers` | boolean | No | true | Whether CSV file has headers in first row |
+| `encoding` | string | No | "utf8" | File encoding |
+| `batch_size` | number | No | 1000 | Number of rows to process in each batch (1-10000) |
+| `max_rows` | number | No | unlimited | Maximum number of rows to import |
+| `create_table` | boolean | No | false | Create table if it doesn't exist |
+| `type_detection` | boolean | No | true | Enable automatic type detection |
+| `conflict_resolution` | string | No | "error" | How to handle conflicts: "skip", "replace", "error" |
+| `conflict_columns` | array | No | - | Columns to check for conflicts (required for "replace") |
+| `column_mapping` | object | No | {} | Map CSV columns to table columns |
 
-// PostgreSQL intervals
-"expires_at": "NOW() + INTERVAL '30 days'"
-```
+### Conflict Resolution Options
 
-### 3. Handle Large Datasets Efficiently
-```json
+| Option | Behavior | Use Case |
+|--------|----------|----------|
+| `"error"` | Stop on first conflict (default) | Strict data integrity |
+| `"skip"` | Skip conflicting records | Idempotent imports |
+| `"replace"` | Update existing records | Data synchronization |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Basic CSV Import
 {
-  "limit": 100,
-  "offset": 0,
-  "return_records": false  // For bulk operations
+  "file_path": "data/users.csv",
+  "table_name": "users"
 }
 ```
 
-### 4. Use Appropriate Filters
-```json
-// Good: Specific filters
-{"id": {"eq": 123}}
-
-// Risky: Broad filters
-{"status": {"eq": "active"}}  // May affect many records
+```json Advanced Import with Type Detection
+{
+  "file_path": "data/products.csv",
+  "table_name": "products",
+  "delimiter": ",",
+  "has_headers": true,
+  "batch_size": 500,
+  "type_detection": true,
+  "conflict_resolution": "skip"
+}
 ```
 
-### 5. Batch Related Operations
+```json Import with Table Creation
+{
+  "file_path": "data/new_dataset.csv",
+  "table_name": "analytics_data",
+  "create_table": true,
+  "max_rows": 10000,
+  "column_mapping": {
+    "user_id": "customer_id",
+    "timestamp": "created_at"
+  }
+}
+```
+
+```json Upsert Import
+{
+  "file_path": "data/user_updates.csv",
+  "table_name": "users",
+  "conflict_resolution": "replace",
+  "conflict_columns": ["email"],
+  "batch_size": 100
+}
+```
+
+</CodeGroup>
+
+### Response
+
 ```json
 {
-  "records": [
-    {"name": "Product 1", "price": 10.00},
-    {"name": "Product 2", "price": 15.00}
-  ]
+  "success": true,
+  "data": {
+    "imported_rows": 15420,
+    "skipped_rows": 12,
+    "total_rows_processed": 15432,
+    "created_table": false,
+    "detected_types": {
+      "id": "integer",
+      "name": "text",
+      "email": "varchar(255)",
+      "created_at": "timestamp"
+    },
+    "processing_time": 45.2,
+    "conflicts_handled": 12
+  },
+  "message": "Successfully imported 15420 records from CSV file"
 }
 ```
 
 ---
 
-## Error Handling
+## import_json
 
-### Common Error Types
+Import JSON data into tables with automatic schema mapping, validation, and conflict handling.
 
-- **ValidationError**: Invalid parameters or data types
-- **ConstraintError**: Foreign key or unique constraint violations
-- **PermissionError**: Insufficient database privileges
-- **SafetyError**: Missing required confirmation or filters
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `file_path` | string | Yes | - | Path to the JSON file to import (array of objects) |
+| `table_name` | string | Yes | - | Name of the target table |
+| `encoding` | string | No | "utf8" | File encoding |
+| `batch_size` | number | No | 1000 | Number of records to process in each batch |
+| `max_rows` | number | No | unlimited | Maximum number of records to import |
+| `create_table` | boolean | No | false | Create table if it doesn't exist |
+| `type_detection` | boolean | No | true | Enable automatic type detection |
+| `conflict_resolution` | string | No | "error" | How to handle conflicts |
+| `conflict_columns` | array | No | - | Columns to check for conflicts |
+| `column_mapping` | object | No | {} | Map JSON keys to table columns |
+
+### JSON Format Requirements
+
+The JSON file must contain an array of objects:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "metadata": {
+      "preferences": {
+        "theme": "dark"
+      }
+    }
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "email": "jane@example.com"
+  }
+]
+```
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Basic JSON Import
+{
+  "file_path": "data/users.json",
+  "table_name": "users"
+}
+```
+
+```json Import with Schema Creation
+{
+  "file_path": "data/products.json",
+  "table_name": "products_new",
+  "create_table": true,
+  "type_detection": true,
+  "batch_size": 250
+}
+```
+
+```json Import with Column Mapping
+{
+  "file_path": "data/external_data.json",
+  "table_name": "customers",
+  "column_mapping": {
+    "customer_id": "id",
+    "full_name": "name",
+    "contact_email": "email"
+  },
+  "conflict_resolution": "replace",
+  "conflict_columns": ["id"]
+}
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "imported_records": 8750,
+    "skipped_records": 3,
+    "total_records_processed": 8753,
+    "detected_schema": {
+      "id": "integer",
+      "name": "text",
+      "email": "varchar(255)",
+      "metadata": "jsonb"
+    },
+    "processing_time": 32.1
+  },
+  "message": "Successfully imported 8750 records from JSON file"
+}
+```
+
+---
+
+## export_csv
+
+Export table data to CSV files with filtering, pagination, ordering, and streaming support for large datasets.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `table_name` | string | Yes | - | Name of the table to export |
+| `file_path` | string | Yes | - | Path where the CSV file should be saved |
+| `columns` | array | No | all | Specific columns to export |
+| `filters` | array | No | [] | WHERE clause filters (same format as query_records) |
+| `order_by` | array | No | [] | ORDER BY clauses |
+| `limit` | integer | No | unlimited | Maximum number of records to export |
+| `offset` | integer | No | 0 | Number of records to skip |
+| `include_headers` | boolean | No | true | Include column headers in CSV |
+| `delimiter` | string | No | "," | CSV delimiter character |
+| `quote_char` | string | No | "\"" | Character used to quote CSV fields |
+| `escape_char` | string | No | "\"" | Character used to escape quotes |
+| `encoding` | string | No | "utf8" | File encoding |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Basic Export
+{
+  "table_name": "users",
+  "file_path": "exports/users_backup.csv"
+}
+```
+
+```json Filtered Export
+{
+  "table_name": "orders",
+  "file_path": "exports/recent_orders.csv",
+  "filters": [
+    {
+      "column": "created_at",
+      "operator": "gte",
+      "value": "2023-11-01T00:00:00Z"
+    },
+    {
+      "column": "status",
+      "operator": "eq",
+      "value": "completed"
+    }
+  ],
+  "order_by": [
+    {"column": "created_at", "direction": "desc"}
+  ]
+}
+```
+
+```json Selective Column Export
+{
+  "table_name": "users",
+  "file_path": "exports/user_contacts.csv",
+  "columns": ["id", "name", "email", "phone"],
+  "filters": [
+    {
+      "column": "active",
+      "operator": "eq", 
+      "value": true
+    }
+  ],
+  "limit": 5000
+}
+```
+
+```json Custom Formatting
+{
+  "table_name": "products",
+  "file_path": "exports/products.csv", 
+  "delimiter": ";",
+  "quote_char": "'",
+  "encoding": "utf16le",
+  "include_headers": true
+}
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "file_path": "exports/users_backup.csv",
+    "rows_exported": 15420,
+    "file_size_bytes": 2048576,
+    "columns": [
+      "id", "name", "email", "created_at", "last_login"
+    ],
+    "encoding": "utf8",
+    "delimiter": ",",
+    "execution_time": 12.5
+  },
+  "message": "Successfully exported 15420 records to CSV file"
+}
+```
+
+---
+
+## export_json
+
+Export table data to JSON files with flexible formatting options, filtering, and streaming support.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `table_name` | string | Yes | - | Name of the table to export |
+| `file_path` | string | Yes | - | Path where the JSON file should be saved |
+| `columns` | array | No | all | Specific columns to export |
+| `filters` | array | No | [] | WHERE clause filters |
+| `order_by` | array | No | [] | ORDER BY clauses |
+| `limit` | integer | No | unlimited | Maximum number of records to export |
+| `offset` | integer | No | 0 | Number of records to skip |
+| `array_format` | boolean | No | true | Export as JSON array vs newline-delimited JSON |
+| `pretty_print` | boolean | No | false | Format JSON with indentation |
+| `encoding` | string | No | "utf8" | File encoding |
+
+### Output Formats
+
+#### JSON Array Format (default)
+```json
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith", 
+    "email": "jane@example.com"
+  }
+]
+```
+
+#### Newline-Delimited JSON (NDJSON)
+```json
+{"id": 1, "name": "John Doe", "email": "john@example.com"}
+{"id": 2, "name": "Jane Smith", "email": "jane@example.com"}
+```
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Basic JSON Export
+{
+  "table_name": "products",
+  "file_path": "exports/products.json"
+}
+```
+
+```json Pretty-Printed Export
+{
+  "table_name": "users",
+  "file_path": "exports/users_formatted.json",
+  "pretty_print": true,
+  "columns": ["id", "name", "email", "created_at"]
+}
+```
+
+```json NDJSON Export for Streaming
+{
+  "table_name": "analytics_events",
+  "file_path": "exports/events.ndjson",
+  "array_format": false,
+  "filters": [
+    {
+      "column": "event_date",
+      "operator": "gte",
+      "value": "2023-11-01"
+    }
+  ],
+  "limit": 100000
+}
+```
+
+```json Filtered Export with Ordering
+{
+  "table_name": "orders",
+  "file_path": "exports/recent_orders.json",
+  "filters": [
+    {
+      "column": "status",
+      "operator": "in",
+      "values": ["completed", "shipped"]
+    }
+  ],
+  "order_by": [
+    {"column": "created_at", "direction": "desc"}
+  ],
+  "limit": 1000
+}
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "file_path": "exports/products.json",
+    "records_exported": 8750,
+    "file_size_bytes": 1024768,
+    "format": "json_array",
+    "pretty_printed": false,
+    "encoding": "utf8",
+    "execution_time": 8.3
+  },
+  "message": "Successfully exported 8750 records to JSON file"
+}
+```
+
+---
+
+## Import/Export Best Practices
+
+### 1. File Management
+```bash
+# Good: Organized file structure
+exports/
+├── daily_backups/
+├── user_data/
+└── analytics/
+
+# Use descriptive filenames with timestamps
+users_backup_2023_12_01.csv
+products_export_2023_12_01_14_30.json
+```
+
+### 2. Performance Optimization
+```json
+// Good: Use appropriate batch sizes
+{
+  "batch_size": 1000,    // Balance memory and performance
+  "max_rows": 50000      // Limit for large datasets
+}
+
+// For very large datasets
+{
+  "batch_size": 5000,
+  "limit": 100000,
+  "offset": 0            // Use pagination for massive datasets
+}
+```
+
+### 3. Data Type Handling
+```json
+// Good: Enable type detection for imports
+{
+  "type_detection": true,
+  "create_table": true   // For new tables
+}
+
+// Good: Specify column mapping for different schemas
+{
+  "column_mapping": {
+    "customer_id": "user_id",
+    "purchase_date": "created_at"
+  }
+}
+```
+
+### 4. Conflict Resolution Strategy
+```json
+// Good: Choose appropriate conflict handling
+{
+  "conflict_resolution": "skip",      // For idempotent imports
+  "conflict_columns": ["email"]       // Unique identifier
+}
+
+// For data synchronization
+{
+  "conflict_resolution": "replace",
+  "conflict_columns": ["id", "updated_at"]
+}
+```
+
+### 5. Export Filtering
+```json
+// Good: Export only necessary data
+{
+  "columns": ["id", "name", "email"],  // Exclude sensitive columns
+  "filters": [
+    {
+      "column": "deleted_at",
+      "operator": "is_null",
+      "value": true
+    }
+  ],
+  "limit": 10000                       // Reasonable limits
+}
+```
+
+---
+
+## File Format Considerations
+
+### CSV Files
+- **Advantages**: Universal compatibility, smaller file size, fast processing
+- **Best For**: Simple tabular data, data exchange with external systems
+- **Limitations**: No nested data support, limited data types
+
+### JSON Files
+- **Advantages**: Rich data types, nested objects, self-describing format
+- **Best For**: Complex data structures, API data exchange, modern applications
+- **Limitations**: Larger file size, slower processing for simple data
+
+### Encoding Considerations
+- **UTF-8**: Default, best for international data
+- **UTF-16LE**: Windows compatibility, larger file size
+- **Latin1/ASCII**: Legacy system compatibility, limited character support
+
+---
+
+## Error Handling for Import/Export
+
+### Common Import Errors
+- **FileNotFoundError**: CSV/JSON file doesn't exist at specified path
+- **FormatError**: Invalid CSV/JSON format or structure
+- **TypeMismatchError**: Data types don't match table schema
+- **ConstraintViolationError**: Data violates table constraints
+- **DuplicateKeyError**: Conflicts with existing unique keys
+
+### Common Export Errors
+- **PermissionError**: Insufficient permissions to write to file path
+- **DiskSpaceError**: Not enough disk space for export file
+- **TableNotFoundError**: Source table doesn't exist
+- **FilterError**: Invalid filter conditions
 
 ### Error Response Format
 
@@ -461,11 +942,19 @@ This tool **permanently deletes data**. Both `filters` and `confirm` are **manda
 {
   "success": false,
   "error": {
-    "type": "ValidationError",
-    "message": "Table 'users' not found",
+    "type": "TypeMismatchError",
+    "message": "Column 'age' expected integer, got string 'twenty-five'",
+    "details": {
+      "file": "data/users.csv",
+      "line": 1247,
+      "column": "age",
+      "expected_type": "integer",
+      "received_value": "twenty-five"
+    },
     "suggestions": [
-      "Check table name spelling",
-      "Use list_tables to see available tables"
+      "Check data types in source file",
+      "Enable type_detection for automatic conversion",
+      "Use column_mapping to transform values"
     ]
   }
 }

@@ -14,52 +14,36 @@
         "tab": "Guides",
         "groups": [
           {
-            "group": "Get Started",
-            "pages": [
-              "index",
-              "quickstart"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "MCP Tools",
-        "groups": [
-          {
             "group": "Getting Started",
             "pages": [
               "index",
-              "quickstart",
-              "setup-guide"
+              "quickstart"
             ]
           },
           {
             "group": "Tools Reference",
             "pages": [
               "tools/index",
+              "tools/database-tools",
+              "tools/data-tools",
+              "tools/auth-tools",
+              "tools/import-export-tools",
+              "tools/ai-tools"
+            ]
+          },
+          {
+            "group": "Detailed Guides",
+            "pages": [
+              "tools/schema-management",
               "tools/data-operations",
-              "tools/schema-management"
-            ]
-          },
-          {
-            "group": "Integration",
-            "pages": [
-              "integration/claude-desktop",
-              "integration/custom-clients",
-              "integration/testing"
-            ]
-          },
-          {
-            "group": "Development",
-            "pages": [
-              "development/index"
+              "tools/authentication",
+              "tools/vector-operations"
             ]
           },
           {
             "group": "Advanced",
             "pages": [
-              "troubleshooting",
-              "security"
+              "troubleshooting"
             ]
           }
         ]

@@ -1,0 +1,321 @@
+---
+title: "Authentication Management"
+description: "Complete user management for Supabase Auth"
+---
+
+## Overview
+
+Tablr MCP authentication tools provide complete user management for Supabase Auth. Create, modify, retrieve, and delete user accounts with metadata support and security controls.
+
+<Warning>
+Authentication operations affect user access. Test changes in development environments first.
+</Warning>
+
+---
+
+## auth_create_user
+
+Create new users in Supabase Auth with email and password authentication.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `email` | string | Yes | - | User email address (valid email format) |
+| `password` | string | Yes | - | User password (minimum 6 characters) |
+| `email_confirm` | boolean | No | false | Auto-confirm email |
+| `user_metadata` | object | No | {} | Custom user metadata |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Basic User Creation
+{
+  "email": "john.doe@example.com",
+  "password": "secure_password123"
+}
+```
+
+```json User with Auto-Confirmation
+{
+  "email": "admin@company.com",
+  "password": "admin_password_secure",
+  "email_confirm": true,
+  "user_metadata": {
+    "role": "admin",
+    "department": "engineering"
+  }
+}
+```
+
+```json User with Custom Metadata
+{
+  "email": "user@example.com",
+  "password": "user_password",
+  "user_metadata": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "company": "Acme Corp",
+    "plan": "premium"
+  }
+}
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "john.doe@example.com",
+    "created_at": "2023-12-01T10:30:00Z",
+    "user_metadata": {
+      "first_name": "John",
+      "last_name": "Doe"
+    }
+  },
+  "message": "Successfully created user with email john.doe@example.com"
+}
+```
+
+---
+
+## auth_list_users
+
+List users from Supabase Auth with filtering and pagination.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `page` | number | No | 1 | Page number for pagination |
+| `per_page` | number | No | 50 | Users per page (max: 1000) |
+| `email_filter` | string | No | - | Filter by email (partial match) |
+| `phone_filter` | string | No | - | Filter by phone (partial match) |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json List All Users
+{
+  "per_page": 25
+}
+```
+
+```json Search by Email
+{
+  "email_filter": "@company.com",
+  "per_page": 100
+}
+```
+
+```json Paginated Results
+{
+  "page": 2,
+  "per_page": 50,
+  "email_filter": "gmail.com"
+}
+```
+
+</CodeGroup>
+
+---
+
+## auth_get_user
+
+Retrieve specific user details by user ID.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | string | Yes | UUID of the user to retrieve |
+
+### Usage Example
+
+```json
+{
+  "user_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+---
+
+## auth_update_user
+
+Update user properties, metadata, and authentication settings.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | string | Yes | ID of user to update |
+| `email` | string | No | New email address |
+| `password` | string | No | New password (minimum 6 characters) |
+| `phone` | string | No | New phone number |
+| `email_confirm` | boolean | No | Confirm email address |
+| `phone_confirm` | boolean | No | Confirm phone number |
+| `user_metadata` | object | No | Custom user metadata |
+| `app_metadata` | object | No | Custom app metadata (admin only) |
+| `ban_duration` | string | No | Ban duration ("24h", "7d", "none" to unban) |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Update Email and Metadata
+{
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+  "email": "john.smith@example.com",
+  "email_confirm": true,
+  "user_metadata": {
+    "first_name": "John",
+    "last_name": "Smith",
+    "role": "manager"
+  }
+}
+```
+
+```json Ban User Temporarily
+{
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+  "ban_duration": "7d",
+  "app_metadata": {
+    "banned_reason": "policy_violation"
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## auth_delete_user
+
+Remove users from authentication system permanently.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `user_id` | string | Yes | UUID of user to delete |
+
+<Warning>
+Permanently deletes user account. Cannot be undone.
+</Warning>
+
+### Usage Example
+
+```json
+{
+  "user_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+---
+
+## Best Practices
+
+### 1. User Creation Security
+```json
+// Good: Strong password, require verification
+{
+  "password": "SecureP@ssw0rd123!",
+  "email_confirm": false
+}
+
+// Avoid: Weak passwords, auto-confirmation in production
+{
+  "password": "123456",
+  "email_confirm": true
+}
+```
+
+### 2. Metadata Management
+```json
+// Good: Structured, purposeful metadata
+{
+  "user_metadata": {
+    "profile": {
+      "first_name": "John",
+      "last_name": "Doe"
+    },
+    "preferences": {
+      "theme": "dark",
+      "notifications": true
+    }
+  }
+}
+```
+
+### 3. Safe User Updates
+```json
+// Update one property at a time for critical changes
+{
+  "user_id": "user-id",
+  "email": "new.email@example.com",
+  "email_confirm": false  // Require re-verification
+}
+```
+
+### 4. Proper Deletion Workflow
+```bash
+1. auth_get_user          # Verify user exists
+2. backup_user_data       # Backup associated data
+3. auth_delete_user       # Perform deletion
+4. verify_cascades        # Check related data cleanup
+```
+
+---
+
+## Security Considerations
+
+### Authentication Best Practices
+- **Password Requirements**: Enforce strong passwords (8+ characters, mixed case, numbers, symbols)
+- **Email Verification**: Always require verification in production
+- **Rate Limiting**: Implement for creation and update operations
+- **Audit Logging**: Track all user management operations
+
+### Metadata Security
+- **Sensitive Data**: Never store sensitive information in user_metadata
+- **PII Handling**: Follow data protection regulations
+- **Access Control**: Use app_metadata for admin-only information
+
+---
+
+## Error Handling
+
+### Common Error Types
+- **ValidationError**: Invalid email format, weak passwords, malformed UUIDs
+- **DuplicateError**: User already exists with same email
+- **NotFoundError**: User ID not found
+- **PermissionError**: Insufficient privileges
+- **RateLimitError**: Too many requests
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "error": {
+    "type": "ValidationError",
+    "message": "Invalid email format provided",
+    "details": {
+      "field": "email",
+      "provided": "invalid-email"
+    },
+    "suggestions": [
+      "Ensure email follows format: user@domain.com"
+    ]
+  }
+}
+```
+
+<Note>
+All authentication tools integrate seamlessly with Supabase's security features and Row Level Security (RLS) policies.
+</Note>

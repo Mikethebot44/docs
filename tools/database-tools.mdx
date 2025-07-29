@@ -1,0 +1,92 @@
+---
+title: "Database & Schema Tools"
+description: "10 tools for exploring, creating, and managing database structures"
+---
+
+## Database Discovery & Schema Management
+
+Essential tools for exploring, creating, and managing your database structure. All operations include safety features and validation.
+
+## Discovery Tools
+
+<CardGroup cols={2}>
+  <Card title="list_tables" icon="table">
+    Discover all tables in your database with automatic schema detection
+  </Card>
+  <Card title="get_table_schema" icon="sitemap">
+    Get detailed column information, types, constraints, and relationships
+  </Card>
+</CardGroup>
+
+## Table Management
+
+<CardGroup cols={2}>
+  <Card title="create_table" icon="plus">
+    Build new tables with columns, constraints, and relationships
+  </Card>
+  <Card title="alter_table" icon="wrench">
+    Modify existing table structures safely
+  </Card>
+  <Card title="alter_column" icon="edit">
+    Modify column properties and data types
+  </Card>
+  <Card title="rename_table" icon="tag">
+    Rename tables with dependency handling
+  </Card>
+  <Card title="drop_table" icon="trash">
+    Remove tables with confirmation and cascade options
+  </Card>
+</CardGroup>
+
+## Index Management
+
+<CardGroup cols={2}>
+  <Card title="add_index" icon="bolt">
+    Create indexes for improved query performance
+  </Card>
+  <Card title="drop_index" icon="bolt-slash">
+    Remove indexes that are no longer needed
+  </Card>
+</CardGroup>
+
+## Constraints
+
+<CardGroup cols={1}>
+  <Card title="add_constraint" icon="link">
+    Add constraints to enforce data integrity
+  </Card>
+</CardGroup>
+
+## Tools Reference
+
+| Tool | Risk Level | Confirmation | Purpose |
+|------|------------|--------------|---------|
+| `list_tables` | Safe | No | Discover database structure |
+| `get_table_schema` | Safe | No | Understand table definitions |
+| `create_table` | Medium | No | Build new tables |
+| `alter_table` | Medium | No | Modify table structure |
+| `alter_column` | Medium | No | Modify column properties |
+| `rename_table` | Medium | No | Rename tables safely |
+| `drop_table` | High | Yes | Remove entire tables |
+| `add_index` | Low | No | Create performance indexes |
+| `drop_index` | Low | No | Remove unused indexes |
+| `add_constraint` | Medium | No | Enforce data integrity |
+
+## Best Practices
+
+- **Start with Discovery**: Use `list_tables` and `get_table_schema` first
+- **Plan Changes**: Design modifications carefully before execution
+- **Test First**: Verify changes in development environments
+- **Use Confirmations**: Always confirm destructive operations
+- **Index Strategy**: Create indexes for frequently queried columns
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Data Operations" icon="chart-line" href="/tools/data-tools">
+    Query and manipulate your data
+  </Card>
+  <Card title="Schema Management Guide" icon="book" href="/tools/schema-management">
+    Detailed documentation and examples
+  </Card>
+</CardGroup>
