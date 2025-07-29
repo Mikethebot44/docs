@@ -28,56 +28,25 @@
           {
             "group": "Getting Started",
             "pages": [
-              "mcp/index",
-              "mcp/what-is-mcp",
-              "mcp/prerequisites", 
-              "mcp/installation",
-              "mcp/configuration"
+              "index",
+              "quickstart",
+              "setup-guide"
             ]
           },
           {
             "group": "Tools Reference",
             "pages": [
-              "mcp/tools/index",
-              {
-                "group": "Database Discovery",
-                "pages": [
-                  "mcp/tools/list-tables",
-                  "mcp/tools/get-table-schema"
-                ]
-              },
-              {
-                "group": "Table Management", 
-                "pages": [
-                  "mcp/tools/create-table",
-                  "mcp/tools/alter-table", 
-                  "mcp/tools/drop-table"
-                ]
-              },
-              {
-                "group": "Data Operations",
-                "pages": [
-                  "mcp/tools/query-records",
-                  "mcp/tools/insert-records",
-                  "mcp/tools/update-records", 
-                  "mcp/tools/delete-records"
-                ]
-              },
-              {
-                "group": "Advanced Tools",
-                "pages": [
-                  "mcp/tools/execute-sql",
-                  "mcp/tools/rls-policies"
-                ]
-              }
+              "tools/index",
+              "tools/data-operations",
+              "tools/schema-management"
             ]
           },
           {
             "group": "Integration",
             "pages": [
-              "mcp/integration/claude-desktop",
-              "mcp/integration/other-clients",
-              "mcp/integration/testing"
+              "integration/claude-desktop",
+              "integration/custom-clients",
+              "integration/testing"
             ]
           },
           {
@@ -89,8 +58,8 @@
           {
             "group": "Advanced",
             "pages": [
-              "mcp/troubleshooting",
-              "mcp/security"
+              "troubleshooting",
+              "security"
             ]
           }
         ]
