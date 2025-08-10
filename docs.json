@@ -27,11 +27,11 @@
             ]
           },
           {
-            "group": "Detailed Guides",
+            "group": "Vector Database Tools",
             "pages": [
-              "tools/schema-management",
-              "tools/data-operations",
-              "tools/authentication"
+              "tools/search-discovery",
+              "tools/index-management",
+              "tools/monitoring-analysis"
             ]
           }
         ]

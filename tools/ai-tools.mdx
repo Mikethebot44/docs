@@ -1,6 +1,6 @@
 ---
 title: "AI & Vector Operations"
-description: "3 tools for research, semantic search, and vector index management"
+description: "Research and search tools: web_search, deep_research_agent, search_codebase, search_documentation"
 ---
 
 ## AI-Powered Database Operations
@@ -14,19 +14,20 @@ Vector operations require a valid Tablr API key and communicate with the Tablr b
 ## Research & Search
 
 <CardGroup cols={2}>
-  <Card title="research_agent" icon="brain">
-    AI-powered web research with quick and deep analysis modes
+  <Card title="web_search" icon="globe">
+    AI-powered cross-source quick research with summarized results
   </Card>
-  <Card title="search_index" icon="search">
-    Semantic search over indexed repositories, docs, and tables
+  <Card title="deep_research_agent" icon="brain">
+    Deep multi-step research with structured analysis and citations
   </Card>
 </CardGroup>
 
-## Index Management
-
-<CardGroup cols={1}>
-  <Card title="manage_index" icon="database">
-    Create, manage, and maintain vector indexes for semantic search
+<CardGroup cols={2}>
+  <Card title="search_codebase" icon="code">
+    Natural language code search across indexed repositories
+  </Card>
+  <Card title="search_documentation" icon="book">
+    Natural language search across indexed documentation
   </Card>
 </CardGroup>
 
@@ -34,29 +35,30 @@ Vector operations require a valid Tablr API key and communicate with the Tablr b
 
 | Tool | Risk Level | Purpose | Key Features |
 |------|------------|---------|--------------|
-| `research_agent` | Safe | Web research | Quick/deep modes, structured analysis, source citations |
-| `search_index` | Safe | Semantic search | Natural language queries, similarity scoring, metadata |
-| `manage_index` | Medium | Index management | Create, delete, rename, status, list operations |
+| `web_search` | Safe | Quick research | Cross-source search, summaries, relevance |
+| `deep_research_agent` | Safe | Deep research | Structured analysis, citations, confidence |
+| `search_codebase` | Safe | Code search | Context, file paths, file-type filters |
+| `search_documentation` | Safe | Docs search | Context, source filtering, relevance |
 
 ## Key Features
 
-### Research Agent
+### Deep Research Agent
 - **Two Modes**: Quick (30 seconds) for fast facts, Deep (2-5 minutes) for analysis
 - **Structured Results**: Organized findings with source citations and relevance scores
 - **Current Information**: Access to real-time web data and recent developments
 - **Topic Analysis**: Compare technologies, market research, best practices
 
-### Semantic Search
-- **Natural Language**: Search using conversational queries instead of keywords
-- **Multi-Source**: Search repositories, documentation, and database tables
-- **Similarity Scoring**: Results ranked by relevance with confidence scores
-- **Metadata Rich**: Detailed information about search results and context
+### Code Search
+- **Natural Language**: Search code using descriptive queries
+- **Repository Scoping**: Limit search to specific repositories (optional)
+- **File Types**: Filter by file extensions (e.g., ts, tsx)
+- **Context**: Include lines before/after matches for clarity
 
-### Vector Index Management
-- **Multiple Sources**: Index repositories, documentation, and database schemas
-- **Lifecycle Management**: Create, monitor, update, and delete indexes
-- **Performance Monitoring**: Track index status, size, and search performance
-- **Batch Operations**: List and manage multiple indexes efficiently
+### Documentation Search
+- **Natural Language**: Search documentation using descriptive queries
+- **Source Scoping**: Limit to specific documentation sites (optional)
+- **Context**: Include surrounding text before/after matches
+- **Relevance**: Results ranked by semantic relevance
 
 ## Configuration
 
@@ -96,7 +98,7 @@ VECTOR_API_MAX_RETRIES=3
   <Card title="All Tools Overview" icon="list" href="/tools">
     Return to tools overview
   </Card>
-  <Card title="Vector Operations Guide" icon="book" href="/tools/vector-operations">
-    Detailed AI tools documentation
+  <Card title="Search & Discovery" icon="book" href="/tools/search-discovery">
+    Detailed search tools documentation
   </Card>
 </CardGroup>

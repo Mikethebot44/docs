@@ -1,0 +1,251 @@
+---
+title: "Search & Discovery Tools"
+description: "Search code and documentation, plus cross-source web search"
+---
+
+## Overview
+
+Search & Discovery tools enable natural language search across your indexed content. Find code examples, documentation, and implementations using AI-powered semantic understanding rather than keyword matching.
+
+<CardGroup cols={3}>
+  <Card title="search_codebase" icon="code">
+    Search code in indexed repositories using natural language and file-type filters
+  </Card>
+  <Card title="search_documentation" icon="book">
+    Search across indexed documentation with contextual snippets
+  </Card>
+  <Card title="web_search" icon="globe">
+    Cross-source quick research across repositories, docs, and the web
+  </Card>
+</CardGroup>
+
+---
+
+## search_codebase
+
+Search code across indexed GitHub repositories using natural language queries.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `query` | string | Yes | - | Natural language search query (min 3 chars) |
+| `repository_urls` | array | No | all | Specific repos to search (searches all if omitted) |
+| `file_types` | array | No | - | File extensions to include (e.g., ["ts", "tsx"]) |
+| `max_results` | integer | No | 20 | Number of results to return (1-100) |
+| `include_context` | boolean | No | true | Include surrounding code context |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Repo-Scoped Code Search
+{
+  "query": "authentication middleware function",
+  "repository_urls": ["https://github.com/owner/repo"],
+  "file_types": ["ts", "tsx"],
+  "max_results": 20
+}
+```
+
+```json Broad Code Search
+{
+  "query": "debounce utility function",
+  "max_results": 10
+}
+```
+
+```json Language-Filtered Search
+{
+  "query": "graphql resolver pattern",
+  "file_types": ["ts"]
+}
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "file_path": "src/auth/middleware.ts",
+        "repository_url": "https://github.com/owner/repo",
+        "content_snippet": "export function authMiddleware(req, res, next) { ... }",
+        "line_number": 42,
+        "relevance_score": 0.91,
+        "context_before": "...",
+        "context_after": "..."
+      }
+    ],
+    "total_matches": 12,
+    "search_time_ms": 320
+  }
+}
+```
+
+---
+
+## search_documentation
+
+Search across indexed documentation using natural language queries.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `query` | string | Yes | - | Natural language query (min 3 chars) |
+| `documentation_urls` | array | No | all | Specific docs to search (searches all if omitted) |
+| `max_results` | integer | No | 20 | Number of results to return (1-100) |
+| `include_context` | boolean | No | true | Include surrounding text context |
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Docs Topic Search
+{
+  "query": "rate limiting configuration",
+  "documentation_urls": ["https://docs.stripe.com"],
+  "max_results": 10
+}
+```
+
+```json Global Docs Search
+{
+  "query": "webhook retries"
+}
+```
+
+```json Scoped Docs Search
+{
+  "query": "OAuth redirect URI",
+  "documentation_urls": ["https://react.dev"]
+}
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "query": "rate limiting configuration",
+    "results": [
+      {
+        "page_url": "https://docs.stripe.com/rate-limits",
+        "page_title": "Rate Limits",
+        "documentation_url": "https://docs.stripe.com",
+        "content_snippet": "Stripe applies rate limits to API requests...",
+        "relevance_score": 0.91,
+        "context_before": "...",
+        "context_after": "..."
+      }
+    ],
+    "total_matches": 27,
+    "search_time_ms": 240
+  }
+}
+```
+
+---
+
+## web_search
+
+AI-powered quick research across repositories, documentation, and the web. Returns summarized results.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `query` | string | Yes | - | Natural language query (min 3 chars) |
+| `sources` | array | No | all | Types to search: ["repositories", "documentation", "web"] |
+| `max_results` | integer | No | 10 | Number of results to return (1-50) |
+| `include_summaries` | boolean | No | true | Include AI summaries |
+
+### Usage Examples
+
+```json Quick Research
+{
+  "query": "Next.js App Router best practices",
+  "sources": ["repositories", "documentation", "web"],
+  "max_results": 10,
+  "include_summaries": true
+}
+```
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "title": "App Router Architecture",
+        "url": "https://nextjs.org/docs/app",
+        "content_snippet": "The App Router introduces...",
+        "source_type": "documentation",
+        "relevance_score": 0.88,
+        "summary": "Overview of the App Router..."
+      }
+    ],
+    "total_matches": 10,
+    "search_time_ms": 580
+  }
+}
+```
+
+---
+
+## Best Practices
+
+### Query Optimization
+
+<Tabs>
+  <Tab title="Semantic Search">
+    **Good Queries:**
+    - "user authentication flow with JWT tokens"
+    - "error handling patterns for API endpoints"
+    - "database migration scripts for PostgreSQL"
+
+    **Avoid:**
+    - Single words: "auth", "error", "database"
+    - Too broad: "how to code"
+    - Too specific: "line 45 in file auth.js"
+  </Tab>
+
+  <Tab title="Code Search">
+    **Good Queries:**
+    - "async function for file upload"
+    - "React component state management"
+    - "SQL injection prevention method"
+
+    **Avoid:**
+    - Variable names: "userData", "dbConnection"
+    - Syntax elements: "if statement", "for loop"
+    - Framework names only: "React", "Express"
+  </Tab>
+</Tabs>
+
+### Search Strategy
+
+1. **Start Broad**: Use semantic_search for general concepts
+2. **Narrow Down**: Use search_code for specific implementations
+3. **Filter Smart**: Apply language/repository filters when needed
+4. **Iterate**: Refine queries based on initial results
+
+### Performance Tips
+
+- **Reasonable Limits**: Use 5-15 results for focused searches
+- **Appropriate Thresholds**: 0.7-0.8 for most queries, 0.6 for broader searches
+- **Source Filtering**: Limit to specific repositories when looking for particular implementations
+
+<Note>
+Search tools work best with content that has been properly indexed. Ensure your repositories and documentation are indexed before searching.
+</Note>

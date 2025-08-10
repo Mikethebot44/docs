@@ -1,0 +1,430 @@
+---
+title: "Monitoring & Analysis Tools"
+description: "Track indexing progress, monitor status, and analyze indexed content sources"
+---
+
+## Overview
+
+Monitoring & Analysis tools provide visibility into your vector database operations. Track indexing progress, monitor completion status, and manage your indexed content sources with comprehensive analytics and reporting.
+
+<CardGroup cols={2}>
+  <Card title="check_repository_status" icon="activity">
+    Monitor repository indexing progress and completion with detailed metrics
+  </Card>
+  <Card title="check_documentation_status" icon="activity">
+    Monitor documentation indexing progress and completion with detailed metrics
+  </Card>
+  <Card title="list_repositories" icon="list-checks">
+    View all indexed repositories with status overview
+  </Card>
+  <Card title="list_documentation" icon="list-checks">
+    View all indexed documentation sources with status overview
+  </Card>
+</CardGroup>
+
+---
+
+## check_repository_status
+
+Check the indexing status and progress of a GitHub repository. Monitor ongoing indexing jobs and verify completion details.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `repository_url` | string | Yes | GitHub repository URL to check |
+
+### Status Types
+
+#### Indexing States
+- **indexing**: Currently processing content and creating vectors
+- **completed**: Successfully indexed and ready for search
+- **failed**: Indexing encountered errors and stopped
+- **not_found**: No index exists for the specified source
+
+#### Progress Metrics
+- **Progress Percentage**: Real-time completion percentage
+- **Documents Processed**: Number of files/pages indexed so far
+- **Total Cost**: Credits consumed for the indexing operation
+- **Time Estimates**: Creation and completion timestamps
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Check Repository Status
+{
+  "source_url": "https://github.com/microsoft/vscode"
+}
+```
+
+```json Monitor Documentation Indexing
+{
+  "source_url": "https://docs.stripe.com/api"
+}
+```
+
+```json Verify Completion
+{
+  "source_url": "https://github.com/vercel/next.js"
+}
+```
+
+</CodeGroup>
+
+### Response Format
+
+#### Active Indexing Response
+```json
+{
+  "success": true,
+  "data": {
+    "repository_url": "https://github.com/microsoft/vscode",
+    "status": "indexing",
+    "progress_percentage": 67,
+    "documents_indexed": 3420,
+    "estimated_total": 5100,
+    "total_cost": 1.45,
+    "created_at": "2024-01-15T10:30:00Z",
+    "estimated_completion": "2024-01-15T11:15:00Z",
+    "processing_rate": "~85 docs/minute",
+    "message": "Indexing in progress - 67% complete"
+  }
+}
+```
+
+#### Completed Indexing Response
+```json
+{
+  "success": true,
+  "data": {
+    "repository_url": "https://github.com/vercel/next.js",
+    "status": "completed",
+    "progress_percentage": 100,
+    "documents_indexed": 847,
+    "total_cost": 0.52,
+    "created_at": "2024-01-15T09:45:00Z",
+    "completed_at": "2024-01-15T10:12:00Z",
+    "indexing_duration": "27 minutes",
+    "search_ready": true,
+    "message": "Documentation fully indexed and ready for search"
+  }
+}
+```
+
+#### Failed Indexing Response
+```json
+{
+  "success": true,
+  "data": {
+    "repository_url": "https://github.com/private/repo",
+    "status": "failed",
+    "progress_percentage": 23,
+    "documents_indexed": 156,
+    "total_cost": 0.08,
+    "created_at": "2024-01-15T14:20:00Z",
+    "failed_at": "2024-01-15T14:28:00Z",
+    "error_reason": "Repository access denied - check permissions",
+    "message": "Indexing failed due to access restrictions"
+  }
+}
+```
+
+---
+
+---
+
+## check_documentation_status
+
+Check the indexing status and progress of a documentation source. Monitor ongoing indexing jobs and verify completion details.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `documentation_url` | string | Yes | Documentation URL to check status for |
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "documentation_url": "https://docs.stripe.com/api",
+    "status": "completed",
+    "progress_percentage": 100,
+    "indexed_pages": 847,
+    "created_at": "2024-01-15T09:45:00Z",
+    "completed_at": "2024-01-15T10:12:00Z",
+    "message": "Documentation fully indexed and ready for search"
+  }
+}
+```
+
+---
+
+## list_repositories
+
+List all indexed GitHub repositories. View status, document counts, and indexing metadata for comprehensive source management.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `status_filter` | string | No | all | Filter by status: "indexing", "completed", "failed", "all" |
+| `limit` | integer | No | 20 | Maximum number of repositories to return (1-100) |
+| `offset` | integer | No | 0 | Number of repositories to skip for pagination |
+
+### Source Filtering
+
+#### Available Filters
+- **repo**: Show only GitHub repositories
+- **doc**: Show only documentation sources
+- **all**: Show all indexed sources (default)
+
+#### Source Information
+- **Status Overview**: Current state of each indexed source
+- **Document Counts**: Number of indexed documents per source
+- **Indexing Dates**: Creation and completion timestamps
+- **Cost Tracking**: Credits consumed per indexing operation
+
+### Usage Examples
+
+<CodeGroup>
+
+```json List Repositories (All)
+{
+  "status_filter": "all",
+  "limit": 20,
+  "offset": 0
+}
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "repositories": [
+      {
+        "repository_url": "https://github.com/vercel/next.js",
+        "status": "completed",
+        "file_count": 2847,
+        "total_cost": 1.23,
+        "created_at": "2024-01-14T16:30:00Z",
+        "completed_at": "2024-01-14T17:15:00Z",
+        "last_search": "2024-01-15T09:22:00Z",
+        "search_count": 47
+      },
+      {
+        "repository_url": "https://github.com/microsoft/typescript",
+        "status": "indexing",
+        "file_count": 1567,
+        "progress_percentage": 45,
+        "total_cost": 0.67,
+        "created_at": "2024-01-15T13:45:00Z",
+        "estimated_completion": "2024-01-15T15:30:00Z"
+      }
+    ],
+    "total_count": 2,
+    "summary": {
+      "total_repositories": 2,
+      "total_documents": 4414,
+      "total_cost": 2.28,
+      "active_indexing": 1
+    },
+    "message": "Retrieved 3 indexed sources"
+  }
+}
+```
+
+---
+
+## list_documentation
+
+List all indexed documentation sources. View status, page counts, and indexing metadata.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `status_filter` | string | No | all | Filter by status: "indexing", "completed", "failed", "all" |
+| `limit` | integer | No | 20 | Maximum number of documentation sources to return (1-100) |
+| `offset` | integer | No | 0 | Number of documentation sources to skip for pagination |
+
+### Usage Examples
+
+```json List Documentation (All)
+{
+  "status_filter": "all",
+  "limit": 20,
+  "offset": 0
+}
+```
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "documentation": [
+      {
+        "documentation_url": "https://docs.stripe.com/api",
+        "status": "completed",
+        "page_count": 694,
+        "created_at": "2024-01-13T11:20:00Z",
+        "completed_at": "2024-01-13T11:35:00Z"
+      }
+    ],
+    "total_count": 1,
+    "message": "Retrieved 1 documentation source"
+  }
+}
+```
+
+---
+
+## Monitoring Strategies
+
+### Real-Time Monitoring
+
+<Tabs>
+  <Tab title="Active Indexing">
+    **During Indexing:**
+    - Check status every 5-10 minutes for large repositories
+    - Monitor progress percentage and processing rate
+    - Watch for error messages or stalled progress
+    - Track cost accumulation for budget management
+  </Tab>
+
+  <Tab title="Completion Verification">
+    **After Indexing:**
+    - Verify 100% completion status
+    - Confirm search readiness
+    - Review final document count and cost
+    - Test search functionality with sample queries
+  </Tab>
+</Tabs>
+
+### Health Monitoring
+
+#### Key Metrics to Track
+- **Indexing Success Rate**: Percentage of successful vs. failed indexing operations
+- **Average Processing Time**: Time taken to index different repository sizes
+- **Cost Efficiency**: Credits per document indexed across different source types
+- **Search Usage**: How frequently indexed sources are being searched
+
+#### Alert Conditions
+- **Stalled Indexing**: Progress percentage unchanged for > 30 minutes
+- **High Costs**: Indexing cost exceeds expected budget
+- **Failed Operations**: Any indexing operations that fail
+- **Low Usage**: Indexed sources with no searches in 30+ days
+
+### Performance Analysis
+
+#### Repository Indexing Benchmarks
+- **Small Repos** (< 100 files): 2-5 minutes, ~$0.05-0.15
+- **Medium Repos** (100-1000 files): 10-30 minutes, ~$0.25-0.75
+- **Large Repos** (> 1000 files): 30-90 minutes, ~$1.00-3.00
+
+#### Documentation Indexing Benchmarks
+- **Small Docs** (< 50 pages): 1-3 minutes, ~$0.02-0.08
+- **Medium Docs** (50-500 pages): 5-15 minutes, ~$0.15-0.45
+- **Large Docs** (> 500 pages): 15-45 minutes, ~$0.50-1.50
+
+### Maintenance Workflows
+
+#### Daily Monitoring
+```bash
+1. Check active indexing operations
+2. Review any failed indexing attempts
+3. Monitor search usage patterns
+4. Verify cost tracking accuracy
+```
+
+#### Weekly Review
+```bash
+1. Analyze indexing performance trends
+2. Review underutilized indexed sources
+3. Plan repository updates for re-indexing
+4. Optimize chunking strategies based on usage
+```
+
+#### Monthly Cleanup
+```bash
+1. Remove outdated or unused indexes
+2. Re-index frequently updated repositories
+3. Review and optimize cost allocation
+4. Update monitoring alerts and thresholds
+```
+
+---
+
+## Troubleshooting Common Issues
+
+### Indexing Problems
+
+<AccordionGroup>
+  <Accordion title="Stalled Indexing Progress">
+    **Symptoms**: Progress percentage hasn't changed in 30+ minutes
+    
+    **Possible Causes**:
+    - Large binary files slowing processing
+    - Network connectivity issues
+    - Repository access permissions changed
+    
+    **Solutions**:
+    - Wait additional time for large repositories
+    - Check repository accessibility
+    - Contact support if stalled > 2 hours
+  </Accordion>
+
+  <Accordion title="Failed Indexing Operations">
+    **Symptoms**: Status shows "failed" with error message
+    
+    **Common Errors**:
+    - "Repository access denied": Check public/private status
+    - "Rate limit exceeded": Wait and retry later
+    - "Content too large": Repository exceeds size limits
+    
+    **Solutions**:
+    - Verify repository permissions
+    - Retry after rate limit reset
+    - Contact support for large repository solutions
+  </Accordion>
+
+  <Accordion title="High Indexing Costs">
+    **Symptoms**: Costs higher than expected for repository size
+    
+    **Possible Causes**:
+    - Large documentation or comment volumes
+    - Binary files not properly filtered
+    - Inefficient chunking configuration
+    
+    **Solutions**:
+    - Review repository content composition
+    - Adjust chunking parameters
+    - Consider indexing specific directories only
+  </Accordion>
+</AccordionGroup>
+
+### Performance Optimization
+
+#### Cost Optimization
+- **Selective Indexing**: Focus on frequently accessed repositories
+- **Chunking Tuning**: Optimize chunk size for content type
+- **Regular Cleanup**: Remove unused indexes to reduce storage costs
+- **Usage Monitoring**: Track search patterns to guide indexing decisions
+
+#### Search Performance
+- **Index Freshness**: Re-index when source content changes significantly
+- **Query Optimization**: Use monitoring data to improve search strategies
+- **Source Management**: Maintain optimal number of indexed sources
+
+<Note>
+Monitoring tools provide essential visibility into your vector database operations. Regular monitoring helps optimize costs, improve performance, and ensure reliable search capabilities.
+</Note>

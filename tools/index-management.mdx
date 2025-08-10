@@ -1,0 +1,337 @@
+---
+title: "Index Management Tools"
+description: "Content indexing, source management, and vector database operations"
+---
+
+## Overview
+
+Index Management tools handle the creation, maintenance, and deletion of vector indexes for your content sources. These tools process repositories, documentation, and other content to enable semantic search capabilities.
+
+<CardGroup cols={3}>
+  <Card title="index_repository" icon="github">
+    Process GitHub repositories to create searchable vector indexes
+  </Card>
+  <Card title="index_documentation" icon="book">
+    Index web documentation and content sites for semantic search
+  </Card>
+  <Card title="delete_repository" icon="trash">
+    Permanently remove an indexed GitHub repository and its vector data
+  </Card>
+  <Card title="delete_documentation" icon="trash">
+    Permanently remove an indexed documentation source and its vector data
+  </Card>
+</CardGroup>
+
+---
+
+## index_repository
+
+Index a GitHub repository to make it searchable with semantic search. Processes code files, documentation, README files, and other content.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `repository_url` | string | Yes | - | GitHub repository URL (e.g., https://github.com/owner/repo) |
+| `options` | object | No | - | Optional indexing configuration |
+| `chunk_size` | number | No | 1000 | Size of text chunks for indexing (100-2000) |
+| `chunk_overlap` | number | No | 200 | Overlap between chunks in characters (0-500) |
+
+### Indexing Process
+
+#### Content Processing
+- **Code Files**: JavaScript, TypeScript, Python, Java, Go, and more
+- **Documentation**: README files, markdown documentation, inline comments
+- **Configuration**: Package files, config files, and project metadata
+- **Filtering**: Automatically excludes binary files, node_modules, and build artifacts
+
+#### Chunking Strategy
+- **Intelligent Splitting**: Respects code structure and documentation sections
+- **Context Preservation**: Maintains relationships between related code sections
+- **Overlap Handling**: Ensures continuity across chunk boundaries
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Basic Repository Indexing
+{
+  "repository_url": "https://github.com/vercel/next.js"
+}
+```
+
+```json Custom Chunking Configuration
+{
+  "repository_url": "https://github.com/microsoft/vscode",
+  "options": {
+    "chunk_size": 1500,
+    "chunk_overlap": 300
+  }
+}
+```
+
+```json Large Repository Optimization
+{
+  "repository_url": "https://github.com/facebook/react",
+  "options": {
+    "chunk_size": 800,
+    "chunk_overlap": 150
+  }
+}
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "repository_url": "https://github.com/vercel/next.js",
+    "status": "indexing",
+    "documents_indexed": 1247,
+    "total_cost": 0.32,
+    "index_metadata": {
+      "index_id": "idx_nextjs_2024_01_15",
+      "created_at": "2024-01-15T10:30:00Z",
+      "file_types": ["js", "ts", "md", "json"],
+      "total_chunks": 5680
+    },
+    "message": "Repository indexing started successfully"
+  }
+}
+```
+
+---
+
+## index_documentation
+
+Index web-based documentation to make it searchable with semantic search. Supports HTML pages, markdown files, and documentation sites.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `documentation_url` | string | Yes | - | URL to documentation page or site (HTTP/HTTPS) |
+| `options` | object | No | - | Optional indexing configuration |
+| `chunk_size` | number | No | 1000 | Size of text chunks for indexing (100-2000) |
+| `chunk_overlap` | number | No | 200 | Overlap between chunks in characters (0-500) |
+
+### Content Processing
+
+#### Supported Formats
+- **HTML Pages**: Documentation websites, API references, tutorials
+- **Markdown Files**: README files, wiki pages, documentation repos
+- **Structured Sites**: GitBook, Notion, Confluence, and similar platforms
+
+#### Content Extraction
+- **Text Content**: Clean extraction of readable text from HTML
+- **Structure Preservation**: Maintains headings, sections, and hierarchy
+- **Link Processing**: Handles internal navigation and cross-references
+- **Media Filtering**: Excludes images and videos, focuses on text content
+
+### Usage Examples
+
+<CodeGroup>
+
+```json API Documentation
+{
+  "documentation_url": "https://docs.stripe.com/api"
+}
+```
+
+```json Framework Documentation
+{
+  "documentation_url": "https://react.dev",
+  "options": {
+    "chunk_size": 1200,
+    "chunk_overlap": 250
+  }
+}
+```
+
+```json Internal Documentation
+{
+  "documentation_url": "https://company.notion.site/internal-docs",
+  "options": {
+    "chunk_size": 800,
+    "chunk_overlap": 100
+  }
+}
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "documentation_url": "https://docs.stripe.com/api",
+    "status": "completed",
+    "documents_indexed": 342,
+    "total_cost": 0.18,
+    "index_metadata": {
+      "index_id": "idx_stripe_docs_2024_01_15",
+      "created_at": "2024-01-15T11:15:00Z",
+      "completed_at": "2024-01-15T11:22:00Z",
+      "total_chunks": 1890,
+      "content_types": ["html", "markdown"]
+    },
+    "message": "Documentation indexed successfully"
+  }
+}
+```
+
+---
+
+## delete_repository
+
+Delete all indexed content for a GitHub repository. This permanently removes the data from the vector database.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `repository_url` | string | Yes | - | Repository URL to delete |
+| `confirm` | boolean | No | false | Must be true to permanently delete |
+
+### Safety Features
+
+#### Confirmation Required
+- **Explicit Confirmation**: `confirm: true` required for deletion
+- **Safety Prompts**: Clear warnings about permanent data loss
+- **No Accidental Deletion**: Default `confirm: false` prevents mistakes
+
+#### Impact Assessment
+- **Usage Statistics**: Shows documents and storage that will be freed
+- **Search Impact**: Warns about content that will no longer be searchable
+- **Cost Information**: Details about credits that were used for indexing
+
+### Usage Examples
+
+<CodeGroup>
+
+```json Delete Repository Index
+{
+  "repository_url": "https://github.com/old-project/deprecated",
+  "confirm": true
+}
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "repository_url": "https://github.com/old-project/deprecated",
+    "files_removed": 567,
+    "storage_freed": "4.2MB",
+    "index_metadata": {
+      "index_id": "idx_old_project_2023_12_01",
+      "created_at": "2023-12-01T09:30:00Z",
+      "deleted_at": "2024-01-15T14:20:00Z"
+    },
+    "message": "Repository deleted successfully - content is no longer searchable"
+  }
+}
+```
+
+---
+
+## delete_documentation
+
+Delete all indexed content for a documentation URL. This permanently removes the data from the vector database.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `documentation_url` | string | Yes | - | Documentation URL to delete |
+| `confirm` | boolean | No | false | Must be true to permanently delete |
+
+### Usage Examples
+
+```json Delete Documentation Index
+{
+  "documentation_url": "https://old-docs.example.com",
+  "confirm": true
+}
+```
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "documentation_url": "https://old-docs.example.com",
+    "pages_removed": 694,
+    "index_metadata": {
+      "index_id": "idx_old_docs_2023_12_01",
+      "created_at": "2023-12-01T09:30:00Z",
+      "deleted_at": "2024-01-15T14:20:00Z"
+    },
+    "message": "Documentation deleted successfully - content is no longer searchable"
+  }
+}
+```
+
+---
+
+## Index Management Best Practices
+
+### Repository Indexing
+
+<Tabs>
+  <Tab title="Preparation">
+    **Before Indexing:**
+    - Ensure repository is public or you have access
+    - Check repository size (large repos may take longer)
+    - Review content to avoid indexing sensitive information
+    - Consider which branches contain the most relevant content
+  </Tab>
+
+  <Tab title="Configuration">
+    **Chunk Size Guidelines:**
+    - **Small Projects** (< 100 files): 800-1000 characters
+    - **Medium Projects** (100-1000 files): 1000-1200 characters  
+    - **Large Projects** (> 1000 files): 1200-1500 characters
+
+    **Chunk Overlap:**
+    - **Code-Heavy**: 150-200 characters (preserve function context)
+    - **Documentation-Heavy**: 200-300 characters (maintain narrative flow)
+  </Tab>
+</Tabs>
+
+### Documentation Indexing
+
+#### Site Assessment
+- **Content Quality**: Ensure documentation is well-structured and current
+- **Access Permissions**: Verify the documentation site is publicly accessible
+- **Content Volume**: Large documentation sites may require custom chunking
+
+#### Optimization Tips
+- **Focused Indexing**: Index specific documentation sections rather than entire sites
+- **Regular Updates**: Re-index documentation when major updates occur
+- **Quality Control**: Review indexed content to ensure relevance and accuracy
+
+### Maintenance Schedule
+
+1. **Weekly**: Check indexing status for recently added repositories
+2. **Monthly**: Review indexed sources and remove outdated content
+3. **Quarterly**: Optimize chunking strategies based on search performance
+4. **As Needed**: Re-index when source content undergoes major changes
+
+<Warning>
+**Important**: Deleting an index is permanent and cannot be undone. Always verify you're deleting the correct source before confirming deletion.
+</Warning>
+
+<Note>
+Index management operations may take several minutes for large repositories or documentation sites. Monitor progress using the status monitoring tools.
+</Note>

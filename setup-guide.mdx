@@ -1,11 +1,11 @@
 ---
 title: "Setup Guide"
-description: "Complete setup guide for Tablr MCP with PostgreSQL database integration"
+description: "Complete setup guide for Tablr MCP with vector database operations"
 ---
 
 ## Overview
 
-This guide will walk you through setting up Tablr MCP with your PostgreSQL database. You'll install the MCP server, configure your database connection, and integrate with your AI assistant.
+This guide will walk you through setting up Tablr MCP for semantic search and content indexing. You'll install the MCP server, configure your API access, and integrate with your AI assistant.
 
 ## Prerequisites
 
@@ -31,19 +31,15 @@ npm --version   # Should show 8.x.x or higher
 git --version  # Should show git version 2.x.x
 ```
 
-### Database Requirements
+### API Access Requirements
 
-**PostgreSQL Database Access**
-- PostgreSQL server (local or remote)
-- Database connection details:
-  - Host and port
-  - Database name
-  - Username and password
-  - SSL configuration (if required)
-- User account with sufficient privileges to create, modify, and query tables
+**Tablr API Key**
+- Active Tablr account at [tablr.dev](https://tablr.dev)
+- Valid API key with vector database permissions
+- Sufficient credits for indexing and search operations
 
 <Note>
-You can use any PostgreSQL provider: self-hosted, AWS RDS, Google Cloud SQL, Azure Database, or other cloud providers.
+You can sign up for a free Tablr account to get started with vector database operations. Paid plans offer higher usage limits and additional features.
 </Note>
 
 ## Installation
@@ -72,7 +68,7 @@ Test your installation:
 
 ```bash
 tablr-mcp --help
-# Expected output: Tablr MCP Server - Database management for PostgreSQL
+# Expected output: Tablr MCP Server - Vector database operations
 ```
 
 ## Configuration
@@ -88,44 +84,36 @@ touch .env  # Unix/macOS/Linux
 type nul > .env  # Windows
 ```
 
-### Database Connection
+### API Key Configuration
 
-Add your PostgreSQL credentials to the `.env` file:
+Add your Tablr API key to the `.env` file:
 
 ```env
-# Required: PostgreSQL connection details
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB=your_database_name
-POSTGRES_USER=your_username
-POSTGRES_PASSWORD=your_password
+# Required: Tablr API key
+TABLR_API_KEY=your_tablr_api_key_here
 
-# Optional: SSL configuration
-POSTGRES_SSL=false
-
-# Optional: Connection pool settings
-POSTGRES_MAX_CONNECTIONS=10
-POSTGRES_IDLE_TIMEOUT=30000
+# Optional: API endpoint (defaults to production)
+TABLR_API_URL=https://www.tablr.dev
 ```
 
 <Warning>
 **Security**: Never commit your `.env` file to version control. Add it to your `.gitignore` file.
 </Warning>
 
-### Test Database Connection
+### Test API Connection
 
 Verify your configuration:
 
 ```bash
-# Start the server to test connection
+# Start the server to test API connection
 npm start
 ```
 
 You should see:
 ```
 Starting Tablr MCP Server...
-Connecting to PostgreSQL database...
-Successfully connected to PostgreSQL
+Initializing vector database client...
+Successfully connected to Tablr API
 MCP Server connected via stdio
 Server started successfully
 ```
@@ -234,35 +222,29 @@ Restart your AI assistant and try these commands:
 .env.local
 .env.production
 
-# Database credentials
+# API credentials
 *.key
 *.pem
 config/secrets.json
 ```
 
-### Database Permissions
+### API Key Security
 
-Grant minimal required permissions:
+Protect your Tablr API key:
 
-```sql
--- Create dedicated user for Tablr MCP
-CREATE USER tablr_user WITH PASSWORD 'secure_password';
+- **Never commit** API keys to version control
+- **Rotate keys** regularly in the Tablr dashboard
+- **Use environment variables** for different environments
+- **Monitor usage** through the Tablr dashboard
+- **Set usage limits** to prevent unexpected charges
 
--- Grant necessary permissions
-GRANT CONNECT ON DATABASE your_database TO tablr_user;
-GRANT USAGE ON SCHEMA public TO tablr_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tablr_user;
-GRANT CREATE ON SCHEMA public TO tablr_user;
-```
-
-### Connection Security
+### Access Control
 
 For production environments:
-- Use SSL/TLS connections (`POSTGRES_SSL=true`)
-- Implement connection pooling
-- Use strong passwords
-- Regularly rotate credentials
-- Monitor database access logs
+- Use separate API keys for different environments
+- Monitor API usage and costs
+- Implement rate limiting if needed
+- Regularly review indexed content and permissions
 
 ## Advanced Configuration
 
@@ -270,41 +252,38 @@ For production environments:
 
 **Development:**
 ```env
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB=myapp_development
+TABLR_API_KEY=dev_api_key_here
+TABLR_API_URL=https://dev.tablr.dev
 DEBUG=true
 ```
 
 **Production:**
 ```env
-POSTGRES_HOST=prod-db.example.com
-POSTGRES_PORT=5432
-POSTGRES_DB=myapp_production
-POSTGRES_SSL=true
+TABLR_API_KEY=prod_api_key_here
+TABLR_API_URL=https://www.tablr.dev
 NODE_ENV=production
 ```
 
 ### Performance Tuning
 
 ```env
-# Connection pool settings
-POSTGRES_MAX_CONNECTIONS=20
-POSTGRES_IDLE_TIMEOUT=10000
-POSTGRES_CONNECTION_TIMEOUT=5000
+# API request settings
+VECTOR_API_TIMEOUT=30000
+VECTOR_API_MAX_RETRIES=3
 
-# Query timeout
-POSTGRES_QUERY_TIMEOUT=30000
+# Search result limits
+VECTOR_DEFAULT_RESULTS=10
+VECTOR_MAX_RESULTS=100
 ```
 
 ## Next Steps
 
 After successful setup:
 
-1. **Explore Tools** - Try different database operations through your AI assistant
-2. **Read Documentation** - Learn about advanced features and best practices
+1. **Explore Tools** - Try indexing repositories and performing semantic searches through your AI assistant
+2. **Read Documentation** - Learn about advanced vector database features and best practices
 3. **Join Community** - Get help and share experiences
 
 <Tip>
-Your Tablr MCP server is now configured and ready to use! Start with simple operations like listing tables and gradually explore more advanced database management features.
+Your Tablr MCP server is now configured and ready to use! Start with simple operations like indexing a repository and gradually explore more advanced semantic search features.
 </Tip>

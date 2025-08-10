@@ -1,29 +1,23 @@
 ---
 title: "Tools Overview"
-description: "Complete reference for all 27+ database management tools"
+description: "Complete reference for all 12 tools: search, indexing, monitoring, and research"
 ---
 
-## 27+ Database Management Tools
+## 12 Tools
 
-Tablr MCP provides comprehensive database management through natural language. All tools include validation, error handling, and security features.
+Tablr MCP provides comprehensive semantic search and content indexing through natural language. All tools include validation, error handling, and security features.
 
 ## Tool Categories
 
-<CardGroup cols={2}>
-  <Card title="Database & Schema Tools" icon="database" href="/tools/database-tools">
-    10 tools for exploring, creating, and managing database structures
+<CardGroup cols={3}>
+  <Card title="Search & Discovery" icon="search" href="/tools/search-discovery">
+    3 tools: code search, docs search, and cross-source web search
   </Card>
-  <Card title="Data Operations" icon="chart-line" href="/tools/data-tools">
-    5 tools for querying, inserting, updating, and deleting records
+  <Card title="Index Management" icon="database" href="/tools/index-management">
+    4 tools: index/delete repositories and documentation
   </Card>
-  <Card title="Authentication Management" icon="user-shield" href="/tools/auth-tools">
-    5 tools for managing Supabase Auth users and permissions
-  </Card>
-  <Card title="Import & Export" icon="arrow-right-arrow-left" href="/tools/import-export-tools">
-    4 tools for CSV/JSON data import and export with streaming
-  </Card>
-  <Card title="AI & Vector Operations" icon="brain" href="/tools/ai-tools">
-    3 tools for research, semantic search, and vector index management
+  <Card title="Monitoring & Analysis" icon="chart-line" href="/tools/monitoring-analysis">
+    4 tools: check status and list repositories/documentation
   </Card>
 </CardGroup>
 
@@ -31,36 +25,34 @@ Tablr MCP provides comprehensive database management through natural language. A
 
 | Category | Tools | Risk Level | Use Cases |
 |----------|-------|------------|-----------|
-| **Database & Schema** | 10 | Safe-High | Table management, structure changes |
-| **Data Operations** | 5 | Safe-High | Query, insert, update, delete records |
-| **Authentication** | 5 | Safe-High | User management, Supabase Auth |
-| **Import/Export** | 4 | Safe-Medium | Data transfer, backup/restore |
-| **AI & Vector** | 3 | Safe | Research, semantic search |
+| **Search & Discovery** | 3 | Safe | Code/doc search, cross-source web search |
+| **Index Management** | 4 | Safe-Medium | Index repos/docs, delete sources |
+| **Monitoring & Analysis** | 4 | Safe | Status checks, list sources |
 
 ## Safety Features
 
-- **SQL Injection Prevention**: All database tools use parameterized queries
-- **Operation Confirmation**: Destructive operations require explicit confirmation
+- **Content Filtering**: Sanitize indexed content for sensitive information
+- **Operation Confirmation**: Destructive index operations require explicit confirmation
 - **Input Validation**: Comprehensive parameter validation before execution
 - **Error Handling**: Detailed error messages with actionable suggestions
-- **Performance Monitoring**: Execution time tracking and optimization
+- **Performance Monitoring**: Execution time tracking for search and indexing operations
 
 ## Architecture
 
-**BaseTool**: Foundation for PostgreSQL database operations  
-**BaseVectorTool**: Specialized for AI operations via Tablr API  
-**SupabaseAuthManager**: Dedicated authentication management
+**BaseVectorTool**: Foundation for vector database operations via Tablr API  
+**Semantic Search Engine**: AI-powered content understanding and retrieval  
+**Index Management**: Content processing and vector database management
 
 ## Getting Started
 
 <CardGroup cols={3}>
-  <Card title="Database Tools" icon="database" href="/tools/database-tools">
-    Start with table discovery and schema exploration
+  <Card title="Search & Discovery" icon="search" href="/tools/search-discovery">
+    Start with code and documentation search
   </Card>
-  <Card title="Data Operations" icon="chart-line" href="/tools/data-tools">
-    Query and manipulate your data safely
+  <Card title="Index Management" icon="database" href="/tools/index-management">
+    Index repositories and documentation for search
   </Card>
-  <Card title="Authentication" icon="user-shield" href="/tools/auth-tools">
-    Manage users with Supabase Auth
+  <Card title="Monitoring" icon="chart-line" href="/tools/monitoring-analysis">
+    Track indexing status and list sources
   </Card>
 </CardGroup>

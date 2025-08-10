@@ -1,12 +1,12 @@
 ---
 title: "Quick Start"
-description: "Get Tablr running and managing your PostgreSQL database in under 5 minutes"
+description: "Get Tablr running and performing semantic search operations in under 5 minutes"
 ---
 
 ## Prerequisites
 
 - **Node.js 18.0.0\+** 
-- **Supabase database**
+- **Tablr API key** (get one from [tablr.dev](https://tablr.dev))
 - **MCP-compatible AI assistant** (Claude Desktop, Cursor, etc.)
 
 ## Step 1: Install Tablr MCP
@@ -22,46 +22,17 @@ npm install -g tablr-mcp
 Create a `.env` file in your project directory which you would like to use Tablr MCP with:
 
 ```env
-PG_CONNECTION_STRING=your-postgres-connection-string
-
 TABLR_API_KEY=your-tablr-api-key
-
-SUPABASE_URL=your-supabase-url
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 ```
 
-## Step 2: Prepare Your PostgreSQL Connection String
+## Step 3: Get Your Tablr API Key
 
-1. Navigate to your Supabase project dashboard
-2. In the header, click 'Connect', it should bring up a dialog
-3. You'll see three connection types: Direct connection, Transaction pooler, and Session pooler
-4. Copy the 'Transaction pooler' connection string
-5. Replace `[YOUR-PASSWORD]` with your actual Supabase project password. If you cannot remember your project password, navigate to Project Settings -\> Database -\> Database password to reset it
-6. Add the PostgreSQL connection string to your `.env` file as `PG_CONNECTION_STRING`
-
-## Step 3: Prepare Your Tablr API Key
-
-1. Navigate to your Tablr Dashboard
+1. Navigate to your [Tablr Dashboard](https://tablr.dev/dashboard)
 2. In the sidebar, click 'API Keys'
 3. Generate a new API key, adding a relevant title and description (optional)
-4. Copy the API key and add it to `.env` as `TABLR_API KEY`
+4. Copy the API key and add it to `.env` as `TABLR_API_KEY`
 
-## Step 4: Prepare Your Supabase Variables
-
-1. Navigate to your Supabase project Dashboard
-2. In the sidebar, click 'Project Settings'
-3. Navigate to the 'Data API' page
-4. Copy your Supabase 'Project URL'
-5. Add it to your `.env` file as `SUPABASE_URL`
-6. Next, navigate to the 'API Keys' page
-7. Copy the 'Service Role Secret'
-8. Add it to your `.env` file as `SUPABASE_SERVICE_ROLE_KEY`
-
-<Warning>
-  IMPORTANT: Do not copy the Supabase Anon key, as it does not have the required permissions for use with Tablr MCP. Make sure you copy the Service Role Key
-</Warning>
-
-## Step 5: Configure Your AI Assistant
+## Step 4: Configure Your AI Assistant
 
 Configure Tablr MCP in your preferred IDE or editor:
 
@@ -159,15 +130,16 @@ Configure Tablr MCP in your preferred IDE or editor:
 - Example: `C:/Users/username/project/.env` not `C:\Users\username\project\.env`
 </Note>
 
-## Step 6: Start Using Tablr
+## Step 5: Start Using Tablr
 
-Restart your AI assistant and start managing your database with natural language:
+Restart your AI assistant and start using vector database operations with natural language:
 
 ```
-"Show me all tables in my database"
-"What's the schema for the users table?"
-"Find all users created in the last week"
-"Execute this SQL: SELECT COUNT(*) FROM orders WHERE status = 'pending'"
+"Index the React repository for semantic search"
+"Find authentication examples in my indexed repositories"
+"Search for useEffect hook implementations in TypeScript"
+"What's the status of the documentation indexing?"
+"List all my indexed sources"
 ```
 ## Common Issues
 
@@ -177,15 +149,14 @@ Restart your AI assistant and start managing your database with natural language
 
     **Solution**:
     This is a common issue, and there are multiple possible sources. Unfortunately there is no way to tell what your error is from the IDE:
-    1. **The MCP configuration you used was not correct for your IDE (see step 5)**
+    1. **The MCP configuration you used was not correct for your IDE (see step 4)**
     2. **The path to your .env file is incorrect**
      - Make sure it is the absolute path, not the relative path
      - Do not use backslashes for Windows
      - Verify your path is correct by right-clicking on the .env file and clicking 'Copy Path'
     3. **Environment Variables are incorrect**
-     - Check that the Postgres Connection string you connected was the 'Transaction Pooler', not 'Direct Connection' or 'Session Pooler'
      - Make sure your Tablr API key is correct by checking in the Tablr dashboard API keys page
-     - Re-check your Supabase URL and Service Role Key, and verify you are not using the Anon Key (important)
+     - Verify the API key has the necessary permissions for vector operations
   </Accordion>
   <Accordion title="Other Checks">
     **Problem**: MCP server won't start

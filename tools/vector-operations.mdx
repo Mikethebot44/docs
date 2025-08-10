@@ -1,11 +1,11 @@
 ---
-title: "AI & Vector Operations"
-description: "AI-powered research, semantic search, and vector index management"
+title: "Vector Database Tools"
+description: "Semantic search, content indexing, and vector database operations"
 ---
 
 ## Overview
 
-AI and vector operations tools provide advanced capabilities for web research, semantic search, and vector index management. Integrate with the Tablr backend API for AI-powered functionality beyond traditional database operations.
+Vector database tools provide comprehensive semantic search and content indexing capabilities. All tools integrate with the Tablr backend API for AI-powered content understanding and retrieval operations.
 
 <Note>
 Vector operations require a valid Tablr API key and communicate with the Tablr backend service.
@@ -13,51 +13,57 @@ Vector operations require a valid Tablr API key and communicate with the Tablr b
 
 ---
 
-## research_agent
+## semantic_search
 
-AI-powered web research tool with two modes for different research needs.
+Search through indexed repositories and documentation using natural language queries that understand meaning and context.
 
 ### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `mode` | string | Yes | Research mode: "quick" or "deep" |
-| `query` | string | Yes | Research query or topic to investigate (3-500 characters) |
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `query` | string | Yes | - | Natural language search query (3-500 characters) |
+| `sources` | array | No | all | Limit search to specific repository or documentation URLs |
+| `top_results` | integer | No | 10 | Maximum number of results to return (1-50) |
+| `similarity_threshold` | number | No | 0.7 | Minimum similarity score (0.0-1.0) |
 
-### Research Modes
+### Search Features
 
-#### Quick Mode
-- Simple web search with summarized results
-- Fast execution (under 30 seconds)
-- Best for factual queries and current information
+#### Semantic Understanding
+- Finds content by meaning, not just keyword matches
+- Understands context and relationships between concepts
+- Works across multiple programming languages and documentation formats
 
-#### Deep Mode  
-- Multi-step research with structured analysis
-- Comprehensive investigation (2-5 minutes)
-- Best for complex topics requiring thorough analysis
+#### Multi-Source Search  
+- Search across multiple repositories simultaneously
+- Combine documentation and code search results
+- Filter by specific sources when needed
 
 ### Usage Examples
 
 <CodeGroup>
 
-```json Quick Research
+```json Code Pattern Search
 {
-  "mode": "quick",
-  "query": "What are the latest features in PostgreSQL 16?"
+  "query": "authentication middleware implementation",
+  "sources": ["https://github.com/express/express"],
+  "top_results": 5,
+  "similarity_threshold": 0.8
 }
 ```
 
-```json Deep Research Analysis
+```json Documentation Search
 {
-  "mode": "deep",
-  "query": "Compare vector database performance between PostgreSQL pgvector and dedicated solutions like Pinecone"
+  "query": "how to handle async operations in React hooks",
+  "sources": ["https://react.dev"],
+  "top_results": 10
 }
 ```
 
-```json Market Research
+```json Multi-Repository Search
 {
-  "mode": "deep",
-  "query": "Current trends in AI-powered database tools and their adoption rates in enterprise environments"
+  "query": "error handling patterns for API endpoints",
+  "top_results": 15,
+  "similarity_threshold": 0.75
 }
 ```
 
@@ -65,84 +71,64 @@ AI-powered web research tool with two modes for different research needs.
 
 ### Response Format
 
-#### Quick Mode Response
 ```json
 {
   "success": true,
   "data": {
-    "mode": "quick",
-    "query": "PostgreSQL 16 features",
-    "summary": "PostgreSQL 16 introduces several key features including improved performance for parallel queries, enhanced logical replication, and better support for JSON operations...",
-    "sources": [
+    "query": "authentication middleware implementation",
+    "results": [
       {
-        "title": "PostgreSQL 16 Release Notes",
-        "url": "https://www.postgresql.org/docs/16/release-16.html",
-        "relevance": 0.95
+        "content": "Authentication middleware for Express.js applications using JWT tokens...",
+        "similarity_score": 0.92,
+        "source_url": "https://github.com/express/express",
+        "file_path": "lib/middleware/auth.js",
+        "title": "JWT Authentication Middleware",
+        "language": "javascript",
+        "relevance_category": "high",
+        "content_type": "code"
+      },
+      {
+        "content": "Middleware implementation for validating user sessions and permissions...",
+        "similarity_score": 0.88,
+        "source_url": "https://github.com/express/express", 
+        "file_path": "examples/auth/session.js",
+        "title": "Session Validation Middleware",
+        "language": "javascript",
+        "relevance_category": "high",
+        "content_type": "code"
       }
     ],
-    "execution_time": 12000
-  }
-}
-```
-
-#### Deep Mode Response
-```json
-{
-  "success": true,
-  "data": {
-    "mode": "deep",
-    "query": "Vector database comparison",
-    "analysis": {
-      "overview": "Comprehensive analysis of vector database solutions...",
-      "key_findings": [
-        "PostgreSQL pgvector offers excellent integration with existing systems",
-        "Dedicated solutions like Pinecone provide superior performance for large-scale operations"
-      ],
-      "detailed_comparison": {
-        "performance": "...",
-        "cost": "...",
-        "ease_of_use": "..."
-      }
-    },
-    "sources": [
-      {
-        "title": "Vector Database Benchmarks 2024",
-        "url": "https://example.com/benchmarks",
-        "relevance": 0.92,
-        "key_points": ["Performance metrics", "Scalability analysis"]
-      }
-    ],
-    "execution_time": 45000
+    "total_results": 15,
+    "search_time_ms": 850,
+    "message": "Found 15 semantically similar results"
   }
 }
 ```
 
 ---
 
-## search_index
+## search_code
 
-Perform semantic search over indexed repositories, documentation, and database tables.
+Search for specific code examples, functions, and implementations across indexed repositories with programming language filtering.
 
 ### Parameters
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `source_type` | string | Yes | - | Type of indexed source: "repo", "doc", or "table" |
-| `source_id` | string | Yes | - | Unique identifier for the indexed source |
-| `query` | string | Yes | - | Natural language search query (1-1000 characters) |
-| `limit` | integer | No | 10 | Maximum results to return (1-100) |
-| `threshold` | number | No | 0.7 | Minimum similarity threshold (0.0-1.0) |
+| `query` | string | Yes | - | Code-focused search query (3-200 characters) |
+| `repositories` | array | No | all | Limit search to specific GitHub repositories |
+| `programming_languages` | array | No | all | Filter by programming languages |
+| `top_results` | integer | No | 15 | Maximum code examples to return (1-30) |
 
-### Source Types
+### Language Support
 
-#### Repository Search ("repo")
-Search through indexed code repositories by URL or identifier.
+#### Supported Languages
+- javascript, typescript, python, java, go, rust, cpp, csharp, php, ruby, swift, kotlin
 
-#### Documentation Search ("doc")  
-Search through indexed documentation sets and knowledge bases.
-
-#### Table Search ("table")
-Search through indexed database table contents and schemas.
+#### Code-Focused Features
+- Optimized for finding function definitions and code patterns
+- Enhanced metadata with file paths and language detection
+- Relevance scoring based on code structure and implementation patterns
 
 ### Usage Examples
 

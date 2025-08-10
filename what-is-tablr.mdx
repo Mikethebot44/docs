@@ -1,45 +1,45 @@
 ---
 title: "What is Tablr MCP?"
-description: "Core concepts and capabilities of Tablr MCP database management"
+description: "Core concepts and capabilities of Tablr MCP vector database tools"
 ---
 
-## Database Management Through AI
+## Vector Database Operations Through AI
 
-Tablr MCP is a specialized Model Context Protocol (MCP) server for comprehensive PostgreSQL database management. It enables AI assistants to:
+Tablr MCP is a specialized Model Context Protocol (MCP) server for semantic search and content indexing. It enables AI assistants to:
 
-- **Explore** database structure (tables, schemas, relationships)
-- **Query** data with complex filters and sorting
-- **Modify** table structures and data
-- **Execute** custom SQL safely
-- **Manage** operations through natural language
+- **Index** repositories, documentation, and content sources
+- **Search** using natural language queries that understand meaning
+- **Discover** code examples and implementations through semantic similarity
+- **Manage** vector indexes and monitor indexing progress
+- **Analyze** indexed content through AI-powered operations
 
-Instead of manually writing SQL or using database tools, ask your AI assistant: *"Show me all users created this week"* or *"Create a new table for storing blog posts"*.
+Instead of manually setting up search systems or keyword matching, ask your AI assistant: *"Find authentication examples in this codebase"* or *"Index the Next.js documentation for semantic search"*.
 
 ## Example Usage
 
-Once configured, interact with your database through natural language:
+Once configured, interact with indexed content through natural language:
 
 ```
-You: "Show me all tables in my database"
-AI: [Uses list_tables tool and displays results]
+You: "Index the React repository for semantic search"
+AI: [Uses index_repository tool to process GitHub repo]
 
-You: "Get the schema for the users table"  
-AI: [Uses get_table_schema tool]
+You: "Find authentication examples in my indexed repositories"  
+AI: [Uses semantic_search tool with natural language query]
 
-You: "Find all users created in the last week"
-AI: [Uses query_records with date filters]
+You: "Search for useEffect hook implementations"
+AI: [Uses search_code tool with language filtering]
 
-You: "Create a new table for storing blog posts"
-AI: [Uses create_table with appropriate schema]
+You: "What's the status of the documentation indexing?"
+AI: [Uses check_index_status tool to show progress]
 ```
 
 ## Architecture
 
-Tablr MCP acts as a bridge between AI assistants and your PostgreSQL database:
+Tablr MCP acts as a bridge between AI assistants and vector database operations:
 
 1. **MCP Client** (Claude Desktop, Cursor, etc.) sends requests
 2. **Tablr MCP Server** processes and validates operations  
-3. **PostgreSQL Database** executes database operations
+3. **Vector Database** executes semantic search and indexing operations
 4. **Results** are formatted and returned to the AI assistant
 
 ## Next Steps
